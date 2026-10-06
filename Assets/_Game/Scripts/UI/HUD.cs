@@ -71,6 +71,9 @@ namespace MultiBash
         {
             Instance = this;
             T = UIKit.T;
+            // the menu / lobby leave the camera in "menu" mode (free cursor, no orbit): a run starts in play mode
+            CameraRig.MenuOpen = false;
+            LocalInput.Blocked = false;
             Build();
         }
 

@@ -176,7 +176,8 @@ namespace MultiBash.EditorTools
             Prop("FrozenWaterfall", 0f, PropCollider.None);
             Prop("FrostMountainA", 0f, PropCollider.None);
             Prop("FrostMountainB", 0f, PropCollider.None);
-            Prop("Pumpkin", 0.5f, PropCollider.Box);
+            Prop("SupplyCrate", 0.6f, PropCollider.Box);
+            Prop("GrainSack", 0.5f, PropCollider.Capsule);
             Prop("Barrel", 0.5f, PropCollider.Capsule);
             Prop("Urn", 0.4f, PropCollider.Capsule);
             // the windmill's blades turn

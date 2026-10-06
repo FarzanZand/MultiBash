@@ -56,7 +56,7 @@ Shared building blocks (prop scattering with spacing and roads, breakables, pads
 
 | What | Script | Notes |
 |---|---|---|
-| Smashable props (pumpkins, urns, barrels, ice crates) | `Pickups/Breakables.cs` | One scene NetworkObject holds every prop (children). Walk / slide into one or hit it with any attack: debris, a sound, gems and sometimes a heart, magnet or chest. Grows back after `respawnSeconds`. Host decides, everyone sees. |
+| Smashable props (crates, sacks, urns, barrels, ice crates) | `Pickups/Breakables.cs` | One scene NetworkObject holds every prop (children). Walk / slide into one or hit it with any attack: debris, a sound, gems and sometimes a heart, magnet or chest. Grows back after `respawnSeconds`. Host decides, everyone sees. |
 | Bounce pads (mushrooms, steam vents, frost geysers) | `Core/JumpPad.cs` | Scene data: each peer predicts the launch in `PlayerCharacter` (`PadTick` replicates the FX). Tune `launch` / `radius` on the pad. |
 | Slippery ice | `Core/IceZone.cs` | Ellipse; low grip + long glides while grounded on it. |
 | Windmill blades | `Core/Spinner.cs` | Purely visual. |

@@ -383,7 +383,7 @@ namespace MultiBash.EditorTools
             {
                 var p = new Vector3(-14 + R() * 32, 0, 4 + R() * 20);
                 if (Mathf.Abs(p.x - 2.5f) < 3.5f) continue;
-                At(i % 3 == 0 ? "RockA" : i % 2 == 0 ? "Pumpkin" : "Bush", p, R() * 360f, 0.9f + R() * 0.4f);
+                At(i % 3 == 0 ? "RockA" : i % 2 == 0 ? "GrainSack" : "Bush", p, R() * 360f, 0.9f + R() * 0.4f);
             }
             for (int i = 0; i < 140; i++)
             {
@@ -526,7 +526,7 @@ namespace MultiBash.EditorTools
             }
             var tree = new Vector3(36, 0, -14);
             d.At("HangingTree", tree, d.R() * 360f, 1.1f, 0.2f, 2.5f);
-            PointLight(d.deco, tree + Vector3.up * (H(tree) + 4f), new Color(0.6f, 1f, 0.5f), 12f, 2.4f, "TreeGlow");
+            PointLight(d.deco, tree + Vector3.up * (H(tree) + 4f), new Color(1f, 0.78f, 0.45f), 12f, 2.4f, "TreeGlow");
             d.Scatter("SkullPile", 8, 1f, 0.8f, 1.2f, 20f, 14f, false, center: new Vector2(38, 4));
             d.Scatter("LanternPost", 4, 1.5f, 1f, 1f, 10f, 12f, center: new Vector2(32, 8), roadClear: 0f, where: p => d.RoadDist(p) < 3.2f);
 
@@ -613,7 +613,7 @@ namespace MultiBash.EditorTools
 
             // ---- network objects: shrines, smashables; bounce pads
             MakeShrines(KeepShrines, H);
-            MakeBreakables(d, new[] { ("Pumpkin", new Color(1f, 0.55f, 0.15f), 1.3f), ("Urn", new Color(0.8f, 0.45f, 0.25f), 1.1f), ("Barrel", new Color(0.55f, 0.36f, 0.2f), 1.0f) },
+            MakeBreakables(d, new[] { ("SupplyCrate", new Color(0.62f, 0.42f, 0.24f), 1.0f), ("GrainSack", new Color(0.78f, 0.7f, 0.48f), 1.0f), ("Urn", new Color(0.8f, 0.45f, 0.25f), 1.1f), ("Barrel", new Color(0.55f, 0.36f, 0.2f), 1.0f) },
                 44, new[] { new Vector2(0, 32), new Vector2(34, 6), new Vector2(-34, -6), new Vector2(-26, -42), new Vector2(12, -38), new Vector2(-20, 22), new Vector2(24, -24) }, 0.75f);
             var shroom = new Color(1f, 0.45f, 0.55f);
             foreach (var p in new[] { new Vector3(-30, 0, 12), new Vector3(-44, 0, 8), new Vector3(-11, 0, 37), new Vector3(36, 0, 33), new Vector3(-36, 0, -34), new Vector3(20, 0, -32) })
@@ -628,8 +628,8 @@ namespace MultiBash.EditorTools
                     new Color(0.3f, 0.18f, 0.2f), new Color(0.12f, 0.02f, 0.06f), new Color(0.64f, 0.16f, 0.18f), new Color(0.42f, 0.12f, 0.16f),
                     new Color(1f, 0.3f, 0.24f), 0.6f, 0f, 55f));
             var fx = ArenaSystems("Graveyard", fogColor);
-            fx.ambientColorA = new Color(0.55f, 1f, 0.75f, 0.85f);    // fireflies and wisps
-            fx.ambientColorB = new Color(0.85f, 0.7f, 1f, 0.75f);
+            fx.ambientColorA = new Color(1f, 0.85f, 0.45f, 0.85f);    // warm fireflies
+            fx.ambientColorB = new Color(0.8f, 1f, 0.6f, 0.75f);
             fx.ambientRate = 30f;
             fx.ambientRise = 0.08f;
 
