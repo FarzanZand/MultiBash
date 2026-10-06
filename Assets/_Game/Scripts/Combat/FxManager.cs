@@ -201,9 +201,27 @@ namespace MultiBash
             }
         }
 
+        // big hordes die by the hundred: past this budget, deaths get a lighter burst so the screen stays readable
+        float _deathBudget = 40f, _deathBudgetTime;
+
         public void DeathBurst(Vector3 pos, Color color, float scale)
         {
             float s = Mathf.Sqrt(scale);
+            float now = Time.unscaledTime;
+            _deathBudget = Mathf.Min(40f, _deathBudget + (now - _deathBudgetTime) * 50f);
+            _deathBudgetTime = now;
+            bool full = _deathBudget >= 1f || scale > 1.2f;
+            _deathBudget -= 1f;
+            if (!full)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    var v = new Vector3(Random.Range(-1f, 1f), Random.Range(0.6f, 1.4f), Random.Range(-1f, 1f)) * 5f;
+                    var c = color; c.a = 1f;
+                    SpawnParticle(pos + Vector3.up * 0.8f, v, c, Random.Range(0.12f, 0.2f), 0.8f, 16f, 0.6f, false, null);
+                }
+                return;
+            }
             // tumbling cube debris
             int n = Mathf.RoundToInt(9 * s);
             for (int i = 0; i < n; i++)
@@ -213,11 +231,12 @@ namespace MultiBash
                 c.a = 1f;
                 SpawnParticle(pos + Vector3.up * 0.8f * scale + Random.insideUnitSphere * 0.3f * scale, v, c, Random.Range(0.12f, 0.24f) * s, Random.Range(0.9f, 1.4f), 16f, 0.6f, false, null);
             }
-            // white pop + dust poof
-            Burst(pos + Vector3.up * 0.8f * scale, Color.white, 2, 4f, 0.22f * s, 0.15f, 0f, true);
-            for (int i = 0; i < 4; i++)
+            // white pop + dust poof (lighter when lots die at once)
+            Burst(pos + Vector3.up * 0.8f * scale, Color.white, 1, 4f, 0.2f * s, 0.12f, 0f, true);
+            int poofs = _deathBudget > 20f ? 3 : 1;
+            for (int i = 0; i < poofs; i++)
                 SpawnParticle(pos + Vector3.up * 0.3f, new Vector3(Random.Range(-1.5f, 1.5f), Random.Range(0.3f, 1f), Random.Range(-1.5f, 1.5f)),
-                    new Color(0.85f, 0.85f, 0.8f, 0.55f), Random.Range(0.6f, 1.0f) * s, 0.6f, -0.5f, 2f, false, softTexture);
+                    new Color(0.8f, 0.8f, 0.76f, 0.4f), Random.Range(0.5f, 0.85f) * s, 0.5f, -0.5f, 2f, false, softTexture);
         }
 
         /// <summary>Small white impact spark on every hit (bigger + golden on crits).</summary>
@@ -350,6 +369,170 @@ namespace MultiBash
             t.position = start;
             t.localScale = Vector3.one * (1.2f + radius * 0.35f);
             _flights.Add(new Flight { t = t, from = start, to = target, duration = delay, radius = radius, def = def, meteor = true });
+        }
+
+        // ------------------------------------------------------------------ chest opening (local visual only)
+
+        class Loot
+        {
+            public Transform t;
+            public Vector3 vel, spin;
+            public float age, life;
+            public bool landed;
+        }
+
+        readonly List<Loot> _loot = new();
+
+        /// <summary>A chest that wobbles, flings its lid open in a burst of light and sprays loot everywhere.</summary>
+        public void ChestOpen(Vector3 pos, Vector3 facing)
+        {
+            var cfg = GameDatabase.Config;
+            if (cfg.chestModel == null)
+            {
+                UpgradeBurst(pos, new Color(1f, 0.85f, 0.3f));
+                return;
+            }
+            StartCoroutine(ChestRoutine(pos, facing));
+        }
+
+        System.Collections.IEnumerator ChestRoutine(Vector3 pos, Vector3 facing)
+        {
+            var cfg = GameDatabase.Config;
+            var lib = AudioManager.Lib;
+            var gold = new Color(1f, 0.82f, 0.3f);
+            pos.y = Ground.Height(pos);
+            var chest = Instantiate(cfg.chestModel);
+            chest.name = "OpeningChest";
+            var look = facing - pos;
+            look.y = 0;
+            chest.transform.SetPositionAndRotation(pos, look.sqrMagnitude > 0.01f ? Quaternion.LookRotation(look) : Quaternion.identity);
+            Transform lid = null;
+            foreach (var t in chest.GetComponentsInChildren<Transform>()) if (t.name == "Lid") lid = t;
+            var lidRest = lid != null ? lid.localRotation : Quaternion.identity;
+            var glow = AttachGlow(chest.transform, gold, 2.5f);
+            if (lib != null) AudioManager.Play(lib.chest, pos, 0.9f);
+
+            // 1) wobble and build up
+            float t0 = 0f;
+            while (t0 < 0.45f)
+            {
+                t0 += Time.deltaTime;
+                float k = t0 / 0.45f;
+                chest.transform.localScale = Vector3.one * 1.3f * (1f + Mathf.Sin(t0 * 40f) * 0.06f * k);
+                chest.transform.rotation = Quaternion.LookRotation(look.sqrMagnitude > 0.01f ? look : Vector3.forward) * Quaternion.Euler(0, 0, Mathf.Sin(t0 * 35f) * 6f * k);
+                if (Random.value < 0.4f) Burst(pos + Vector3.up * 0.6f, gold, 1, 2f, 0.12f, 0.4f, -1f, true);
+                yield return null;
+            }
+            // 2) BANG: lid flies open, light, ring and loot
+            chest.transform.localScale = Vector3.one * 1.3f;
+            if (lib != null) AudioManager.Play(lib.treasure, pos, 1f);
+            CameraRig.Instance?.Shake(0.2f);
+            LightPillar(pos, gold, 14f, 1.2f);
+            Shockwave(pos, 3f, gold, false);
+            Burst(pos + Vector3.up * 0.9f, gold, 40, 10f, 0.25f, 0.9f, 5f, true);
+            Burst(pos + Vector3.up * 0.9f, Color.white, 12, 6f, 0.35f, 0.3f, 0f, true);
+            int n = 16;
+            for (int i = 0; i < n && cfg.chestLoot != null && cfg.chestLoot.Length > 0; i++)
+            {
+                var model = cfg.chestLoot[i % 3 == 0 ? Random.Range(0, cfg.chestLoot.Length) : Random.Range(0, Mathf.Min(3, cfg.chestLoot.Length))];
+                if (model == null) continue;
+                var go = Instantiate(model);
+                foreach (var r in go.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                go.transform.position = pos + Vector3.up * 0.8f;
+                go.transform.localScale = Vector3.one * Random.Range(0.55f, 0.85f);
+                float a = Random.Range(0f, Mathf.PI * 2f);
+                var v = new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * Random.Range(2.5f, 6f) + Vector3.up * Random.Range(7f, 11f);
+                _loot.Add(new Loot { t = go.transform, vel = v, spin = Random.insideUnitSphere * 720f, life = Random.Range(1.6f, 2.4f) });
+            }
+            float t1 = 0f;
+            while (t1 < 0.3f)
+            {
+                t1 += Time.deltaTime;
+                if (lid != null) lid.localRotation = lidRest * Quaternion.Euler(-115f * Mathf.Clamp01(t1 / 0.18f) + Mathf.Sin(t1 * 30f) * 8f * (1f - t1 / 0.3f), 0, 0);
+                yield return null;
+            }
+            // 3) glow a while, then sink away
+            yield return new WaitForSeconds(2.4f);
+            float t2 = 0f;
+            while (t2 < 0.5f)
+            {
+                t2 += Time.deltaTime;
+                chest.transform.localScale = Vector3.one * 1.3f * (1f - t2 / 0.5f);
+                yield return null;
+            }
+            if (glow != null) Destroy(glow.gameObject);
+            Destroy(chest);
+        }
+
+        void UpdateLoot(float dt)
+        {
+            var lib = AudioManager.Lib;
+            for (int i = _loot.Count - 1; i >= 0; i--)
+            {
+                var l = _loot[i];
+                if (l.t == null) { _loot.RemoveAt(i); continue; }
+                l.age += dt;
+                l.vel += Vector3.down * 22f * dt;
+                var p = l.t.position + l.vel * dt;
+                float g = Ground.Height(p) + 0.15f;
+                if (p.y < g)
+                {
+                    p.y = g;
+                    if (l.vel.y < -2f && lib != null && !l.landed) AudioManager.Play(lib.gem, p, 0.25f, Random.Range(1.1f, 1.6f), 0.05f);
+                    l.landed = true;
+                    l.vel = new Vector3(l.vel.x * 0.55f, -l.vel.y * 0.4f, l.vel.z * 0.55f);   // bounce
+                    l.spin *= 0.6f;
+                }
+                l.t.position = p;
+                l.t.Rotate(l.spin * dt, Space.World);
+                if (l.age > l.life)
+                {
+                    float k = (l.age - l.life) / 0.3f;
+                    l.t.localScale *= Mathf.Max(0f, 1f - k * 0.5f);
+                    if (k >= 1f)
+                    {
+                        SpawnParticle(p + Vector3.up * 0.2f, Vector3.up, new Color(1f, 0.85f, 0.4f), 0.3f, 0.3f, 0f, 1f, true, sparkTexture);
+                        Destroy(l.t.gameObject);
+                        _loot.RemoveAt(i);
+                    }
+                }
+            }
+        }
+
+        /// <summary>Frost Nova with extra rings: each one wider, a beat later (matches the host's delayed blasts).</summary>
+        public void NovaRings(Vector3 center, float radius, int rings, Color color)
+        {
+            Nova(center, radius, color);
+            if (rings > 1) StartCoroutine(NovaLater(center, radius, rings, color));
+        }
+
+        System.Collections.IEnumerator NovaLater(Vector3 center, float radius, int rings, Color color)
+        {
+            for (int k = 1; k < rings; k++)
+            {
+                yield return new WaitForSeconds(0.2f);
+                Nova(center, radius * (1f + 0.4f * k), Color.Lerp(color, Color.white, 0.25f * k));
+            }
+        }
+
+        /// <summary>Critical hit flair: a golden star burst (bigger with Brutality's big crits).</summary>
+        float _critBudget = 20f, _critTime;
+
+        public void CritBurst(Vector3 pos, float power)
+        {
+            float now = Time.unscaledTime;
+            _critBudget = Mathf.Min(20f, _critBudget + (now - _critTime) * 25f);
+            _critTime = now;
+            if (_critBudget < 1f) return;
+            _critBudget -= 1f;
+            Burst(pos, new Color(1f, 0.85f, 0.25f), Mathf.RoundToInt(4 + 3 * power), 6f + 2f * power, 0.14f, 0.28f, 0f, true);
+        }
+
+        /// <summary>Execution: a red skull flash where an enemy was finished off.</summary>
+        public void ExecuteBurst(Vector3 pos)
+        {
+            LightPillar(pos, new Color(1f, 0.2f, 0.15f), 4f, 0.4f);
+            Burst(pos + Vector3.up * 1f, new Color(1f, 0.25f, 0.2f), 14, 6f, 0.2f, 0.45f, 2f, true);
         }
 
         public void Nova(Vector3 center, float radius, Color color)
@@ -732,6 +915,7 @@ namespace MultiBash
 
         void LateUpdate()
         {
+            if (_loot.Count > 0) UpdateLoot(Time.deltaTime);
             PerfStats.Fx.Start();
             try { Tick(); }
             finally { PerfStats.Fx.Stop(); }

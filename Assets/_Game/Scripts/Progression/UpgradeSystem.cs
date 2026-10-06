@@ -13,6 +13,8 @@ namespace MultiBash
     public static class UpgradeSystem
     {
         public const short Heal = 2000;
+        /// <summary>Fallback when everything is maxed: a small permanent boost that can be taken forever.</summary>
+        public const short PowerSurge = 2001;
         const short EvolveBase = 3000;
 
         public static bool IsWeapon(short code) => code > 0 && code < 1000;
@@ -38,7 +40,7 @@ namespace MultiBash
             var db = GameDatabase.Instance;
             var w = db.GetWeapon(weaponIndex);
             if (w == null || w.evolvesInto == null || w.evolveWith == null) return false;
-            if (pc.WeaponLevelOf(weaponIndex) < w.MaxLevel) return false;
+            if (pc.WeaponLevelOf(weaponIndex) < w.EvolveAt) return false;
             int tome = db.powerups.IndexOf(w.evolveWith);
             return tome >= 0 && pc.PowerupLevels.Get(tome) > 0 && db.IndexOf(w.evolvesInto) >= 0;
         }
@@ -82,8 +84,8 @@ namespace MultiBash
             for (int i = 0; i < db.weapons.Count; i++)
             {
                 var w = db.weapons[i];
-                if (w.isEvolution) continue;
                 int lvl = pc.WeaponLevelOf(i);
+                if (w.isEvolution && lvl == 0) continue;   // evolutions come from evolving, but level up like any weapon
                 if (lvl > 0 && lvl < w.MaxLevel)
                     Candidates.Add(new Candidate { code = (short)(i + 1), weight = RarityWeight(w.rarity, luck) * (treasure ? 3f : 1.6f) });
                 else if (lvl == 0 && weaponCount < cfg.maxWeapons)
@@ -106,7 +108,10 @@ namespace MultiBash
             {
                 if (Candidates.Count == 0)
                 {
-                    pc.Choices.Set(slot, slot == 0 ? Heal : (short)0);
+                    // everything maxed: Power Surge (+ a heal when it would actually heal)
+                    bool hurt = pc.Health < pc.MaxHealth - 0.5f;
+                    short fill = slot == firstSlot ? PowerSurge : slot == firstSlot + 1 && hurt ? Heal : (short)0;
+                    pc.Choices.Set(slot, fill);
                     continue;
                 }
                 float total = 0f;
@@ -135,6 +140,7 @@ namespace MultiBash
             else if (IsWeapon(code)) pc.AddOrLevelWeapon(WeaponIndex(code));
             else if (IsPowerup(code)) pc.AddPowerup(PowerupIndex(code));
             else if (code == Heal) pc.Heal(pc.Stats.MaxHealth * GameDatabase.Config.healChoicePercent);
+            else if (code == PowerSurge) { pc.PowerSurges++; pc.LoadoutVersion++; }
         }
 
         // ------------------------------------------------------------------ UI helpers
@@ -144,7 +150,7 @@ namespace MultiBash
             var db = GameDatabase.Instance;
             if (IsWeapon(code) || IsEvolution(code)) return db.GetWeapon(WeaponIndex(code))?.displayName ?? "?";
             if (IsPowerup(code)) return db.GetPowerup(PowerupIndex(code))?.displayName ?? "?";
-            return "Second Wind";
+            return code == PowerSurge ? "Power Surge" : "Second Wind";
         }
 
         public static Sprite IconOf(short code)
@@ -152,6 +158,11 @@ namespace MultiBash
             var db = GameDatabase.Instance;
             if (IsWeapon(code) || IsEvolution(code)) return db.GetWeapon(WeaponIndex(code))?.icon;
             if (IsPowerup(code)) return db.GetPowerup(PowerupIndex(code))?.icon;
+            if (code == PowerSurge)
+            {
+                var might = db.powerups.Find(p => p.name == "Might");
+                if (might != null) return might.icon;
+            }
             return db.healIcon;
         }
 
@@ -161,7 +172,7 @@ namespace MultiBash
             if (IsEvolution(code)) return Rarity.Legendary;
             if (IsWeapon(code)) return db.GetWeapon(WeaponIndex(code))?.rarity ?? Rarity.Common;
             if (IsPowerup(code)) return db.GetPowerup(PowerupIndex(code))?.rarity ?? Rarity.Common;
-            return Rarity.Common;
+            return code == PowerSurge ? Rarity.Epic : Rarity.Common;
         }
 
         public static Color ColorOf(short code) => RarityOf(code) switch
@@ -214,16 +225,18 @@ namespace MultiBash
                 var a = w.GetLevel(lvl);
                 var b = w.GetLevel(lvl + 1);
                 if (!Mathf.Approximately(a.damage, b.damage)) Add(Delta("Damage", $"{a.damage:0.#}", $"{b.damage:0.#}"));
-                if (a.amount != b.amount) Add(Delta(w.kind == WeaponKind.Orbit ? "Blades" : w.kind == WeaponKind.MeleeArc ? "Swings" : w.kind == WeaponKind.Chain ? "Bolts" : "Projectiles", $"{a.amount}", $"{b.amount}"));
+                if (a.amount != b.amount) Add(Delta(w.kind == WeaponKind.Orbit ? "Blades" : w.kind == WeaponKind.MeleeArc ? "Swings" : w.kind == WeaponKind.Chain ? "Bolts"
+                    : w.kind is WeaponKind.Aura or WeaponKind.Nova ? "Rings" : w.kind == WeaponKind.Lobbed ? "Flasks" : "Projectiles", $"{a.amount}", $"{b.amount}"));
                 if (!Mathf.Approximately(a.area, b.area)) Add(Delta("Size", $"{a.area:0.#}m", $"{b.area:0.#}m"));
-                if (a.pierce != b.pierce) Add(Delta(w.kind == WeaponKind.Chain ? "Chain Jumps" : "Pierce", $"{a.pierce}", $"{b.pierce}"));
+                bool usesPierce = w.kind is WeaponKind.Projectile or WeaponKind.Homing or WeaponKind.Chain;
+                if (a.pierce != b.pierce && usesPierce) Add(Delta(w.kind == WeaponKind.Chain ? "Chain Jumps" : "Pierce", $"{a.pierce}", $"{b.pierce}"));
                 if (!Mathf.Approximately(a.cooldown, b.cooldown)) Add(Delta("Cooldown", $"{a.cooldown:0.##}s", $"{b.cooldown:0.##}s"));
                 if (!Mathf.Approximately(a.duration, b.duration)) Add(Delta("Duration", $"{a.duration:0.#}s", $"{b.duration:0.#}s"));
                 if (!Mathf.Approximately(a.speed, b.speed)) Add(Delta("Speed", $"{a.speed:0}", $"{b.speed:0}"));
-                if (lvl + 1 >= w.MaxLevel && w.evolveWith != null && w.evolvesInto != null)
+                if (lvl + 1 >= w.EvolveAt && w.evolveWith != null && w.evolvesInto != null)
                 {
                     lines = Mathf.Min(lines, 2);
-                    Add($"<color=#e2c8ff>MAX + {w.evolveWith.displayName} = {w.evolvesInto.displayName}</color>");
+                    Add($"<color=#e2c8ff>LVL {w.EvolveAt} + {w.evolveWith.displayName} = {w.evolvesInto.displayName}</color>");
                 }
                 return sb.ToString();
             }
@@ -264,6 +277,14 @@ namespace MultiBash
                     }
                 return sb.ToString();
             }
+            if (code == PowerSurge)
+            {
+                var st = pc.Stats;
+                Add("<color=#f2c447>Everything is maxed! Take as many as you like.</color>");
+                Add(Delta("Damage", Pct(st.Damage), Pct(st.Damage + PlayerCharacter.SurgeDamage)));
+                Add(Delta("Max HP", $"{st.MaxHealth:0}", $"{st.MaxHealth + PlayerCharacter.SurgeHealth:0}"));
+                return sb.ToString();
+            }
             return Delta("Health", $"{pc.Health:0}", $"{Mathf.Min(pc.MaxHealth, pc.Health + pc.MaxHealth * GameDatabase.Config.healChoicePercent):0}");
         }
 
@@ -299,6 +320,7 @@ namespace MultiBash
                 return $"{p.description}\n<color=#9fe39f>{p.EffectText}</color>";
             }
             levelText = "";
+            if (code == PowerSurge) return "Permanent damage and health boost.";
             return $"Heal {GameDatabase.Config.healChoicePercent * 100f:0}% of your max HP.";
         }
     }

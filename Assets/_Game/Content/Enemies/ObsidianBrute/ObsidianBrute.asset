@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfa4861c1b13514fb502afb4e0d0d61, type: 3}
+  m_Name: ObsidianBrute
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.EnemyDefinition
+  displayName: Obsidian Brute
+  prefab: {fileID: 7508598120343200481, guid: c9c2ad8c06136f64e91cb410c40e8196, type: 3}
+  maxHealth: 160
+  moveSpeed: 3
+  contactDamage: 18
+  attackInterval: 1.4
+  attackRange: 0.9
+  radius: 0.85
+  knockbackResist: 0.8
+  movement: 0
+  hopRest: 0.7
+  hopTime: 0.45
+  hopHeight: 1.2
+  fodder: 0
+  scale: 1
+  gearSize: 1
+  xpChance: 1
+  flees: 0
+  lifetime: 0
+  dropChests: 0
+  attack: 2
+  attackDistance: 3.4
+  specialCooldown: 3.5
+  telegraphTime: 0.9
+  specialRadius: 3.4
+  specialDamageMul: 1.4
+  projectileSpeed: 12
+  specialColor: {r: 1, g: 0.41568628, b: 0.101960786, a: 1}
+  specialSound: {fileID: 8300000, guid: 979bf58c8f756594f86d328c669f15f7, type: 3}
+  xpValue: 10
+  healthOrbChance: 0.12
+  magnetChance: 0.015
+  splitInto: {fileID: 0}
+  splitCount: 0
+  bossName: 
+  bossHealthMultiplier: 150
+  bossDamageMultiplier: 2.5
+  bossScale: 3.2
+  bossSplitCount: 0
+  hitSound: {fileID: 8300000, guid: d1434f993cc561f45b37d63952cab047, type: 3}
+  deathSound: {fileID: 8300000, guid: 979bf58c8f756594f86d328c669f15f7, type: 3}
+  moveSound: {fileID: 0}
+  deathColor: {r: 0.22745098, g: 0.1882353, b: 0.2509804, a: 1}

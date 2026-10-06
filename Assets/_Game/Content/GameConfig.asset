@@ -44,9 +44,9 @@ MonoBehaviour:
   slideSpeedMultiplier: 1.9
   slideDuration: 0.45
   slideCooldown: 0.8
-  xpFirstLevel: 5
-  xpPerLevel: 4
-  xpQuadratic: 0.55
+  xpFirstLevel: 6
+  xpPerLevel: 6
+  xpQuadratic: 1.1
   xpPerExtraPlayer: 0.35
   choicesPerLevel: 3
   maxWeapons: 4
@@ -54,18 +54,25 @@ MonoBehaviour:
   healChoicePercent: 0.3
   rerollsPerRun: 3
   skipHealPercent: 0.15
-  healthPerMinute: 0.25
-  healthPerMinuteSquared: 0.07
+  healthPerMinute: 0.12
+  healthPerMinuteSquared: 0
   speedPerMinute: 0.05
   healthPerExtraPlayer: 0.25
   spawnRatePerExtraPlayer: 0.4
-  damagePerMinute: 0.12
-  maxEnemies: 260
+  damagePerMinute: 0.08
+  healthPerTeamLevel: 0.03
+  healthPerTeamLevelSquared: 0.0045
+  maxEnemies: 420
   spawnDistanceMin: 22
   spawnDistanceMax: 30
   eliteHealthMultiplier: 8
   eliteScale: 1.8
   eliteCrown: {fileID: 919132149155446097, guid: 8225c4fd8cf36e1459b6a8f70e08c598, type: 3}
+  stageGear:
+  - {fileID: 919132149155446097, guid: 53498be7bfba52945bbfa7db57acc04a, type: 3}
+  - {fileID: 919132149155446097, guid: 9fa0f9125d09998468d52619915f8c8e, type: 3}
+  stage2At: 0.36
+  stage3At: 0.63
   arenaHalfSize: 58
   downedSeconds: 30
   reviveSeconds: 2.5
@@ -75,5 +82,13 @@ MonoBehaviour:
   healthOrbPrefab: {fileID: 1670481910353055049, guid: 9836d99be791d604f8ef65e2352b8204, type: 3}
   magnetPrefab: {fileID: 7212339308308698714, guid: 20907914ce4f1ee4f841afe9f2091900, type: 3}
   chestPrefab: {fileID: 2860937837257182838, guid: 9cca0653dc853a54d8a9b3db36eaf45a, type: 3}
+  chestModel: {fileID: 919132149155446097, guid: e1b200e97d64ffc4dba3fc8b9ddf4462, type: 3}
+  chestLoot:
+  - {fileID: 919132149155446097, guid: 72235d87851e20244824718bb3a13818, type: 3}
+  - {fileID: 919132149155446097, guid: 174af6527cf31a34087319dcce2368bf, type: 3}
+  - {fileID: 919132149155446097, guid: 9d2bf14a0b8762c4380131a4c9fc17c9, type: 3}
+  - {fileID: 919132149155446097, guid: b4eba4fef4cbbad488f17f9bf8b904ae, type: 3}
+  - {fileID: 919132149155446097, guid: a47bae6bb5fb1e74d9724489e17745e7, type: 3}
+  - {fileID: 919132149155446097, guid: 8225c4fd8cf36e1459b6a8f70e08c598, type: 3}
   healthOrbHeal: 0.25
   maxGems: 220

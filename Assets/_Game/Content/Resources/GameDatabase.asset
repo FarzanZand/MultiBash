@@ -72,6 +72,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d3f0133d089eae44eb4dd13ec674a873, type: 2}
   - {fileID: 11400000, guid: 078e1434b2dd68243a67ac57b4072cb7, type: 2}
   - {fileID: 11400000, guid: 778c89a0245b2824d88a0fce3bba61e3, type: 2}
+  - {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
+  - {fileID: 11400000, guid: d48f3b5bc3a33734e919f5c1135cc899, type: 2}
+  - {fileID: 11400000, guid: 6db45975306804b45a14b787b5abc367, type: 2}
+  - {fileID: 11400000, guid: b37eb7923c0f05d46a45e7318fdd451a, type: 2}
+  - {fileID: 11400000, guid: 9d4d776cab5234543acd94cb30729768, type: 2}
+  - {fileID: 11400000, guid: 7cebf6c6b2a9eae40a48aabec5c9504a, type: 2}
   maps:
   - {fileID: 11400000, guid: 17df5ab1abd2de343b26d3ac01bd906c, type: 2}
   - {fileID: 11400000, guid: f590a9db72d0fb34b8c2a6bf1f264389, type: 2}

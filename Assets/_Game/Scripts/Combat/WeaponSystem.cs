@@ -16,6 +16,8 @@ namespace MultiBash
             public int level;
             public float cooldown;
             public WeaponDefinition def;
+            public int fires;          // volleys fired (evolution extras trigger every few)
+            public float extraTimer;   // continuous weapons: timer for their evolution extra
             public readonly Dictionary<Enemy, float> hitTimers = new();
         }
 
@@ -68,6 +70,7 @@ namespace MultiBash
                 {
                     bool fired = Fire(s, lvl, stats);
                     s.cooldown = fired ? lvl.cooldown * stats.Cooldown : 0.15f;
+                    if (fired) s.fires++;
                 }
             }
         }
@@ -116,6 +119,7 @@ namespace MultiBash
             dir.Normalize();
             int count = Mathf.Max(1, lvl.amount + stats.ProjectileCount);
             float spread = Mathf.Min(25f * (count - 1), 120f);
+            if (s.def.isEvolution) spread = 360f * (count - 1) / count;   // Twin Moons: a full circle of glaives
             for (int i = 0; i < count; i++)
             {
                 float a = count == 1 ? 0f : -spread * 0.5f + spread * i / (count - 1);
@@ -159,6 +163,17 @@ namespace MultiBash
                 });
                 PendingCrit = false;
                 _owner.Rpc_Meteor(p, delay, radius, (byte)s.weaponIndex);
+                if (s.def.isEvolution)
+                {
+                    // Armageddon: every impact leaves a burning crater
+                    float burn = 3.5f * stats.Duration;
+                    CombatWorld.SpawnPuddle(new CombatWorld.Puddle
+                    {
+                        owner = _owner, weapon = s.weaponIndex, pos = p, radius = radius * 0.75f, delay = delay, life = burn,
+                        damagePerTick = lvl.damage * stats.Damage * 0.12f, tickInterval = 0.4f, knockback = 0f,
+                    });
+                    _owner.Rpc_Flask(p + Vector3.up * 0.2f, p, delay, radius * 0.75f, burn, (byte)s.weaponIndex);
+                }
             }
             return true;
         }
@@ -177,7 +192,34 @@ namespace MultiBash
                 e.TakeDamage(Dmg(lvl, stats), pos, lvl.knockback, _owner);
                 e.ApplySlow(slow);
             }
-            _owner.Rpc_Nova(radius, (byte)s.weaponIndex);
+            // extra rings (levels + Multishot): each one bigger, a beat later
+            int rings = Mathf.Max(1, lvl.amount + stats.ProjectileCount);
+            for (int k = 1; k < rings; k++)
+            {
+                CombatWorld.SpawnBlast(new CombatWorld.Blast
+                {
+                    owner = _owner, pos = pos, delay = 0.2f * k, radius = radius * (1f + 0.4f * k), damage = Dmg(lvl, stats) * 0.75f,
+                    crit = PendingCrit, knockback = lvl.knockback * 0.7f, slow = slow,
+                });
+                PendingCrit = false;
+            }
+            _owner.Rpc_Nova(radius, (byte)rings, (byte)s.weaponIndex);
+            if (s.def.isEvolution)
+            {
+                // Absolute Zero: a spray of homing frost shards
+                int n = 8 + stats.ProjectileCount * 2;
+                for (int i = 0; i < n; i++)
+                {
+                    var d = Quaternion.Euler(-10f, i * 360f / n, 0) * Vector3.forward;
+                    CombatWorld.SpawnProjectile(new CombatWorld.Projectile
+                    {
+                        owner = _owner, weapon = s.weaponIndex, pos = Origin + Vector3.up * 0.3f, vel = d * 16f, life = 1.6f, pierce = 2,
+                        damage = Dmg(lvl, stats) * 0.5f, crit = PendingCrit, knockback = 2f, radius = 0.45f, turn = 300f, slow = slow,
+                    });
+                    PendingCrit = false;
+                }
+                _owner.Rpc_Homing(Origin + Vector3.up * 0.3f, Vector3.forward, (byte)n, 16f, 1.6f, 2, (byte)s.weaponIndex);
+            }
             return true;
         }
 
@@ -202,6 +244,22 @@ namespace MultiBash
                 PendingCrit = false;
             }
             _owner.Rpc_Homing(Origin, fwd, (byte)count, speed, life, (byte)Mathf.Clamp(lvl.pierce, 1, 255), (byte)s.weaponIndex);
+            if (s.def.isEvolution && s.fires % 2 == 1)
+            {
+                // Phantom Legion: every other volley a ring of spirit blades bursts out around you
+                int n = 10;
+                for (int i = 0; i < n; i++)
+                {
+                    var d = Quaternion.Euler(-5f, i * 36f, 0) * Vector3.forward;
+                    CombatWorld.SpawnProjectile(new CombatWorld.Projectile
+                    {
+                        owner = _owner, weapon = s.weaponIndex, pos = Origin + Vector3.up * 0.4f, vel = d * speed, life = life,
+                        pierce = Mathf.Max(1, lvl.pierce), damage = Dmg(lvl, stats), crit = PendingCrit, knockback = lvl.knockback, radius = 0.45f, turn = 360f,
+                    });
+                    PendingCrit = false;
+                }
+                _owner.Rpc_Homing(Origin + Vector3.up * 0.4f, Vector3.forward, (byte)n, speed, life, (byte)Mathf.Clamp(lvl.pierce, 1, 255), (byte)s.weaponIndex);
+            }
             return true;
         }
 
@@ -224,6 +282,15 @@ namespace MultiBash
                 var sd = Quaternion.Euler(0, i * (360f / swings), 0) * dir;
                 ArcDamage(s, lvl, stats, sd, radius, arc);
                 _owner.Rpc_Slash(sd, radius, arc, (byte)s.weaponIndex);
+                if (s.def.isEvolution)
+                {
+                    // Titan's Cleaver: each swing slams a shockwave where the blade lands
+                    var at = _owner.transform.position + sd * radius * 0.85f;
+                    at.y = Ground.Height(at);
+                    CombatWorld.SpawnBlast(new CombatWorld.Blast { owner = _owner, pos = at, delay = 0.12f, radius = 3f * Mathf.Sqrt(stats.Area), damage = Dmg(lvl, stats) * 0.6f, crit = PendingCrit, knockback = 8f });
+                    PendingCrit = false;
+                    _owner.Rpc_Shock(at, 3f * Mathf.Sqrt(stats.Area), (byte)s.weaponIndex);
+                }
             }
             return true;
         }
@@ -279,6 +346,23 @@ namespace MultiBash
                 PendingCrit = false;
             }
             _owner.Rpc_Projectiles(Origin, dir, (byte)count, spread, speed, life, (byte)Mathf.Clamp(lvl.pierce, 1, 255), (byte)s.weaponIndex);
+            if (s.def.isEvolution && s.fires % 3 == 2)
+            {
+                // Hail of Arrows: every third volley also looses a full ring of arrows
+                int n = 16;
+                float ring = 360f * (n - 1) / n;
+                for (int i = 0; i < n; i++)
+                {
+                    var d = Quaternion.Euler(0, -ring * 0.5f + ring * i / (n - 1), 0) * dir;
+                    CombatWorld.SpawnProjectile(new CombatWorld.Projectile
+                    {
+                        owner = _owner, weapon = s.weaponIndex, pos = Origin, vel = d * speed, life = life, pierce = lvl.pierce,
+                        damage = Dmg(lvl, stats), crit = PendingCrit, knockback = lvl.knockback, radius = 0.45f * Mathf.Sqrt(stats.Area),
+                    });
+                    PendingCrit = false;
+                }
+                _owner.Rpc_Projectiles(Origin, dir, (byte)n, ring, speed, life, (byte)Mathf.Clamp(lvl.pierce, 1, 255), (byte)s.weaponIndex);
+            }
             return true;
         }
 
@@ -301,6 +385,14 @@ namespace MultiBash
                 fired = true;
                 Vector3 from = Origin + Vector3.up * 0.8f;
                 var current = first;
+                if (s.def.isEvolution)
+                {
+                    // Thunder God's Rod: the first strike of every bolt explodes
+                    var at = first.transform.position;
+                    CombatWorld.SpawnBlast(new CombatWorld.Blast { owner = _owner, pos = at, delay = 0.05f, radius = 2.6f * Mathf.Sqrt(stats.Area), damage = Dmg(lvl, stats) * 0.8f, crit = PendingCrit, knockback = 5f });
+                    PendingCrit = false;
+                    _owner.Rpc_Shock(at, 2.6f * Mathf.Sqrt(stats.Area), (byte)s.weaponIndex);
+                }
                 for (int j = 0; j <= jumps && current != null; j++)
                 {
                     Chained.Add(current);
@@ -343,6 +435,7 @@ namespace MultiBash
                     crit = PendingCrit,
                     tickInterval = 0.5f,
                     knockback = lvl.knockback,
+                    slow = s.def.isEvolution ? 0.6f : 0f,   // Plague Cauldron: the plague pools also slow
                 });
                 PendingCrit = false;
                 _owner.Rpc_Flask(Origin + Vector3.up * 0.5f, to, flight, radius, duration, (byte)s.weaponIndex);
@@ -358,6 +451,25 @@ namespace MultiBash
             var pos = _owner.transform.position;
             EnemyRegistry.Query(pos, radius, Hits);
             foreach (var e in Hits) e.TakeDamage(Dmg(lvl, stats), pos, lvl.knockback, _owner);
+            // extra rings (levels + Multishot): wider halos that burn the outer crowd
+            int rings = Mathf.Max(1, lvl.amount + stats.ProjectileCount);
+            for (int k = 1; k < rings; k++)
+            {
+                float inner = radius * (1f + 0.45f * (k - 1)), outer = radius * (1f + 0.45f * k);
+                EnemyRegistry.Query(pos, outer, Hits);
+                foreach (var e in Hits)
+                {
+                    var d = e.transform.position - pos;
+                    d.y = 0;
+                    if (d.sqrMagnitude >= inner * inner) e.TakeDamage(Dmg(lvl, stats) * 0.7f, pos, lvl.knockback, _owner);
+                }
+            }
+            if (s.def.isEvolution)
+            {
+                // Sanctuary: the holy light also mends you and allies standing in it
+                foreach (var p in PlayerCharacter.All)
+                    if (p != null && p.IsAlive && (p.transform.position - pos).sqrMagnitude <= radius * radius) p.Heal(p.MaxHealth * 0.006f);
+            }
             _owner.Rpc_AuraPulse(radius, (byte)s.weaponIndex);
             return true; // always pulses (also fine when no enemies are near)
         }
@@ -379,6 +491,29 @@ namespace MultiBash
             foreach (var k in DeadKeys) s.hitTimers.Remove(k);
 
             float rehit = lvl.cooldown * stats.Cooldown;
+            if (s.def.isEvolution)
+            {
+                // Blade Tornado: the blades fling copies of themselves outward
+                s.extraTimer -= _owner.Runner.DeltaTime;
+                if (s.extraTimer <= 0f && EnemyRegistry.Nearest(center, radius + 12f) != null)
+                {
+                    s.extraTimer = 1.4f * stats.Cooldown;
+                    float a0 = angle0 * Mathf.Deg2Rad;
+                    var d0 = new Vector3(Mathf.Cos(a0), 0, Mathf.Sin(a0));
+                    float ring = 360f * (blades - 1) / Mathf.Max(1, blades);
+                    for (int i = 0; i < blades; i++)
+                    {
+                        var d = Quaternion.Euler(0, -ring * 0.5f + (blades == 1 ? 0 : ring * i / (blades - 1)), 0) * d0;
+                        CombatWorld.SpawnProjectile(new CombatWorld.Projectile
+                        {
+                            owner = _owner, weapon = s.weaponIndex, pos = center + Vector3.up * 0.9f + d * radius, vel = d * 20f, life = 0.8f, pierce = 4,
+                            damage = Dmg(lvl, stats) * 0.8f, crit = PendingCrit, knockback = lvl.knockback, radius = 0.6f,
+                        });
+                        PendingCrit = false;
+                    }
+                    _owner.Rpc_Projectiles(center + Vector3.up * 0.9f, d0, (byte)blades, ring, 20f, 0.8f, 4, (byte)s.weaponIndex);
+                }
+            }
             for (int i = 0; i < blades; i++)
             {
                 float a = (angle0 + i * 360f / blades) * Mathf.Deg2Rad;

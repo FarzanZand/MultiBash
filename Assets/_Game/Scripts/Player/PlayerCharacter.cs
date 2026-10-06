@@ -36,6 +36,9 @@ namespace MultiBash
         [Networked, Capacity(3)] public NetworkArray<short> Choices => default;
         /// <summary>Upgrade-offer rerolls left this run.</summary>
         [Networked] public byte Rerolls { get; set; }
+        /// <summary>Power Surges taken (fallback upgrade once everything is maxed).</summary>
+        [Networked] public int PowerSurges { get; set; }
+        public const float SurgeDamage = 0.06f, SurgeHealth = 6f;
         /// <summary>Level-ups that came from chests (rolled with extra luck).</summary>
         [Networked] public int TreasurePicks { get; set; }
         [Networked] public NetworkBool OfferIsTreasure { get; set; }
@@ -199,6 +202,11 @@ namespace MultiBash
             {
                 int lvl = PowerupLevels.Get(i);
                 if (lvl > 0) _stats.Add(db.powerups[i].perLevel, lvl);
+            }
+            if (PowerSurges > 0)
+            {
+                _stats.Add(new StatModifier(StatType.Damage, SurgeDamage), PowerSurges);
+                _stats.Add(new StatModifier(StatType.MaxHealth, SurgeHealth), PowerSurges);
             }
             _statsVersion = LoadoutVersion;
         }
@@ -484,7 +492,9 @@ namespace MultiBash
         {
             float t = Stats.Thorns;
             if (t <= 0f || attacker == null || !attacker.IsAlive) return;
+            var at = attacker.transform.position;
             attacker.TakeDamage(hit * t + 4f, transform.position, 3f, this);
+            Rpc_Thorns(at);
         }
 
         /// <summary>Host: instantly bring back (used when a run ends in victory).</summary>
@@ -626,11 +636,29 @@ namespace MultiBash
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]
-        public void Rpc_Nova(float radius, byte weapon)
+        public void Rpc_Nova(float radius, byte rings, byte weapon)
         {
             var def = GameDatabase.Instance.GetWeapon(weapon);
-            FxManager.Instance?.Nova(transform.position, radius, def != null ? def.fxColor : Color.cyan);
+            FxManager.Instance?.NovaRings(transform.position, radius, Mathf.Max(1, (int)rings), def != null ? def.fxColor : Color.cyan);
             if (def != null) AudioManager.Play(def.fireSound, transform.position, 0.6f);
+        }
+
+        /// <summary>Evolution extras: a shockwave ring on the ground.</summary>
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]
+        public void Rpc_Shock(Vector3 pos, float radius, byte weapon)
+        {
+            var def = GameDatabase.Instance.GetWeapon(weapon);
+            FxManager.Instance?.Shockwave(pos, radius, def != null ? def.fxColor : Color.white, false);
+            if (def != null) AudioManager.Play(def.hitSound != null ? def.hitSound : def.fireSound, pos, 0.4f, 0.8f);
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]
+        void Rpc_Thorns(Vector3 pos)
+        {
+            FxManager.Instance?.Burst(pos + Vector3.up * 0.9f, new Color(0.85f, 0.9f, 1f), 10, 7f, 0.16f, 0.3f, 0f, true);
+            FxManager.Instance?.HitSpark(pos + Vector3.up * 0.9f, true);
+            var lib = AudioManager.Lib;
+            if (lib != null) AudioManager.Play(lib.crit, pos, 0.35f, 0.6f);
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]

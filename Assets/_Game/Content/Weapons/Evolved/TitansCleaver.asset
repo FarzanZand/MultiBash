@@ -27,6 +27,24 @@ MonoBehaviour:
     duration: 0
     speed: 0
     knockback: 12
+  - upgradeText: +1, +15% damage
+    damage: 66.7
+    cooldown: 0.75
+    amount: 5
+    area: 5.8
+    pierce: 1
+    duration: 0
+    speed: 0
+    knockback: 12
+  - upgradeText: 'MAX: +1, +30% damage'
+    damage: 75.399994
+    cooldown: 0.67499995
+    amount: 6
+    area: 6.38
+    pierce: 2
+    duration: 0
+    speed: 0
+    knockback: 12
   heldModel: {fileID: 919132149155446097, guid: f2c04dd3b86729149afc08ac02164963, type: 3}
   projectileModel: {fileID: 0}
   fxColor: {r: 1, g: 0.8235294, b: 0.47843137, a: 1}

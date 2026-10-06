@@ -25,6 +25,10 @@ MonoBehaviour:
   hopRest: 0.7
   hopTime: 0.45
   hopHeight: 1.2
+  fodder: 0
+  scale: 1
+  gearSize: 1.4
+  xpChance: 1
   flees: 0
   lifetime: 0
   dropChests: 0
@@ -43,7 +47,7 @@ MonoBehaviour:
   splitInto: {fileID: 0}
   splitCount: 0
   bossName: Ancient Golem
-  bossHealthMultiplier: 40
+  bossHealthMultiplier: 160
   bossDamageMultiplier: 2
   bossScale: 2.4
   bossSplitCount: 0

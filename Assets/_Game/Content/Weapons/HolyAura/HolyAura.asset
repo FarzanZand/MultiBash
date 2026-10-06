@@ -63,6 +63,33 @@ MonoBehaviour:
     duration: 0
     speed: 0
     knockback: 2.5
+  - upgradeText: +1 ring, +8% damage
+    damage: 12.960001
+    cooldown: 0.4
+    amount: 2
+    area: 4.8
+    pierce: 1
+    duration: 0
+    speed: 0
+    knockback: 2.5
+  - upgradeText: +1 ring, +16% damage
+    damage: 13.92
+    cooldown: 0.4
+    amount: 3
+    area: 4.8
+    pierce: 2
+    duration: 0
+    speed: 0
+    knockback: 2.5
+  - upgradeText: 'OVERDRIVE: +1 ring, +25% damage'
+    damage: 15
+    cooldown: 0.35999998
+    amount: 4
+    area: 4.8
+    pierce: 3
+    duration: 0
+    speed: 0
+    knockback: 2.5
   heldModel: {fileID: 0}
   projectileModel: {fileID: 0}
   fxColor: {r: 1, g: 0.8862745, b: 0.5411765, a: 1}

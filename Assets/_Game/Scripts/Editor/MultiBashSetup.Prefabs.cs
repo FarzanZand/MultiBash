@@ -85,6 +85,9 @@ namespace MultiBash.EditorTools
             BuildEnemyPrefab($"{E}/MagmaSlime/MagmaSlimeSmall.prefab", Model("Enemies", "MagmaSlime"), 0.6f, true);
             BuildEnemyPrefab($"{E}/FireImp/FireImp.prefab", Model("Enemies", "FireImp"), 1.1f, false);
             BuildEnemyPrefab($"{E}/TreasureSlime/TreasureSlime.prefab", Model("Enemies", "TreasureSlime"), 1.0f, true);
+            BuildEnemyPrefab($"{E}/Ghoul/Ghoul.prefab", Model("Enemies", "Ghoul"), 1.0f, false);
+            BuildEnemyPrefab($"{E}/Wraith/Wraith.prefab", Model("Enemies", "Wraith"), 1.0f, false);
+            BuildEnemyPrefab($"{E}/ObsidianBrute/ObsidianBrute.prefab", Model("Enemies", "ObsidianBrute"), 1.3f, false);
 
             // ---------------------------------------------------------------- pickups
             string Pk = Content + "/Pickups";

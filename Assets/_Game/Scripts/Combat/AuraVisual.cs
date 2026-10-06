@@ -8,6 +8,7 @@ namespace MultiBash
         public PlayerCharacter Owner;
         Transform _ring;
         Renderer _renderer;
+        readonly System.Collections.Generic.List<(Transform t, Renderer r)> _extra = new();
         MaterialPropertyBlock _mpb;
         float _pulse;
         static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -31,6 +32,7 @@ namespace MultiBash
             if (!show)
             {
                 if (_ring != null) _ring.gameObject.SetActive(false);
+                foreach (var e in _extra) e.t.gameObject.SetActive(false);
                 return;
             }
             if (_ring == null)
@@ -47,14 +49,38 @@ namespace MultiBash
             _ring.localScale = Vector3.one * radius * 2f * (1f + _pulse * 0.08f);
             _ring.Rotate(0, 40f * Time.deltaTime, 0, Space.World);
             var c = def.fxColor;
-            c.a = 0.45f + _pulse * 0.5f;
+            c.a = 0.32f + _pulse * 0.35f;
             _mpb.SetColor(ColorId, c);
             _renderer.SetPropertyBlock(_mpb);
+
+            // extra halos for extra rings (weapon levels + Multishot), counter-rotating, a bit fainter
+            int rings = Mathf.Max(1, def.GetLevel(level).amount + Owner.Stats.ProjectileCount);
+            while (_extra.Count < rings - 1)
+            {
+                var t = FxManager.Instance.CreateGroundDecal("AuraRingX", FxManager.Instance.ringTexture, true);
+                _extra.Add((t, t.GetComponent<Renderer>()));
+            }
+            for (int k = 0; k < _extra.Count; k++)
+            {
+                var (t, r) = _extra[k];
+                bool on = k < rings - 1;
+                t.gameObject.SetActive(on);
+                if (!on) continue;
+                float rr = radius * (1f + 0.45f * (k + 1));
+                t.position = Owner.transform.position + Vector3.up * (0.07f + 0.01f * k);
+                t.localScale = Vector3.one * rr * 2f * (1f + _pulse * 0.06f);
+                t.Rotate(0, (k % 2 == 0 ? -55f : 35f) * Time.deltaTime, 0, Space.World);
+                var ce = Color.Lerp(def.fxColor, Color.white, 0.2f);
+                ce.a = 0.16f + _pulse * 0.22f;
+                _mpb.SetColor(ColorId, ce);
+                r.SetPropertyBlock(_mpb);
+            }
         }
 
         void OnDestroy()
         {
             if (_ring != null) Destroy(_ring.gameObject);
+            foreach (var e in _extra) if (e.t != null) Destroy(e.t.gameObject);
         }
     }
 }

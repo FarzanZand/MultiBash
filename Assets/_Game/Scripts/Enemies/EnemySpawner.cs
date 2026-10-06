@@ -78,12 +78,14 @@ namespace MultiBash
                 return;
             }
             int elitesLeft = b.elites;
+            if (b.count >= 40) _gm.Rpc_Horde(b.count);
             foreach (var anchor in Alive)
             {
                 int count = Mathf.CeilToInt(b.count / (float)Alive.Count);
                 var c = anchor.transform.position;
                 for (int i = 0; i < count; i++)
                 {
+                    if (EnemyRegistry.All.Count >= GameDatabase.Config.maxEnemies) return;
                     Vector3 p;
                     if (b.ring)
                     {

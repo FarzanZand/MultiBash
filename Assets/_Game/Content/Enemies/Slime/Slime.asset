@@ -25,6 +25,10 @@ MonoBehaviour:
   hopRest: 0.6
   hopTime: 0.5
   hopHeight: 1.3
+  fodder: 0
+  scale: 1
+  gearSize: 1.4
+  xpChance: 1
   flees: 0
   lifetime: 0
   dropChests: 0
@@ -43,7 +47,7 @@ MonoBehaviour:
   splitInto: {fileID: 11400000, guid: e4ad3d895fc23f6409edd07a013b00bb, type: 2}
   splitCount: 2
   bossName: Slime Mother
-  bossHealthMultiplier: 110
+  bossHealthMultiplier: 260
   bossDamageMultiplier: 2
   bossScale: 3.6
   bossSplitCount: 8

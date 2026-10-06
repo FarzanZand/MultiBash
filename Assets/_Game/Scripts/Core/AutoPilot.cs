@@ -48,9 +48,26 @@ namespace MultiBash
                 if (_choiceDelay > 0.6f)
                 {
                     _choiceDelay = 0f;
-                    me.Rpc_Choose(Random.Range(0, 3));
+                    me.Rpc_Choose(PickChoice(me));
                 }
             }
+        }
+
+        /// <summary>Bot upgrade pick like a sensible player: evolve > new weapon > weapon level > anything.</summary>
+        static int PickChoice(PlayerCharacter me)
+        {
+            int best = Random.Range(0, 3), score = -1;
+            for (int i = 0; i < me.Choices.Length; i++)
+            {
+                short c = me.Choices.Get(i);
+                if (c == 0) continue;
+                int sc = UpgradeSystem.IsEvolution(c) ? 4
+                    : UpgradeSystem.IsWeapon(c) && me.WeaponLevelOf(UpgradeSystem.WeaponIndex(c)) == 0 ? 3
+                    : UpgradeSystem.IsWeapon(c) ? 2 : 1;
+                sc = sc * 10 + Random.Range(0, 5);
+                if (sc > score) { score = sc; best = i; }
+            }
+            return best;
         }
 
         /// <summary>Dev cheat (host only, F9): jump the run timer forward to test later waves and bosses.</summary>
@@ -66,7 +83,8 @@ namespace MultiBash
             var me = PlayerCharacter.Local;
             string line = $"t={gm.RunTime:0} state={gm.State} lvl={gm.TeamLevel} xp={gm.TeamXP}/{gm.XPToNext} enemies={EnemyRegistry.All.Count} gems={Pickup.All.Count} kills={gm.TotalKills} fps={1f / Mathf.Max(0.0001f, Time.smoothDeltaTime):0}";
             if (me != null && me.Object != null && me.Object.IsValid)
-                line += $" hp={me.Health:0}/{me.MaxHealth:0} downed={me.Downed} weapons={me.WeaponCount} powerups={me.PowerupCount} dmgHits={PlayerCharacter.DamageFromHits:0} dmgLava={PlayerCharacter.DamageFromLava:0}";
+                line += $" hp={me.Health:0}/{me.MaxHealth:0} downed={me.Downed} weapons={me.WeaponCount} powerups={me.PowerupCount} dmgHits={PlayerCharacter.DamageFromHits:0} dmgLava={PlayerCharacter.DamageFromLava:0} hitsPerKill={(Enemy.RegularKills > 0 ? Enemy.RegularHits / (float)Enemy.RegularKills : 0):0.00}";
+                Enemy.RegularHits = 0; Enemy.RegularKills = 0;
             line += " | " + PerfStats.Report();
             Telemetry.AppendLine(line);
             Debug.Log("[Telemetry] " + line);

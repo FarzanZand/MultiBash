@@ -29,6 +29,46 @@ MonoBehaviour:
     rampCurve: 1.6
     groupSize: 1
     eliteChance: 0.012
+  - enemy: {fileID: 11400000, guid: d48f3b5bc3a33734e919f5c1135cc899, type: 2}
+    startMinute: 2.5
+    endMinute: 10
+    rateAtStart: 0.2
+    rateAtEnd: 3.2
+    rampCurve: 1.3
+    groupSize: 7
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: b37eb7923c0f05d46a45e7318fdd451a, type: 2}
+    startMinute: 3.6
+    endMinute: 10
+    rateAtStart: 0.2
+    rateAtEnd: 1.8
+    rampCurve: 1.6
+    groupSize: 3
+    eliteChance: 0.01
+  - enemy: {fileID: 11400000, guid: 9d4d776cab5234543acd94cb30729768, type: 2}
+    startMinute: 5.8
+    endMinute: 10
+    rateAtStart: 0.08
+    rateAtEnd: 0.45
+    rampCurve: 1.6
+    groupSize: 1
+    eliteChance: 0.04
+  - enemy: {fileID: 11400000, guid: 7cebf6c6b2a9eae40a48aabec5c9504a, type: 2}
+    startMinute: 6.2
+    endMinute: 10
+    rateAtStart: 0.2
+    rateAtEnd: 1.2
+    rampCurve: 1.6
+    groupSize: 3
+    eliteChance: 0.01
+  - enemy: {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
+    startMinute: 4
+    endMinute: 10
+    rateAtStart: 0.15
+    rateAtEnd: 2.2
+    rampCurve: 1.3
+    groupSize: 7
+    eliteChance: 0
   - enemy: {fileID: 11400000, guid: 9814521879f445b41b580bc620c92602, type: 2}
     startMinute: 1.5
     endMinute: 10
@@ -168,4 +208,67 @@ MonoBehaviour:
     ring: 0
     elites: 3
     announcement: FINAL ERUPTION!
+    boss: 0
+  - minute: 3.6
+    enemy: {fileID: 11400000, guid: b37eb7923c0f05d46a45e7318fdd451a, type: 2}
+    count: 10
+    ring: 1
+    elites: 1
+    announcement: Ash ghouls crawl out of the cinders!
+    boss: 0
+  - minute: 6
+    enemy: {fileID: 11400000, guid: 9d4d776cab5234543acd94cb30729768, type: 2}
+    count: 5
+    ring: 1
+    elites: 1
+    announcement: Obsidian Brutes rise from the lava!
+    boss: 0
+  - minute: 6.6
+    enemy: {fileID: 11400000, guid: 7cebf6c6b2a9eae40a48aabec5c9504a, type: 2}
+    count: 12
+    ring: 1
+    elites: 1
+    announcement: Wraiths ride the smoke!
+    boss: 0
+  - minute: 4.6
+    enemy: {fileID: 11400000, guid: d48f3b5bc3a33734e919f5c1135cc899, type: 2}
+    count: 50
+    ring: 1
+    elites: 0
+    announcement: Cinderlings pour from the cracks!
+    boss: 0
+  - minute: 5.6
+    enemy: {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
+    count: 88
+    ring: 1
+    elites: 0
+    announcement: The ashen rabble swarms!
+    boss: 0
+  - minute: 6.6
+    enemy: {fileID: 11400000, guid: d48f3b5bc3a33734e919f5c1135cc899, type: 2}
+    count: 126
+    ring: 1
+    elites: 0
+    announcement: The caldera overflows!
+    boss: 0
+  - minute: 7.6
+    enemy: {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
+    count: 164
+    ring: 1
+    elites: 0
+    announcement: An endless horde!
+    boss: 0
+  - minute: 8.6
+    enemy: {fileID: 11400000, guid: d48f3b5bc3a33734e919f5c1135cc899, type: 2}
+    count: 202
+    ring: 1
+    elites: 0
+    announcement: THE MOUNTAIN SPITS FIRE!
+    boss: 0
+  - minute: 9.6
+    enemy: {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
+    count: 240
+    ring: 1
+    elites: 0
+    announcement: EVERYTHING AT ONCE!
     boss: 0

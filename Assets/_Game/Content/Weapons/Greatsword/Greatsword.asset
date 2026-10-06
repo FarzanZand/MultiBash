@@ -63,6 +63,33 @@ MonoBehaviour:
     duration: 0
     speed: 0
     knockback: 10
+  - upgradeText: +1 swing, +8% damage
+    damage: 38.88
+    cooldown: 0.8
+    amount: 3
+    area: 4.8
+    pierce: 1
+    duration: 0
+    speed: 0
+    knockback: 10
+  - upgradeText: +1 swing, +16% damage
+    damage: 41.76
+    cooldown: 0.8
+    amount: 4
+    area: 4.8
+    pierce: 2
+    duration: 0
+    speed: 0
+    knockback: 10
+  - upgradeText: 'OVERDRIVE: +1 swing, +25% damage'
+    damage: 45
+    cooldown: 0.71999997
+    amount: 5
+    area: 4.8
+    pierce: 3
+    duration: 0
+    speed: 0
+    knockback: 10
   heldModel: {fileID: 919132149155446097, guid: f2c04dd3b86729149afc08ac02164963, type: 3}
   projectileModel: {fileID: 0}
   fxColor: {r: 0.62352943, g: 0.76862746, b: 1, a: 1}

@@ -20,6 +20,8 @@ namespace MultiBash
         [Networked] public int AttackTick { get; set; }
         [Networked] public NetworkBool Boss { get; set; }
         [Networked] public int CritCount { get; set; }
+        /// <summary>Run stage when spawned: 0 early, 1 mid (veterans: helmets), 2 late (war-painted, horned helms).</summary>
+        [Networked] public byte Stage { get; set; }
 
         public EnemyDefinition Def { get; private set; }
         public float Radius => (Def != null ? Def.radius : 0.5f) * Mathf.Max(0.1f, ScaleMul);
@@ -55,8 +57,12 @@ namespace MultiBash
         Vector3 _lastPos;
 
         /// <summary>Called by the spawner inside Runner.Spawn's onBeforeSpawned (host).</summary>
-        public void Init(int defIndex, bool elite, float healthMul, float damageMul, bool boss = false)
+        public void Init(int defIndex, bool elite, float healthMul, float damageMul, bool boss = false, int stage = 0)
         {
+            Stage = (byte)(boss ? 0 : Mathf.Clamp(stage, 0, 2));
+            float stageMul = 1f + 0.1f * Stage;   // veterans hit and take a bit more
+            healthMul *= stageMul;
+            damageMul *= stageMul;
             var def = GameDatabase.Instance.GetEnemy(defIndex);
             var cfg = GameDatabase.Config;
             DefIndex = (byte)defIndex;
@@ -70,9 +76,10 @@ namespace MultiBash
             }
             else
             {
-                MaxHealth = def.maxHealth * healthMul * (elite ? cfg.eliteHealthMultiplier : 1f);
+                // fodder never gets tougher: late hordes are about numbers, not HP
+                MaxHealth = def.maxHealth * (def.fodder ? 1f : healthMul) * (elite ? cfg.eliteHealthMultiplier : 1f);
                 ContactDamage = def.contactDamage * damageMul * (elite ? 1.5f : 1f);
-                ScaleMul = elite ? cfg.eliteScale : 1f;
+                ScaleMul = (elite ? cfg.eliteScale : 1f) * Mathf.Max(0.2f, def.scale) * (Stage == 2 ? 1.1f : 1f);
             }
             Health = MaxHealth;
         }
@@ -103,6 +110,7 @@ namespace MultiBash
             _lastCrit = CritCount;
             _lastPos = transform.position;
             _hopTimer = Random.Range(0f, Def != null ? Def.hopRest : 0.5f);
+            ApplyStageLook();
             ApplyTint(0f);
 
             var crownPrefab = GameDatabase.Config.eliteCrown;
@@ -375,9 +383,14 @@ namespace MultiBash
         }
 
         /// <summary>Host only.</summary>
+        /// <summary>Telemetry (host): hits needed per kill for regular (non-fodder, non-boss) enemies.</summary>
+        public static int RegularHits, RegularKills;
+
         public void TakeDamage(float amount, Vector3 from, float knockback, PlayerCharacter source)
         {
             if (!HasStateAuthority || !IsAlive) return;
+            bool regular = Def != null && !Def.fodder && !Boss && !Elite;
+            if (regular) RegularHits++;
             if (WeaponSystem.PendingCrit) CritCount++;
             WeaponSystem.PendingCrit = false;
             Health -= amount;
@@ -386,6 +399,7 @@ namespace MultiBash
             {
                 amount += Health;
                 Health = 0f;
+                GameManager.Instance?.Rpc_Execute(transform.position);
             }
             if (source != null && source.Data != null) source.Data.DamageDealt += amount;
             if (source != null)
@@ -406,6 +420,7 @@ namespace MultiBash
             if (Health <= 0f)
             {
                 Health = 0f;
+                if (regular) RegularKills++;
                 GameManager.Instance?.OnEnemyKilled(this, source);
                 Runner.Despawn(Object);
             }
@@ -434,6 +449,7 @@ namespace MultiBash
                 FxManager.Instance?.HitSpark(transform.position + Vector3.up * (0.9f * ScaleMul), crit);
                 if (Def.hitSound != null) AudioManager.Play(Def.hitSound, transform.position, 0.45f);
                 if (crit && AudioManager.Lib != null) AudioManager.Play(AudioManager.Lib.crit, transform.position, 0.3f, 1f, 0.15f);
+                if (crit) FxManager.Instance?.CritBurst(transform.position + Vector3.up * (0.9f * ScaleMul), Mathf.Clamp(dmg / 40f, 0.5f, 3f));
                 _rig?.Hit();
             }
             _lastHealth = h;
@@ -473,6 +489,65 @@ namespace MultiBash
 
         bool _tinted;
 
+        // ------------------------------------------------------------------ stage look (recolor + gear)
+
+        static readonly System.Collections.Generic.Dictionary<(Material, int), Material> StageMats = new();
+        static readonly Color[] StageTints = { Color.white, new(0.68f, 0.8f, 1.18f), new(1.22f, 0.5f, 0.45f) };
+        Color _stageTint = Color.white;
+
+        void ApplyStageLook()
+        {
+            if (Stage == 0 || Def == null) return;
+            _stageTint = StageTints[Stage];
+            // shared tinted material copies (one per original material and stage) so big swarms still batch
+            foreach (var r in _renderers)
+            {
+                if (r == null || r is ParticleSystemRenderer) continue;
+                var mats = r.sharedMaterials;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    var m = mats[i];
+                    if (m == null || !m.HasProperty(BaseColorId)) continue;
+                    if (!StageMats.TryGetValue((m, Stage), out var v))
+                    {
+                        v = new Material(m) { name = m.name + "_S" + Stage };
+                        v.SetColor(BaseColorId, m.GetColor(BaseColorId) * _stageTint);
+                        StageMats[(m, Stage)] = v;
+                    }
+                    mats[i] = v;
+                }
+                r.sharedMaterials = mats;
+            }
+            if (Def.fodder || Boss) return;
+            var gearSet = GameDatabase.Config.stageGear;
+            var gear = gearSet != null && gearSet.Length >= Stage ? gearSet[Stage - 1] : null;
+            if (gear == null) return;
+            // sit on top of the head (or body), riding along with its animation
+            Transform anchor = FindDeep(transform, "Head") ?? FindDeep(transform, "Body") ?? transform;
+            var rs = anchor.GetComponentsInChildren<Renderer>();
+            if (rs.Length == 0) rs = _renderers;
+            var b = rs[0].bounds;
+            foreach (var r in rs) b.Encapsulate(r.bounds);
+            var g = Instantiate(gear, anchor);
+            g.transform.position = new Vector3(b.center.x, b.max.y - b.size.y * 0.18f, b.center.z);
+            g.transform.rotation = transform.rotation;
+            float size = Mathf.Min(Mathf.Min(b.size.x, b.size.z) * Def.gearSize, 0.5f * transform.lossyScale.x) + 0.0001f;
+            g.transform.localScale = Vector3.one * size / Mathf.Max(0.001f, anchor.lossyScale.x);
+            foreach (var gr in g.GetComponentsInChildren<Renderer>()) gr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            _renderers = GetComponentsInChildren<Renderer>();
+        }
+
+        static Transform FindDeep(Transform t, string name)
+        {
+            if (t.name == name) return t;
+            for (int i = 0; i < t.childCount; i++)
+            {
+                var f = FindDeep(t.GetChild(i), name);
+                if (f != null) return f;
+            }
+            return null;
+        }
+
         void ApplyTint(float flash, float windup = 0f, bool slowed = false)
         {
             if (_renderers == null) return;
@@ -487,7 +562,7 @@ namespace MultiBash
                 return;
             }
             _tinted = true;
-            var baseColor = Elite ? new Color(1f, 0.9f, 0.72f) : Color.white;
+            var baseColor = (Elite ? new Color(1f, 0.9f, 0.72f) : Color.white) * _stageTint;
             if (slowed) baseColor *= new Color(0.6f, 0.85f, 1.3f);
             var emission = Color.white * (flash * 2.5f) + (Elite ? new Color(0.14f, 0.09f, 0.02f) : Color.black)
                            + new Color(1f, 0.15f, 0.05f) * windup * 1.6f + (slowed ? new Color(0.05f, 0.15f, 0.3f) : Color.black);

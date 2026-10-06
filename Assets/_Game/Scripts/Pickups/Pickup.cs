@@ -39,7 +39,17 @@ namespace MultiBash
         {
             var cfg = GameDatabase.Config;
             int gems = 0;
-            foreach (var p in All) if (p.Kind == PickupKind.XP) gems++;
+            foreach (var p in All)
+            {
+                if (p.Kind != PickupKind.XP) continue;
+                gems++;
+                // merge into an idle gem lying right next to it: fewer, juicier gems in big fights
+                if (!p.Target.IsValid && (p.transform.position - pos).sqrMagnitude < 1.4f * 1.4f)
+                {
+                    p.Value += value;
+                    return;
+                }
+            }
             if (gems >= cfg.maxGems)
             {
                 // too many gems on the map: merge into the oldest idle one
@@ -130,6 +140,12 @@ namespace MultiBash
                     }
                 }
                 if (target == null) return;
+                if (Kind == PickupKind.Chest)
+                {
+                    // chests don't fly: you walk into them and they burst open right there
+                    Collect(target);
+                    return;
+                }
                 Target = target.Object.Id;
                 _speed = -4f; // small hop away first, like a vacuum pop
             }

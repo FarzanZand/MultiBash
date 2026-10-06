@@ -328,7 +328,7 @@ namespace MultiBash
                     string evo = "";
                     if (!w.isEvolution && w.evolveWith != null && w.evolvesInto != null)
                         evo = UpgradeSystem.CanEvolve(me, idx) ? "<color=#ffb347>Evolves on your next level-up!</color>"
-                            : $"<color=#d9b8ff>MAX + {w.evolveWith.displayName} = {w.evolvesInto.displayName}</color>";
+                            : $"<color=#d9b8ff>LVL {w.EvolveAt} + {w.evolveWith.displayName} = {w.evolvesInto.displayName}</color>";
                     Row(w.icon, $"{w.displayName}  <size=22>{lv}</size>",
                         $"{w.description}\n<color=#f2c447>{L.damage * me.Stats.Damage:0} damage   every {L.cooldown * me.Stats.Cooldown:0.##}s</color>", evo);
                 }

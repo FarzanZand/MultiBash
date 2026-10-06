@@ -61,6 +61,9 @@ namespace MultiBash
         [Tooltip("Spawn rate +X per extra player.")]
         public float spawnRatePerExtraPlayer = 0.6f;
         public float damagePerMinute = 0.08f;
+        [Tooltip("Enemy HP +X per team level (enemies keep up with how strong the party is).")]
+        public float healthPerTeamLevel = 0.06f;
+        public float healthPerTeamLevelSquared = 0.004f;
         public int maxEnemies = 220;
         public float spawnDistanceMin = 22f;
         public float spawnDistanceMax = 30f;
@@ -69,6 +72,10 @@ namespace MultiBash
         public float eliteScale = 1.8f;
         [Tooltip("Floating crown shown over elites and bosses.")]
         public GameObject eliteCrown;
+        [Tooltip("Gear worn by mid-run (index 0) and late-run (index 1) enemies.")]
+        public GameObject[] stageGear;
+        [Tooltip("Run fractions where enemies switch to stage 2 and stage 3 looks.")]
+        public float stage2At = 0.3f, stage3At = 0.62f;
 
         [Header("Arena")]
         public float arenaHalfSize = 58f;
@@ -84,6 +91,9 @@ namespace MultiBash
         public NetworkObject healthOrbPrefab;
         public NetworkObject magnetPrefab;
         public NetworkObject chestPrefab;
+        [Tooltip("Plain chest model for the opening animation, and the loot it sprays out.")]
+        public GameObject chestModel;
+        public GameObject[] chestLoot;
         [Range(0f, 1f)] public float healthOrbHeal = 0.25f;
         public int maxGems = 220;
 

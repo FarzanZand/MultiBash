@@ -63,6 +63,33 @@ MonoBehaviour:
     duration: 2
     speed: 20
     knockback: 3
+  - upgradeText: +1 dagger, +8% damage
+    damage: 18.36
+    cooldown: 0.95
+    amount: 7
+    area: 1
+    pierce: 4
+    duration: 2
+    speed: 20
+    knockback: 3
+  - upgradeText: +1 dagger, +16% damage
+    damage: 19.72
+    cooldown: 0.95
+    amount: 8
+    area: 1
+    pierce: 5
+    duration: 2
+    speed: 20
+    knockback: 3
+  - upgradeText: 'OVERDRIVE: +1 dagger, +25% damage'
+    damage: 21.25
+    cooldown: 0.85499996
+    amount: 9
+    area: 1
+    pierce: 6
+    duration: 2
+    speed: 20
+    knockback: 3
   heldModel: {fileID: 0}
   projectileModel: {fileID: 919132149155446097, guid: dc941c92912e6c244a3b752cb36a6e69, type: 3}
   fxColor: {r: 0.7529412, g: 0.5411765, b: 1, a: 1}

@@ -291,6 +291,24 @@ namespace MultiBash.EditorTools
                 };
             });
 
+            // levels 6-8: every weapon keeps growing - more projectiles, swings, rings, blades and bolts on screen
+            void Grow(WeaponDefinition w, string unit)
+            {
+                if (w.levels.Length != 5) return;
+                var last = w.levels[4];
+                var list = new List<WeaponLevel>(w.levels);
+                for (int k = 1; k <= 3; k++)
+                {
+                    float mul = 1f + (k == 3 ? 0.25f : 0.08f * k);
+                    list.Add(L(k == 3 ? $"OVERDRIVE: +1 {unit}, +25% damage" : $"+1 {unit}, +{8 * k}% damage",
+                        last.damage * mul, last.cooldown * (k == 3 ? 0.9f : 1f), last.amount + k, last.area, last.pierce + k, last.duration, last.speed, last.knockback));
+                }
+                w.levels = list.ToArray();
+                EditorUtility.SetDirty(w);
+            }
+            Grow(sword, "swing"); Grow(bow, "arrow"); Grow(staff, "bolt"); Grow(flask, "flask"); Grow(blades, "blade");
+            Grow(aura, "ring"); Grow(boomerang, "boomerang"); Grow(meteor, "meteor"); Grow(nova, "ring"); Grow(daggers, "dagger");
+
             // ------------------------------------------------------------------ powerups
             string P = Content + "/Powerups";
             PowerupDefinition Pow(string name, string desc, Rarity r, int max, StatType stat, float v, string iconName = null)
@@ -310,7 +328,7 @@ namespace MultiBash.EditorTools
             Pow("Vitality", "More max health (and heals that much).", Rarity.Common, 5, StatType.MaxHealth, 20f);
             var haste = Pow("Haste", "Weapons attack more often.", Rarity.Rare, 5, StatType.Cooldown, -0.07f);
             var expanse = Pow("Expanse", "Bigger swings, auras, puddles and orbits.", Rarity.Common, 5, StatType.Area, 0.12f);
-            Pow("Multishot", "+1 arrow, flask, blade, swing and lightning jump.", Rarity.Epic, 2, StatType.ProjectileCount, 1f);
+            Pow("Multishot", "+1 arrow, flask, blade, swing, ring and lightning jump.", Rarity.Epic, 4, StatType.ProjectileCount, 1f);
             Pow("Magnet", "Collect XP from further away.", Rarity.Common, 5, StatType.PickupRadius, 1.3f);
             var wisdom = Pow("Wisdom", "Gain more XP for the whole team.", Rarity.Rare, 5, StatType.XPGain, 0.1f);
             var regen = Pow("Regeneration", "Slowly recover health.", Rarity.Rare, 5, StatType.HealthRegen, 0.6f);
@@ -343,7 +361,9 @@ namespace MultiBash.EditorTools
                     w.fxColor = Hex(fx);
                     w.fireSound = from.fireSound;
                     w.hitSound = from.hitSound;
-                    w.levels = new[] { lvl };
+                    var l2 = L("+1, +15% damage", lvl.damage * 1.15f, lvl.cooldown, lvl.amount + 1, lvl.area, lvl.pierce + 1, lvl.duration, lvl.speed, lvl.knockback);
+                    var l3 = L("MAX: +1, +30% damage", lvl.damage * 1.3f, lvl.cooldown * 0.9f, lvl.amount + 2, lvl.area * 1.1f, lvl.pierce + 2, lvl.duration, lvl.speed, lvl.knockback);
+                    w.levels = new[] { lvl, l2, l3 };
                 });
                 if (Force || from.evolvesInto == null)
                 {
@@ -417,7 +437,7 @@ namespace MultiBash.EditorTools
                 e.xpValue = 2; e.healthOrbChance = 0.02f; e.magnetChance = 0.003f;
                 e.splitInto = smallSlime; e.splitCount = 2;
                 e.knockbackResist = 0.3f;
-                e.bossName = "Slime Mother"; e.bossHealthMultiplier = 110f; e.bossDamageMultiplier = 2f; e.bossScale = 3.6f; e.bossSplitCount = 8;
+                e.bossName = "Slime Mother"; e.bossHealthMultiplier = 260f; e.bossDamageMultiplier = 2f; e.bossScale = 3.6f; e.bossSplitCount = 8;
                 e.hitSound = Clip("SFX_SlimeHit"); e.deathSound = Clip("SFX_SlimeDeath"); e.moveSound = Clip("SFX_SlimeHop");
                 e.deathColor = Hex("#7ee04a");
             });
@@ -426,7 +446,7 @@ namespace MultiBash.EditorTools
                 e.displayName = "Skeleton";
                 e.maxHealth = 14; e.moveSpeed = 3.6f; e.contactDamage = 6; e.attackInterval = 1.1f; e.radius = 0.42f;
                 e.movement = EnemyMovement.Walker;
-                e.bossName = "Bone King"; e.bossHealthMultiplier = 200f; e.bossDamageMultiplier = 3f; e.bossScale = 3.3f;
+                e.bossName = "Bone King"; e.bossHealthMultiplier = 480f; e.bossDamageMultiplier = 3f; e.bossScale = 3.3f;
                 e.xpValue = 1; e.healthOrbChance = 0.015f; e.magnetChance = 0.002f;
                 e.hitSound = Clip("SFX_BoneHit"); e.deathSound = Clip("SFX_SkeletonDeath");
                 e.deathColor = Hex("#efe6cf");
@@ -470,10 +490,76 @@ namespace MultiBash.EditorTools
                 e.attack = EnemyAttack.Stomp; e.attackDistance = 4f; e.specialCooldown = 4f; e.telegraphTime = 1.05f;
                 e.specialRadius = 4.5f; e.specialDamageMul = 1.5f; e.specialColor = Hex("#5ad8ff"); e.specialSound = Clip("SFX_GolemStomp");
                 e.knockbackResist = 0.85f;
-                e.bossName = "Ancient Golem"; e.bossHealthMultiplier = 40f; e.bossDamageMultiplier = 2f; e.bossScale = 2.4f;
+                e.bossName = "Ancient Golem"; e.bossHealthMultiplier = 160f; e.bossDamageMultiplier = 2f; e.bossScale = 2.4f;
                 e.xpValue = 8; e.healthOrbChance = 0.15f; e.magnetChance = 0.02f;
                 e.hitSound = Clip("SFX_RockHit"); e.deathSound = Clip("SFX_GolemStomp");
                 e.deathColor = Hex("#8e939c");
+            });
+
+            // stage 2 / 3 newcomers
+            Asset<EnemyDefinition>($"{E}/Ghoul/Ghoul.asset", e =>
+            {
+                e.displayName = "Ghoul";
+                e.maxHealth = 30; e.moveSpeed = 4.5f; e.contactDamage = 7; e.attackInterval = 0.9f; e.radius = 0.45f;
+                e.movement = EnemyMovement.Walker; e.gearSize = 1.3f;
+                e.xpValue = 3; e.healthOrbChance = 0.02f; e.magnetChance = 0.003f;
+                e.hitSound = Clip("SFX_SlimeHit"); e.deathSound = Clip("SFX_SkeletonDeath");
+                e.deathColor = Hex("#7aa04a");
+            });
+            Asset<EnemyDefinition>($"{E}/Wraith/Wraith.asset", e =>
+            {
+                e.displayName = "Wraith";
+                e.maxHealth = 26; e.moveSpeed = 5.4f; e.contactDamage = 10; e.attackInterval = 1f; e.radius = 0.45f;
+                e.movement = EnemyMovement.Flyer; e.gearSize = 1.1f;
+                e.attack = EnemyAttack.Ranged; e.attackDistance = 9f; e.specialCooldown = 3.2f; e.projectileSpeed = 11f;
+                e.specialDamageMul = 1.2f; e.specialRadius = 0.45f; e.specialColor = Hex("#c070ff"); e.specialSound = Clip("SFX_DaggerCast");
+                e.xpValue = 3; e.healthOrbChance = 0.02f;
+                e.hitSound = Clip("SFX_BatScreech"); e.deathSound = Clip("SFX_BatDeath");
+                e.deathColor = Hex("#9a5aff");
+            });
+            Asset<EnemyDefinition>($"{E}/ObsidianBrute/ObsidianBrute.asset", e =>
+            {
+                e.displayName = "Obsidian Brute";
+                e.maxHealth = 160; e.moveSpeed = 3.0f; e.contactDamage = 18; e.attackInterval = 1.4f; e.radius = 0.85f;
+                e.movement = EnemyMovement.Walker; e.gearSize = 1.0f;
+                e.attack = EnemyAttack.Stomp; e.attackDistance = 3.4f; e.specialCooldown = 3.5f; e.telegraphTime = 0.9f;
+                e.specialRadius = 3.4f; e.specialDamageMul = 1.4f; e.specialColor = Hex("#ff6a1a"); e.specialSound = Clip("SFX_GolemStomp");
+                e.knockbackResist = 0.8f;
+                e.xpValue = 10; e.healthOrbChance = 0.12f; e.magnetChance = 0.015f;
+                e.hitSound = Clip("SFX_RockHit"); e.deathSound = Clip("SFX_GolemStomp");
+                e.deathColor = Hex("#3a3040");
+            });
+
+            // fodder: weak horde enemies that never scale up (one hit all run long, so late game = slaying fast)
+            Asset<EnemyDefinition>($"{E}/Fodder/BoneRabble.asset", e =>
+            {
+                e.displayName = "Bone Rabble";
+                e.fodder = true; e.scale = 0.72f; e.xpChance = 0.25f;
+                e.maxHealth = 4; e.moveSpeed = 4.4f; e.contactDamage = 4; e.attackInterval = 1f; e.radius = 0.32f;
+                e.movement = EnemyMovement.Walker;
+                e.xpValue = 1; e.healthOrbChance = 0.002f;
+                e.hitSound = Clip("SFX_BoneHit"); e.deathSound = Clip("SFX_SkeletonDeath");
+                e.deathColor = Hex("#efe6cf");
+            });
+            Asset<EnemyDefinition>($"{E}/Fodder/Slimeling.asset", e =>
+            {
+                e.displayName = "Slimeling";
+                e.fodder = true; e.scale = 0.85f; e.xpChance = 0.25f;
+                e.maxHealth = 3; e.moveSpeed = 4.6f; e.contactDamage = 3; e.attackInterval = 0.9f; e.radius = 0.3f;
+                e.movement = EnemyMovement.Hopper; e.hopRest = 0.25f; e.hopTime = 0.35f; e.hopHeight = 0.7f;
+                e.xpValue = 1; e.healthOrbChance = 0.002f;
+                e.hitSound = Clip("SFX_SlimeHit"); e.deathSound = Clip("SFX_SlimeDeath");
+                e.deathColor = Hex("#7ee04a");
+            });
+            Asset<EnemyDefinition>($"{E}/Fodder/Cinderling.asset", e =>
+            {
+                e.displayName = "Cinderling";
+                e.fodder = true; e.scale = 0.85f; e.xpChance = 0.25f;
+                e.maxHealth = 4; e.moveSpeed = 4.8f; e.contactDamage = 4; e.attackInterval = 0.9f; e.radius = 0.3f;
+                e.movement = EnemyMovement.Hopper; e.hopRest = 0.22f; e.hopTime = 0.35f; e.hopHeight = 0.8f;
+                e.xpValue = 1; e.healthOrbChance = 0.002f;
+                e.hitSound = Clip("SFX_MagmaHit"); e.deathSound = Clip("SFX_MagmaDeath");
+                e.deathColor = Hex("#ff7a1a");
             });
 
             Asset<EnemyDefinition>($"{E}/TreasureSlime/TreasureSlime.asset", e =>
@@ -506,7 +592,7 @@ namespace MultiBash.EditorTools
                 e.xpValue = 2; e.healthOrbChance = 0.02f; e.magnetChance = 0.003f;
                 e.splitInto = smallMagma; e.splitCount = 2;
                 e.knockbackResist = 0.35f;
-                e.bossName = "Magma Queen"; e.bossHealthMultiplier = 120f; e.bossDamageMultiplier = 2f; e.bossScale = 3.8f; e.bossSplitCount = 10;
+                e.bossName = "Magma Queen"; e.bossHealthMultiplier = 300f; e.bossDamageMultiplier = 2f; e.bossScale = 3.8f; e.bossSplitCount = 10;
                 e.hitSound = Clip("SFX_MagmaHit"); e.deathSound = Clip("SFX_MagmaDeath"); e.moveSound = Clip("SFX_SlimeHop");
                 e.deathColor = Hex("#ff7a1a");
             });
@@ -549,6 +635,26 @@ namespace MultiBash.EditorTools
             LinkEnemy($"{E}/FireImp/FireImp.asset", $"{E}/FireImp/FireImp.prefab");
             LinkEnemy($"{E}/TreasureSlime/TreasureSlime.asset", $"{E}/TreasureSlime/TreasureSlime.prefab");
             var treasure = Load<EnemyDefinition>($"{E}/TreasureSlime/TreasureSlime.asset");
+            LinkEnemy($"{E}/Ghoul/Ghoul.asset", $"{E}/Ghoul/Ghoul.prefab");
+            LinkEnemy($"{E}/Wraith/Wraith.asset", $"{E}/Wraith/Wraith.prefab");
+            LinkEnemy($"{E}/ObsidianBrute/ObsidianBrute.asset", $"{E}/ObsidianBrute/ObsidianBrute.prefab");
+            var ghoul = Load<EnemyDefinition>($"{E}/Ghoul/Ghoul.asset");
+            var wraith = Load<EnemyDefinition>($"{E}/Wraith/Wraith.asset");
+            var brute = Load<EnemyDefinition>($"{E}/ObsidianBrute/ObsidianBrute.asset");
+            LinkEnemy($"{E}/Fodder/BoneRabble.asset", $"{E}/Skeleton/Skeleton.prefab");
+            LinkEnemy($"{E}/Fodder/Slimeling.asset", $"{E}/Slime/SlimeSmall.prefab");
+            LinkEnemy($"{E}/Fodder/Cinderling.asset", $"{E}/MagmaSlime/MagmaSlimeSmall.prefab");
+            var rabble = Load<EnemyDefinition>($"{E}/Fodder/BoneRabble.asset");
+            var slimeling = Load<EnemyDefinition>($"{E}/Fodder/Slimeling.asset");
+            var cinder = Load<EnemyDefinition>($"{E}/Fodder/Cinderling.asset");
+            // escalating hordes: every minute from 4 on, a bigger ring of fodder
+            List<WaveBurst> Hordes(EnemyDefinition a, EnemyDefinition b, params string[] lines)
+            {
+                var list = new List<WaveBurst>();
+                for (int m = 4; m <= 9; m++)
+                    list.Add(new() { minute = m + 0.6f, enemy = m % 2 == 0 ? a : b, count = 50 + 38 * (m - 4), ring = true, elites = 0, announcement = lines[(m - 4) % lines.Length] });
+                return list;
+            }
 
             var skel = Load<EnemyDefinition>($"{E}/Skeleton/Skeleton.asset");
             var slime = Load<EnemyDefinition>($"{E}/Slime/Slime.asset");
@@ -560,11 +666,16 @@ namespace MultiBash.EditorTools
             {
                 w.entries = new List<WaveEntry>
                 {
-                    new() { enemy = skel, startMinute = 0f, endMinute = 10f, rateAtStart = 0.45f, rateAtEnd = 9f, groupSize = 2, eliteChance = 0.008f },
+                    new() { enemy = skel, startMinute = 0f, endMinute = 10f, rateAtStart = 0.45f, rateAtEnd = 8f, groupSize = 2, eliteChance = 0.008f },
                     new() { enemy = slime, startMinute = 1f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 4.5f, groupSize = 1, eliteChance = 0.012f },
                     new() { enemy = skel, startMinute = 2.5f, endMinute = 10f, rateAtStart = 0.1f, rateAtEnd = 1.0f, groupSize = 8, eliteChance = 0f },
                     new() { enemy = slime, startMinute = 4f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 0.6f, groupSize = 6, eliteChance = 0f },
-                    new() { enemy = bat, startMinute = 1.25f, endMinute = 10f, rateAtStart = 0.12f, rateAtEnd = 1.6f, groupSize = 5, eliteChance = 0f },
+                    new() { enemy = rabble, startMinute = 2.5f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 3.2f, groupSize = 6, rampCurve = 1.3f, eliteChance = 0f },
+                    new() { enemy = slimeling, startMinute = 4f, endMinute = 10f, rateAtStart = 0.15f, rateAtEnd = 2.2f, groupSize = 8, rampCurve = 1.3f, eliteChance = 0f },
+                    new() { enemy = ghoul, startMinute = 3.6f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 2.0f, groupSize = 3, eliteChance = 0.01f },
+                    new() { enemy = wraith, startMinute = 6.2f, endMinute = 10f, rateAtStart = 0.25f, rateAtEnd = 1.4f, groupSize = 3, eliteChance = 0.01f },
+                    new() { enemy = brute, startMinute = 6.5f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 0.35f, groupSize = 1, eliteChance = 0.04f },
+                    new() { enemy = bat, startMinute = 1.25f, endMinute = 10f, rateAtStart = 0.12f, rateAtEnd = 2.2f, groupSize = 6, eliteChance = 0f },
                     new() { enemy = archer, startMinute = 2.25f, endMinute = 10f, rateAtStart = 0.08f, rateAtEnd = 0.9f, groupSize = 2, eliteChance = 0.01f },
                     new() { enemy = shroom, startMinute = 3.25f, endMinute = 10f, rateAtStart = 0.08f, rateAtEnd = 0.8f, groupSize = 1, eliteChance = 0f },
                     new() { enemy = golem, startMinute = 4f, endMinute = 10f, rateAtStart = 0.03f, rateAtEnd = 0.22f, groupSize = 1, eliteChance = 0.05f },
@@ -587,6 +698,10 @@ namespace MultiBash.EditorTools
                     new() { minute = 9f, enemy = skel, boss = true, announcement = "THE BONE KING RISES!" },
                     new() { minute = 9.5f, enemy = slime, count = 70, ring = false, elites = 3, announcement = "FINAL SURGE!" },
                 };
+                w.bursts.Add(new() { minute = 3.6f, enemy = ghoul, count = 10, ring = true, elites = 1, announcement = "Ghouls claw their way out of the graves!" });
+                w.bursts.Add(new() { minute = 6.25f, enemy = wraith, count = 14, ring = true, elites = 1, announcement = "Wraiths descend!" });
+                w.bursts.Add(new() { minute = 6.9f, enemy = brute, count = 4, ring = true, elites = 1, announcement = "Obsidian Brutes stomp in!" });
+                w.bursts.AddRange(Hordes(rabble, slimeling, "The rabble swarms!", "A flood of slimelings!", "They keep coming!", "An endless horde!", "THE DEAD WON'T STOP!", "EVERYTHING AT ONCE!"));
             });
 
             var magma = Load<EnemyDefinition>($"{E}/MagmaSlime/MagmaSlime.asset");
@@ -597,6 +712,11 @@ namespace MultiBash.EditorTools
                 {
                     new() { enemy = skel, startMinute = 0f, endMinute = 10f, rateAtStart = 0.5f, rateAtEnd = 7.5f, groupSize = 2, eliteChance = 0.008f },
                     new() { enemy = magma, startMinute = 0.75f, endMinute = 10f, rateAtStart = 0.12f, rateAtEnd = 4.5f, groupSize = 1, eliteChance = 0.012f },
+                    new() { enemy = cinder, startMinute = 2.5f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 3.2f, groupSize = 7, rampCurve = 1.3f, eliteChance = 0f },
+                    new() { enemy = ghoul, startMinute = 3.6f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 1.8f, groupSize = 3, eliteChance = 0.01f },
+                    new() { enemy = brute, startMinute = 5.8f, endMinute = 10f, rateAtStart = 0.08f, rateAtEnd = 0.45f, groupSize = 1, eliteChance = 0.04f },
+                    new() { enemy = wraith, startMinute = 6.2f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 1.2f, groupSize = 3, eliteChance = 0.01f },
+                    new() { enemy = rabble, startMinute = 4f, endMinute = 10f, rateAtStart = 0.15f, rateAtEnd = 2.2f, groupSize = 7, rampCurve = 1.3f, eliteChance = 0f },
                     new() { enemy = imp, startMinute = 1.5f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 1.3f, groupSize = 2, eliteChance = 0.01f },
                     new() { enemy = bat, startMinute = 2f, endMinute = 10f, rateAtStart = 0.1f, rateAtEnd = 1.2f, groupSize = 5, eliteChance = 0f },
                     new() { enemy = magma, startMinute = 3f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 0.6f, groupSize = 6, eliteChance = 0f },
@@ -620,6 +740,10 @@ namespace MultiBash.EditorTools
                     new() { minute = 9f, enemy = skel, boss = true, announcement = "THE BONE KING RISES FROM THE ASH!" },
                     new() { minute = 9.5f, enemy = imp, count = 50, ring = false, elites = 3, announcement = "FINAL ERUPTION!" },
                 };
+                w.bursts.Add(new() { minute = 3.6f, enemy = ghoul, count = 10, ring = true, elites = 1, announcement = "Ash ghouls crawl out of the cinders!" });
+                w.bursts.Add(new() { minute = 6.0f, enemy = brute, count = 5, ring = true, elites = 1, announcement = "Obsidian Brutes rise from the lava!" });
+                w.bursts.Add(new() { minute = 6.6f, enemy = wraith, count = 12, ring = true, elites = 1, announcement = "Wraiths ride the smoke!" });
+                w.bursts.AddRange(Hordes(cinder, rabble, "Cinderlings pour from the cracks!", "The ashen rabble swarms!", "The caldera overflows!", "An endless horde!", "THE MOUNTAIN SPITS FIRE!", "EVERYTHING AT ONCE!"));
             });
 
             string Mp = Content + "/Maps";
@@ -657,21 +781,30 @@ namespace MultiBash.EditorTools
                     new(StatType.Duration, 1f), new(StatType.PickupRadius, 3.2f), new(StatType.XPGain, 1f),
                     new(StatType.CritChance, 0.08f), new(StatType.CritDamage, 2f),
                 };
-                c.healthPerMinute = 0.25f;
-                c.healthPerMinuteSquared = 0.07f;
+                // enemies grow in NUMBERS more than HP: ~2x HP at minute 9 (was ~8x), hordes do the rest
+                c.healthPerMinute = 0.12f;
+                c.healthPerMinuteSquared = 0f;
                 c.speedPerMinute = 0.05f;
                 c.healthPerExtraPlayer = 0.25f;
                 c.spawnRatePerExtraPlayer = 0.4f;
-                c.damagePerMinute = 0.12f;
-                c.maxEnemies = 260;
-                c.xpFirstLevel = 5;
-                c.xpPerLevel = 4;
-                c.xpQuadratic = 0.55f;
+                c.damagePerMinute = 0.08f;
+                c.maxEnemies = 420;
+                c.xpFirstLevel = 6;
+                c.xpPerLevel = 6;
+                c.xpQuadratic = 1.1f;
+                c.healthPerTeamLevel = 0.03f;
+                c.healthPerTeamLevelSquared = 0.0045f;
                 c.eliteCrown = Model("Enemies", "Crown");
+                c.stage2At = 0.36f;
+                c.stage3At = 0.63f;
+                c.stageGear = new[] { Model("Enemies", "GearHelmet"), Model("Enemies", "GearWarHelm") };
                 c.xpGemPrefab = Load<GameObject>($"{Pk}/XPGem.prefab")?.GetComponent<NetworkObject>();
                 c.healthOrbPrefab = Load<GameObject>($"{Pk}/HealthOrb.prefab")?.GetComponent<NetworkObject>();
                 c.magnetPrefab = Load<GameObject>($"{Pk}/Magnet.prefab")?.GetComponent<NetworkObject>();
                 c.chestPrefab = Load<GameObject>($"{Pk}/Chest.prefab")?.GetComponent<NetworkObject>();
+                c.chestModel = Model("Pickups", "Chest");
+                c.chestLoot = new[] { Model("Pickups", "GemGreen"), Model("Pickups", "GemBlue"), Model("Pickups", "GemRed"), Model("Pickups", "HealthOrb"),
+                    Model("Weapons", "PoisonFlask"), Model("Enemies", "Crown") };
             });
         }
 

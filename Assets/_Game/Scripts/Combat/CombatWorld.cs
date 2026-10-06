@@ -44,7 +44,7 @@ namespace MultiBash
             public PlayerCharacter owner;
             public int weapon;
             public Vector3 pos;
-            public float radius, delay, life, damagePerTick, tickInterval, knockback, tickTimer;
+            public float radius, delay, life, damagePerTick, tickInterval, knockback, tickTimer, slow;
             public bool crit;
         }
 
@@ -190,6 +190,7 @@ namespace MultiBash
                     {
                         WeaponSystem.PendingCrit = p.crit;
                         e.TakeDamage(p.damagePerTick, p.pos, p.knockback, p.owner);
+                        if (p.slow > 0f && e.IsAlive) e.ApplySlow(p.slow);
                     }
                 }
                 if (p.life <= 0f) Puddles.RemoveAt(i);

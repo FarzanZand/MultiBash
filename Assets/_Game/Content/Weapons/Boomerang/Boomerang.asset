@@ -64,6 +64,33 @@ MonoBehaviour:
     duration: 1.5
     speed: 24
     knockback: 6
+  - upgradeText: +1 boomerang, +8% damage
+    damage: 34.56
+    cooldown: 1
+    amount: 5
+    area: 1.5
+    pierce: 1
+    duration: 1.5
+    speed: 24
+    knockback: 6
+  - upgradeText: +1 boomerang, +16% damage
+    damage: 37.12
+    cooldown: 1
+    amount: 6
+    area: 1.5
+    pierce: 2
+    duration: 1.5
+    speed: 24
+    knockback: 6
+  - upgradeText: 'OVERDRIVE: +1 boomerang, +25% damage'
+    damage: 40
+    cooldown: 0.9
+    amount: 7
+    area: 1.5
+    pierce: 3
+    duration: 1.5
+    speed: 24
+    knockback: 6
   heldModel: {fileID: 0}
   projectileModel: {fileID: 919132149155446097, guid: da18e7e584809af4d9ef2747415464ed, type: 3}
   fxColor: {r: 1, g: 0.8235294, b: 0.47843137, a: 1}

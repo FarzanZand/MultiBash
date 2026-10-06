@@ -1221,7 +1221,34 @@ def treasure_slime():
     root_with([group("Body", body, (0, 0, 0))])
 
 
+def gear_helmet():
+    """Stage 2 enemy gear: dented iron kettle helmet with a rim and rivets (unit size, sits on top of any enemy)."""
+    ps = [soft("ico", (0, 0, 0.18), (0.62, 0.62, 0.42), "iron", sub=2),
+          soft("cyl", (0, 0, 0.06), (0.9, 0.9, 0.06), "dark_iron", verts=14),
+          soft("cube", (0, -0.31, 0.2), (0.08, 0.04, 0.3), "steel_light")]
+    for i in range(6):
+        a = math.radians(i * 60)
+        ps.append(soft("ico", (math.cos(a) * 0.3, math.sin(a) * 0.3, 0.1), (0.05, 0.05, 0.05), "gold_trim", sub=1))
+    root_with([group("Mesh", ps, (0, 0, 0))])
+
+
+def gear_warhelm():
+    """Stage 3 enemy gear: blackened spiked helm with two red horns and a glowing visor slit."""
+    ps = [soft("ico", (0, 0, 0.2), (0.64, 0.64, 0.46), "obsidian", sub=2),
+          soft("cyl", (0, 0, 0.06), (0.86, 0.86, 0.07), "dark_iron", verts=14),
+          soft("cube", (0, -0.3, 0.17), (0.34, 0.04, 0.05), "fire_core")]
+    for x in (-1, 1):
+        ps.append(soft("cone", (0.3 * x, 0, 0.32), (0.16, 0.16, 0.5), "cloth_red", verts=6, rot=(0, 35 * x, 0)))
+        ps.append(soft("cone", (0.48 * x, 0, 0.6), (0.07, 0.07, 0.2), "bone", verts=6, rot=(0, 55 * x, 0)))
+    for i in range(5):
+        a = math.radians(i * 72 + 90)
+        ps.append(soft("cone", (math.cos(a) * 0.18, math.sin(a) * 0.18 + 0.05, 0.42), (0.07, 0.07, 0.18), "iron", verts=4))
+    root_with([group("Mesh", ps, (0, 0, 0))])
+
+
 VOLCANO_MODELS = [
+    ("Enemies", "GearHelmet", gear_helmet),
+    ("Enemies", "GearWarHelm", gear_warhelm),
     ("Enemies", "TreasureSlime", treasure_slime),
     ("Enemies", "MagmaSlime", magma_slime),
     ("Enemies", "FireImp", fire_imp),
@@ -1957,7 +1984,7 @@ def skeleton():
     root_with(parts + JOINTS)
 
 
-SMOOTH_ENEMIES = {"Slime", "MagmaSlime", "Bat", "FireImp", "BombShroom", "TreasureSlime"}
+SMOOTH_ENEMIES = {"Slime", "MagmaSlime", "Bat", "FireImp", "BombShroom", "TreasureSlime", "Wraith"}
 
 
 def _smooth_all():
@@ -2288,6 +2315,120 @@ MODELS = [
 ] + EXTRA_MODELS + ROUND2_MODELS + VOLCANO_MODELS
 
 # lists above were built while older builders were still bound: use the latest definition of every builder
+def ghoul():
+    """Stage 2 undead: hunched grey-green ghoul, long clawed arms, ragged loincloth, glowing yellow eyes."""
+    flesh, dark = "moss", "slime_dark"
+    body = [
+        skin([((0, 0.06, 0.95), (0.17, 0.13)), ((0, -0.02, 1.2), (0.2, 0.15)), ((0, -0.1, 1.42), (0.23, 0.17))], flesh),   # hunched spine
+        soft("ico", (0, 0.06, 1.33), (0.34, 0.22, 0.2), dark, sub=2),                                                     # back hump
+        soft("cone", (0, -0.02, 0.88), (0.36, 0.3, 0.26), "leather_dark", verts=7, r2=0.4, rot=(180, 0, 0)),                # ragged loincloth
+        soft("cyl", (0, 0, 0.98), (0.36, 0.28, 0.06), "rope", verts=8),
+    ]
+    for i in range(4):                                                                                                     # ribs showing
+        body.append(soft("cube", (0, -0.17 + 0.01 * i, 1.12 + 0.07 * i), (0.26 - 0.02 * i, 0.03, 0.025), "bone"))
+    Body = group("Body", body, (0, 0, HIP_Z))
+    head = [soft("ico", (0, -0.2, 1.52), (0.27, 0.3, 0.25), flesh, sub=2),
+            soft("ico", (0, -0.31, 1.45), (0.2, 0.14, 0.12), dark, sub=2),                                                 # jaw
+            soft("ico", (-0.07, -0.33, 1.56), (0.06, 0.03, 0.04), "lantern_glow", sub=1),
+            soft("ico", (0.07, -0.33, 1.56), (0.06, 0.03, 0.04), "lantern_glow", sub=1)]
+    for x in (-0.05, -0.015, 0.02, 0.055):
+        head.append(soft("cone", (x, -0.38, 1.44), (0.025, 0.02, 0.05), "bone", verts=4, rot=(180, 0, 0)))                 # fangs
+    for x in (-1, 1):
+        head.append(soft("cone", (0.13 * x, -0.15, 1.6), (0.05, 0.03, 0.14), flesh, verts=4, rot=(0, 60 * x, 0)))          # pointed ears
+    JOINTS.append(group("Head", head, (0, -0.1, 1.42)))
+
+    def arm(side):
+        x = 0.24 * side
+        upper = group("ArmR" if side < 0 else "ArmL", [skin([((x, -0.08, 1.4), (0.07, 0.07)), ((x * 1.15, -0.12, 1.15), (0.055, 0.055))], flesh)],
+                      (x, -0.08, 1.42))
+        fore = [skin([((x * 1.15, -0.12, 1.15), (0.05, 0.05)), ((x * 1.2, -0.22, 0.88), (0.045, 0.045))], flesh),
+                soft("ico", (x * 1.2, -0.24, 0.84), (0.1, 0.08, 0.08), dark, sub=1)]
+        for k in range(3):                                                                                                 # long claws
+            fore.append(soft("cone", (x * 1.2 + 0.03 * (k - 1), -0.3, 0.76), (0.025, 0.025, 0.13), "bone", verts=4, rot=(200, 0, 0)))
+        JOINTS.append(group("ForeArmR" if side < 0 else "ForeArmL", fore, (x * 1.15, -0.12, 1.15)))
+        return upper
+
+    def leg(side):
+        x = 0.1 * side
+        thigh = group("LegR" if side < 0 else "LegL", [skin([((x, 0.04, 0.92), (0.075, 0.075)), ((x * 1.2, -0.06, 0.55), (0.06, 0.06))], flesh)],
+                      (x, 0.04, HIP_Z))
+        shin = group("ShinR" if side < 0 else "ShinL", [
+            skin([((x * 1.2, -0.06, 0.55), (0.055, 0.055)), ((x * 1.2, 0.05, 0.12), (0.045, 0.045))], flesh),
+            soft("ico", (x * 1.2, -0.05, 0.05), (0.1, 0.2, 0.06), dark, sub=1)], (x * 1.2, -0.06, KNEE_Z))
+        JOINTS.append(shin)
+        return thigh
+
+    root_with([Body, arm(-1), arm(1), leg(-1), leg(1)] + JOINTS)
+
+
+def wraith():
+    """Stage 3 spectre: floating hooded shroud with tattered tail, skeletal hands, two burning eyes (a flyer)."""
+    body = [
+        soft("cone", (0, 0, 0.55), (0.62, 0.55, 1.0), "mage_dark", verts=10, r2=0.42),                                    # shroud
+        soft("cone", (0, 0, 1.06), (0.66, 0.58, 0.12), "purple_glow", verts=10, r2=0.5),                                   # glowing trim
+        soft("ico", (0, 0.02, 1.25), (0.44, 0.42, 0.42), "mage_dark", sub=2),                                              # hood
+        soft("ico", (0, -0.14, 1.22), (0.3, 0.2, 0.3), "black", sub=2),                                                    # dark face hole
+        soft("ico", (-0.07, -0.24, 1.25), (0.07, 0.03, 0.05), "fire_core", sub=1),
+        soft("ico", (0.07, -0.24, 1.25), (0.07, 0.03, 0.05), "fire_core", sub=1),
+        soft("cone", (0, 0.12, 1.5), (0.14, 0.14, 0.22), "mage_dark", verts=6, rot=(-40, 0, 0)),                           # hood tip
+    ]
+    for i in range(6):                                                                                                     # tattered hem strands
+        a = math.radians(i * 60 + 15)
+        body.append(soft("cone", (math.cos(a) * 0.24, math.sin(a) * 0.22, 0.06), (0.1, 0.06, 0.32), "mage_dark", verts=4, rot=(180, 0, 0)))
+    Body = group("Body", body, (0, 0, 0.6))
+    arms = []
+    for side in (-1, 1):
+        x = 0.3 * side
+        a = [soft("cone", (x, -0.05, 1.02), (0.16, 0.16, 0.36), "mage_dark", verts=8, r2=0.3, rot=(150, 0, 20 * side)),
+             soft("ico", (x * 1.2, -0.18, 0.86), (0.08, 0.06, 0.08), "bone", sub=1)]
+        for k in range(3):
+            a.append(bone((x * 1.2 + 0.025 * (k - 1), -0.2, 0.84), (x * 1.25 + 0.03 * (k - 1), -0.3, 0.74), 0.008))
+        arms.append(group("ArmR" if side < 0 else "ArmL", a, (x, -0.05, 1.15)))
+    root_with([Body] + arms)
+
+
+def obsidian_brute():
+    """Stage 3 heavy: hulking obsidian brute, magma veins, shoulder spikes, huge glowing fists."""
+    body = [
+        rock_chunk((0, 0, 1.3), (0.9, 0.62, 0.66), "obsidian", 71),
+        rock_chunk((0, 0.02, 0.98), (0.6, 0.44, 0.36), "basalt_dark", 72),
+        rock_chunk((0, 0, 0.86), (0.52, 0.4, 0.24), "obsidian", 73),
+        part("cube", (0, -0.31, 1.3), (0.08, 0.02, 0.4), "magma"),                                                           # magma veins
+        part("cube", (0.15, -0.3, 1.18), (0.22, 0.02, 0.05), "magma", rot=(0, 30, 0)),
+        part("cube", (-0.14, -0.3, 1.4), (0.2, 0.02, 0.05), "magma", rot=(0, -25, 0)),
+    ]
+    for x in (-1, 1):
+        for k in range(3):
+            body.append(soft("cone", (0.36 * x + 0.06 * k * x, 0.05 * k, 1.62 + 0.03 * k), (0.08, 0.08, 0.26 - 0.04 * k), "obsidian", verts=4,
+                             rot=(0, 25 * x, 0)))
+    Body = group("Body", body, (0, 0, HIP_Z))
+    head = [rock_chunk((0, -0.08, 1.7), (0.3, 0.28, 0.24), "obsidian", 74),
+            part("cube", (0, -0.22, 1.72), (0.22, 0.03, 0.04), "magma_core"),
+            soft("cone", (-0.1, -0.05, 1.86), (0.06, 0.06, 0.16), "basalt", verts=4, rot=(0, -20, 0)),
+            soft("cone", (0.1, -0.05, 1.86), (0.06, 0.06, 0.16), "basalt", verts=4, rot=(0, 20, 0))]
+    JOINTS.append(group("Head", head, (0, 0, NECK_Z - 0.05)))
+
+    def arm(side):
+        x = 0.5 * side
+        upper = group("ArmR" if side < 0 else "ArmL", [rock_chunk((x, 0, 1.36), (0.32, 0.3, 0.4), "basalt_dark", 80 + side)], (x, 0, SHOULDER_Z))
+        fore = [rock_chunk((x * 1.04, -0.02, 1.04), (0.3, 0.3, 0.36), "obsidian", 82 + side),
+                rock_chunk((x * 1.06, -0.04, 0.76), (0.4, 0.38, 0.34), "basalt_dark", 84 + side),
+                part("cube", (x * 1.06, -0.24, 0.76), (0.2, 0.02, 0.05), "magma")]
+        JOINTS.append(group("ForeArmR" if side < 0 else "ForeArmL", fore, (x, 0, ELBOW_Z)))
+        return upper
+
+    def leg(side):
+        x = 0.18 * side
+        thigh = group("LegR" if side < 0 else "LegL", [rock_chunk((x, 0, 0.7), (0.3, 0.32, 0.42), "basalt_dark", 90 + side)], (x, 0, HIP_Z))
+        shin = group("ShinR" if side < 0 else "ShinL", [rock_chunk((x, 0, 0.3), (0.28, 0.3, 0.42), "obsidian", 92 + side),
+                                                         rock_chunk((x, -0.06, 0.07), (0.34, 0.42, 0.16), "basalt_dark", 94 + side)], (x, 0, KNEE_Z))
+        JOINTS.append(shin)
+        return thigh
+
+    root_with([Body, arm(-1), arm(1), leg(-1), leg(1)] + JOINTS)
+
+
+MODELS += [("Enemies", "Ghoul", ghoul), ("Enemies", "Wraith", wraith), ("Enemies", "ObsidianBrute", obsidian_brute)]
 MODELS = [(c, n, globals().get(f.__name__, f) if f.__name__ != "fn" else f) for c, n, f in MODELS]
 
 if __name__ == "__main__":

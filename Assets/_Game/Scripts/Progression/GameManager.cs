@@ -40,6 +40,7 @@ namespace MultiBash
         public int AlivePlayerCount { get; private set; }
 
         EnemySpawner _spawner;
+        int _stage;
         float _xpRemainder;
         readonly HashSet<PlayerRef> _spawnedFor = new();
 
@@ -108,6 +109,17 @@ namespace MultiBash
 
                 case RunState.Playing:
                     RunTime += dt;
+                    {
+                        // announce when the horde moves into its next stage (new looks, gear and enemy types)
+                        float frac = RunTime / Mathf.Max(1f, cfg.runDurationSeconds);
+                        int st = frac >= cfg.stage3At ? 2 : frac >= cfg.stage2At ? 1 : 0;
+                        if (st > _stage)
+                        {
+                            _stage = st;
+                            Announce(st == 1 ? "The horde arms itself! (Stage 2)" : "The horde turns bloodthirsty! (Stage 3)");
+                            Rpc_Horde(120);
+                        }
+                    }
                     _spawner.Tick(dt);
                     CombatWorld.Tick(Runner.Tick, dt);
                     CheckDefeat();
@@ -217,11 +229,17 @@ namespace MultiBash
             if (idx < 0) return;
             float minute = RunTime / 60f;
             int players = Mathf.Max(1, PlayerCharacter.All.Count);
+            // enemies keep up with the team's power: toughness from time AND team level (fodder only half of the level part)
+            float L = Mathf.Max(0, TeamLevel - 1);
+            float levelMul = 1f + cfg.healthPerTeamLevel * L + cfg.healthPerTeamLevelSquared * L * L;
+            if (def.fodder) levelMul = 1f + (levelMul - 1f) * 0.35f;
             float hpMul = (1f + cfg.healthPerMinute * minute + cfg.healthPerMinuteSquared * minute * minute) * (1f + cfg.healthPerExtraPlayer * (players - 1))
-                          * (map != null ? map.difficulty : 1f);
+                          * (map != null ? map.difficulty : 1f) * levelMul;
             float dmgMul = 1f + cfg.damagePerMinute * minute;
             var rot = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
-            Runner.Spawn(def.prefab, pos, rot, null, (r, o) => o.GetComponent<Enemy>().Init(idx, elite, hpMul, dmgMul, boss));
+            float frac = RunTime / Mathf.Max(1f, cfg.runDurationSeconds);
+            int stage = frac >= cfg.stage3At ? 2 : frac >= cfg.stage2At ? 1 : 0;
+            Runner.Spawn(def.prefab, pos, rot, null, (r, o) => o.GetComponent<Enemy>().Init(idx, elite, hpMul, dmgMul, boss, stage));
         }
 
         public void OnEnemyKilled(Enemy e, PlayerCharacter killer)
@@ -262,7 +280,7 @@ namespace MultiBash
                 return;
             }
             int xp = def.xpValue * (e.Elite ? 10 : 1);
-            Pickup.SpawnXP(Runner, pos, xp);
+            if (e.Elite || Random.value < def.xpChance) Pickup.SpawnXP(Runner, pos, xp);
             if (Random.value < def.healthOrbChance) Pickup.Spawn(Runner, cfg.healthOrbPrefab, pos + RandomOffset(), PickupKind.Health, 0);
             if (Random.value < def.magnetChance) Pickup.Spawn(Runner, cfg.magnetPrefab, pos + RandomOffset(), PickupKind.Magnet, 0);
             if (e.Elite) Pickup.Spawn(Runner, cfg.chestPrefab, pos + RandomOffset(), PickupKind.Chest, 0);
@@ -316,6 +334,23 @@ namespace MultiBash
             if (me != null && (me.transform.position - pos).sqrMagnitude < (radius + 8f) * (radius + 8f)) CameraRig.Instance?.Shake(explosion ? 0.45f : 0.35f);
         }
 
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]
+        public void Rpc_Execute(Vector3 pos)
+        {
+            FxManager.Instance?.ExecuteBurst(pos);
+            var lib = AudioManager.Lib;
+            if (lib != null) AudioManager.Play(lib.crit, pos, 0.4f, 0.55f);
+        }
+
+        /// <summary>A big horde arrives: a rumble for everyone.</summary>
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        public void Rpc_Horde(int count)
+        {
+            CameraRig.Instance?.Shake(Mathf.Clamp(count / 150f, 0.2f, 0.6f));
+            var lib = AudioManager.Lib;
+            if (lib != null) AudioManager.PlayUI(lib.bossWarning, 0.35f, 1.5f);
+        }
+
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         void Rpc_BossDefeated(Vector3 pos)
         {
@@ -354,12 +389,11 @@ namespace MultiBash
                     AudioManager.PlayUI(lib.magnet, 0.8f);
                     break;
                 case PickupKind.Chest:
-                    AudioManager.Play(lib.chest, pos, 0.8f);
-                    AudioManager.Play(lib.treasure, pos, 1f);
-                    FxManager.Instance?.UpgradeBurst(pos, new Color(1f, 0.85f, 0.3f));
-                    FxManager.Instance?.LightPillar(pos, new Color(1f, 0.8f, 0.3f), 10f, 0.9f);
-                    FxManager.Instance?.Burst(pos + Vector3.up, new Color(1f, 0.85f, 0.3f), 30, 9f, 0.3f, 0.8f, 6f, true);
+                {
+                    var who = PlayerCharacter.All.Find(p => p != null && p.Object != null && p.Object.InputAuthority == collector);
+                    FxManager.Instance?.ChestOpen(pos, who != null ? who.transform.position : pos + Vector3.back);
                     break;
+                }
             }
         }
 

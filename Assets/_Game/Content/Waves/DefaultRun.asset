@@ -17,7 +17,7 @@ MonoBehaviour:
     startMinute: 0
     endMinute: 10
     rateAtStart: 0.45
-    rateAtEnd: 9
+    rateAtEnd: 8
     rampCurve: 1.6
     groupSize: 2
     eliteChance: 0.008
@@ -45,13 +45,53 @@ MonoBehaviour:
     rampCurve: 1.6
     groupSize: 6
     eliteChance: 0
+  - enemy: {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
+    startMinute: 2.5
+    endMinute: 10
+    rateAtStart: 0.2
+    rateAtEnd: 3.2
+    rampCurve: 1.3
+    groupSize: 6
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: 6db45975306804b45a14b787b5abc367, type: 2}
+    startMinute: 4
+    endMinute: 10
+    rateAtStart: 0.15
+    rateAtEnd: 2.2
+    rampCurve: 1.3
+    groupSize: 8
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: b37eb7923c0f05d46a45e7318fdd451a, type: 2}
+    startMinute: 3.6
+    endMinute: 10
+    rateAtStart: 0.2
+    rateAtEnd: 2
+    rampCurve: 1.6
+    groupSize: 3
+    eliteChance: 0.01
+  - enemy: {fileID: 11400000, guid: 7cebf6c6b2a9eae40a48aabec5c9504a, type: 2}
+    startMinute: 6.2
+    endMinute: 10
+    rateAtStart: 0.25
+    rateAtEnd: 1.4
+    rampCurve: 1.6
+    groupSize: 3
+    eliteChance: 0.01
+  - enemy: {fileID: 11400000, guid: 9d4d776cab5234543acd94cb30729768, type: 2}
+    startMinute: 6.5
+    endMinute: 10
+    rateAtStart: 0.06
+    rateAtEnd: 0.35
+    rampCurve: 1.6
+    groupSize: 1
+    eliteChance: 0.04
   - enemy: {fileID: 11400000, guid: 45386d41657be884787122c3369843cf, type: 2}
     startMinute: 1.25
     endMinute: 10
     rateAtStart: 0.12
-    rateAtEnd: 1.6
+    rateAtEnd: 2.2
     rampCurve: 1.6
-    groupSize: 5
+    groupSize: 6
     eliteChance: 0
   - enemy: {fileID: 11400000, guid: 24e61111c6ba45842b954a1fae683571, type: 2}
     startMinute: 2.25
@@ -182,4 +222,67 @@ MonoBehaviour:
     ring: 0
     elites: 3
     announcement: FINAL SURGE!
+    boss: 0
+  - minute: 3.6
+    enemy: {fileID: 11400000, guid: b37eb7923c0f05d46a45e7318fdd451a, type: 2}
+    count: 10
+    ring: 1
+    elites: 1
+    announcement: Ghouls claw their way out of the graves!
+    boss: 0
+  - minute: 6.25
+    enemy: {fileID: 11400000, guid: 7cebf6c6b2a9eae40a48aabec5c9504a, type: 2}
+    count: 14
+    ring: 1
+    elites: 1
+    announcement: Wraiths descend!
+    boss: 0
+  - minute: 6.9
+    enemy: {fileID: 11400000, guid: 9d4d776cab5234543acd94cb30729768, type: 2}
+    count: 4
+    ring: 1
+    elites: 1
+    announcement: Obsidian Brutes stomp in!
+    boss: 0
+  - minute: 4.6
+    enemy: {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
+    count: 50
+    ring: 1
+    elites: 0
+    announcement: The rabble swarms!
+    boss: 0
+  - minute: 5.6
+    enemy: {fileID: 11400000, guid: 6db45975306804b45a14b787b5abc367, type: 2}
+    count: 88
+    ring: 1
+    elites: 0
+    announcement: A flood of slimelings!
+    boss: 0
+  - minute: 6.6
+    enemy: {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
+    count: 126
+    ring: 1
+    elites: 0
+    announcement: They keep coming!
+    boss: 0
+  - minute: 7.6
+    enemy: {fileID: 11400000, guid: 6db45975306804b45a14b787b5abc367, type: 2}
+    count: 164
+    ring: 1
+    elites: 0
+    announcement: An endless horde!
+    boss: 0
+  - minute: 8.6
+    enemy: {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
+    count: 202
+    ring: 1
+    elites: 0
+    announcement: THE DEAD WON'T STOP!
+    boss: 0
+  - minute: 9.6
+    enemy: {fileID: 11400000, guid: 6db45975306804b45a14b787b5abc367, type: 2}
+    count: 240
+    ring: 1
+    elites: 0
+    announcement: EVERYTHING AT ONCE!
     boss: 0

@@ -49,6 +49,16 @@ namespace MultiBash
         [Tooltip("Hopper: hop height in meters.")]
         public float hopHeight = 1.2f;
 
+        [Header("Hordes")]
+        [Tooltip("Fodder: never gains HP over time (dies in one hit all run long). Used for the big late-game hordes.")]
+        public bool fodder;
+        [Tooltip("Size multiplier for this enemy (lets several enemies share one prefab).")]
+        public float scale = 1f;
+        [Tooltip("Size of the stage gear (helmets) relative to the head/body width.")]
+        public float gearSize = 1.4f;
+        [Tooltip("Chance a kill drops its XP gem (fodder hordes drop less so levels don't fly by).")]
+        [Range(0f, 1f)] public float xpChance = 1f;
+
         [Header("Treasure (runaway loot enemies)")]
         [Tooltip("Hops AWAY from the players instead of toward them.")]
         public bool flees;

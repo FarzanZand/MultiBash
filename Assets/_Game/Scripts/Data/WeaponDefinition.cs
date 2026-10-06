@@ -71,6 +71,10 @@ namespace MultiBash
         [Tooltip("Evolved weapons are never offered as normal picks.")]
         public bool isEvolution;
 
+        /// <summary>Weapons can evolve from this level on (they keep levelling to MaxLevel otherwise).</summary>
+        public const int EvolveLevel = 5;
+        public int EvolveAt => Mathf.Min(EvolveLevel, levels.Length);
+
         public int MaxLevel => levels.Length;
         public WeaponLevel GetLevel(int level) => levels[Mathf.Clamp(level - 1, 0, levels.Length - 1)];
     }

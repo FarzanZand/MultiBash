@@ -63,6 +63,33 @@ MonoBehaviour:
     duration: 1.1
     speed: 34
     knockback: 4
+  - upgradeText: +1 arrow, +8% damage
+    damage: 21.6
+    cooldown: 0.6
+    amount: 5
+    area: 1
+    pierce: 8
+    duration: 1.1
+    speed: 34
+    knockback: 4
+  - upgradeText: +1 arrow, +16% damage
+    damage: 23.199999
+    cooldown: 0.6
+    amount: 6
+    area: 1
+    pierce: 9
+    duration: 1.1
+    speed: 34
+    knockback: 4
+  - upgradeText: 'OVERDRIVE: +1 arrow, +25% damage'
+    damage: 25
+    cooldown: 0.54
+    amount: 7
+    area: 1
+    pierce: 10
+    duration: 1.1
+    speed: 34
+    knockback: 4
   heldModel: {fileID: 919132149155446097, guid: 6247f3eb9ac038a44bc7a24e7e025519, type: 3}
   projectileModel: {fileID: 919132149155446097, guid: cbc86a7d13d05cf4793a38c790b76748, type: 3}
   fxColor: {r: 0.78431374, g: 1, b: 0.6039216, a: 1}

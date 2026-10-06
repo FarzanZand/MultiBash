@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfa4861c1b13514fb502afb4e0d0d61, type: 3}
+  m_Name: Wraith
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.EnemyDefinition
+  displayName: Wraith
+  prefab: {fileID: 9220251418271630822, guid: e1f94e268c1dc034f82810a63dd6b6fd, type: 3}
+  maxHealth: 26
+  moveSpeed: 5.4
+  contactDamage: 10
+  attackInterval: 1
+  attackRange: 0.9
+  radius: 0.45
+  knockbackResist: 0
+  movement: 2
+  hopRest: 0.7
+  hopTime: 0.45
+  hopHeight: 1.2
+  fodder: 0
+  scale: 1
+  gearSize: 1.1
+  xpChance: 1
+  flees: 0
+  lifetime: 0
+  dropChests: 0
+  attack: 1
+  attackDistance: 9
+  specialCooldown: 3.2
+  telegraphTime: 0.9
+  specialRadius: 0.45
+  specialDamageMul: 1.2
+  projectileSpeed: 11
+  specialColor: {r: 0.7529412, g: 0.4392157, b: 1, a: 1}
+  specialSound: {fileID: 8300000, guid: 0504ed97472b26840aecc55a5c0fea35, type: 3}
+  xpValue: 3
+  healthOrbChance: 0.02
+  magnetChance: 0.002
+  splitInto: {fileID: 0}
+  splitCount: 0
+  bossName: 
+  bossHealthMultiplier: 150
+  bossDamageMultiplier: 2.5
+  bossScale: 3.2
+  bossSplitCount: 0
+  hitSound: {fileID: 8300000, guid: ed78027ea8372f34aacc2488f38f3b28, type: 3}
+  deathSound: {fileID: 8300000, guid: 2d7bc6161191d6e4c94dc08c3da7f24c, type: 3}
+  moveSound: {fileID: 0}
+  deathColor: {r: 0.6039216, g: 0.3529412, b: 1, a: 1}

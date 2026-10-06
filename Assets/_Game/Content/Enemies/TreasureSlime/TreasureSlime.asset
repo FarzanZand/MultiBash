@@ -25,6 +25,10 @@ MonoBehaviour:
   hopRest: 0.18
   hopTime: 0.42
   hopHeight: 1.1
+  fodder: 0
+  scale: 1
+  gearSize: 1.4
+  xpChance: 1
   flees: 1
   lifetime: 28
   dropChests: 2
