@@ -310,7 +310,90 @@ namespace MultiBash.EditorTools
             return fx;
         }
 
+        static StageMood.Mood Mood(Color sun, float sunI, Color fog, float fogEnd, Color amb, Color eq, Color ground, Color top, Color hor, Color clouds,
+            Color moon, float stars, float aurora, float motes) => new()
+        {
+            sun = sun, sunIntensity = sunI, fog = fog, fogEnd = fogEnd, ambientSky = amb, ambientEquator = eq, ambientGround = ground,
+            skyTop = top, skyHorizon = hor, clouds = clouds, moon = moon, stars = stars, aurora = aurora, motes = motes,
+        };
+
+        static void AddMoods(Light sun, params StageMood.Mood[] moods)
+        {
+            var m = sun.gameObject.AddComponent<StageMood>();
+            m.sun = sun;
+            m.moods = moods;
+        }
+
         static float YawToward(Vector3 from, Vector3 to) => Mathf.Atan2(to.x - from.x, to.z - from.z) * Mathf.Rad2Deg;
+
+        // ======================================================================== MENU / LOBBY SET
+
+        /// <summary>Dusk backdrop for the menu and lobby: a meadow with a cobbled road leading to the keep, trees, the
+        /// windmill and mountains. The heroes stand around x 0..5, z 0..3 facing the camera (-Z).</summary>
+        static Transform FrontEndSet(string terrainName, int seed)
+        {
+            var fog = new Color(0.47f, 0.47f, 0.6f);
+            Lighting(KeepSkyMat, fog, 30f, 230f, new Color(0.58f, 0.62f, 0.88f), new Color(0.66f, 0.6f, 0.62f), new Color(0.38f, 0.36f, 0.34f));
+            Sun(new Vector3(28, -55, 0), new Color(1f, 0.84f, 0.66f), 1.5f);
+            new GameObject("PostProcess").AddComponent<Volume>().sharedProfile = MapProfile("Assets/Settings/MB_PostProcessKeep.asset",
+                1.0f, 0.7f, new Color(1f, 0.85f, 0.75f), 0.22f, new Color(0.06f, 0.04f, 0.12f), 18f, 14f, 0.2f, new Color(1f, 0.98f, 1.0f));
+            FindVolume().isGlobal = true;
+            var road = new (Vector2 a, Vector2 b)[] { (new(2, -4), new(2.5f, 30)), (new(2.5f, 30), new(4, 70)) };
+            float Hf(float x, float z)
+            {
+                float d = Mathf.Sqrt((x - 2) * (x - 2) + z * z);
+                float h = Fbm(x * 0.03f, z * 0.03f, 3) * 3f * Mathf.SmoothStep(0f, 1f, (d - 14f) / 30f);
+                h += Mathf.Max(0f, (Mathf.Abs(x - 2) - 30f) * 0.25f) + Mathf.Max(0f, (z - 60f) * 0.2f);
+                return h - Mathf.Max(0f, -z - 20f) * 0.1f;
+            }
+            void Splat(TerrainData d, float x, float z, float steep, float h, float[] w)
+            {
+                float cliff = Mathf.Clamp01((steep - 24f) / 8f);
+                float rm = RoadMask(x, z, road, 1.4f) * (1 - cliff);
+                float dirt = Mathf.Clamp01((Mathf.PerlinNoise(x * 0.07f + 5, z * 0.07f + 9) - 0.66f) * 6f) * (1 - cliff) * (1 - rm);
+                w[1] = cliff; w[2] = rm; w[3] = 0f; w[4] = dirt; w[0] = Mathf.Max(0f, 1f - cliff - rm - dirt);
+            }
+            string tp = Scenes + "/" + terrainName + ".asset";
+            if (AssetDatabase.LoadAssetAtPath<TerrainData>(tp) != null) AssetDatabase.DeleteAsset(tp);
+            HeightBase = 1f;
+            var terrain = BuildTerrain(40f, out var data, Hf, KeepLayers, Splat, tp);
+            HeightBase = 0f;
+            float H(Vector3 p) => terrain.SampleHeight(p) + terrain.transform.position.y;
+            var deco = new GameObject("Props").transform;
+            var rng = new System.Random(seed);
+            float R() => (float)rng.NextDouble();
+            void At(string prop, Vector3 p, float yaw, float scale) { p.y = H(p) - 0.05f; Place(prop, p, yaw, scale, deco); }
+            At("Keep", new Vector3(3, 0, 62), 180f, 1.1f);
+            At("Windmill", new Vector3(-22, 0, 34), 140f, 1.2f);
+            At("TowerRuin", new Vector3(26, 0, 30), 70f, 1.1f);
+            At("Mausoleum", new Vector3(24, 0, 16), -120f, 1f);
+            At("HangingTree", new Vector3(-14, 0, 14), 40f, 1.0f);
+            for (int i = 0; i < 6; i++)
+            {
+                At("Brazier", new Vector3(i % 2 == 0 ? -0.5f : 5.5f, 0, 12 + i * 7), 0, 1.1f);
+                At("Banner", new Vector3(i % 2 == 0 ? -1.5f : 6.5f, 0, 14.5f + i * 7), 180, 1.2f);
+            }
+            for (int i = 0; i < 26; i++)
+            {
+                var p = new Vector3(-40 + R() * 80, 0, 6 + R() * 60);
+                if (Mathf.Abs(p.x - 2.5f) < 6f) continue;
+                At(i % 3 == 0 ? "TreePine" : i % 2 == 0 ? "TreeA" : "TreeB", p, R() * 360f, 1f + R() * 0.5f);
+            }
+            for (int i = 0; i < 12; i++)
+            {
+                var p = new Vector3(-14 + R() * 32, 0, 4 + R() * 20);
+                if (Mathf.Abs(p.x - 2.5f) < 3.5f) continue;
+                At(i % 3 == 0 ? "RockA" : i % 2 == 0 ? "Pumpkin" : "Bush", p, R() * 360f, 0.9f + R() * 0.4f);
+            }
+            for (int i = 0; i < 140; i++)
+            {
+                var p = new Vector3(-20 + R() * 45, 0, -6 + R() * 34);
+                if (Mathf.Abs(p.x - 2.5f) < 2.2f && p.z > 3f) continue;
+                At(i % 5 == 0 ? (i % 2 == 0 ? "FlowersA" : "FlowersB") : "GrassTuft", p, R() * 360f, 0.8f + R() * 0.6f);
+            }
+            Backdrop(deco, 170f, 14, seed);
+            return deco;
+        }
 
         // ======================================================================== HAUNTED KEEP
 
@@ -384,7 +467,7 @@ namespace MultiBash.EditorTools
             // ---- golden dusk: low warm sun, violet sky with the moon rising, cool shadows
             var fogColor = new Color(0.47f, 0.47f, 0.6f);
             Lighting(KeepSkyMat, fogColor, 26f, 210f, new Color(0.58f, 0.62f, 0.88f), new Color(0.66f, 0.6f, 0.62f), new Color(0.38f, 0.36f, 0.34f));
-            Sun(new Vector3(34, -65, 0), new Color(1f, 0.84f, 0.66f), 1.55f);
+            var sun = Sun(new Vector3(34, -65, 0), new Color(1f, 0.84f, 0.66f), 1.55f);
             new GameObject("PostProcess").AddComponent<Volume>().sharedProfile = MapProfile("Assets/Settings/MB_PostProcessKeep.asset",
                 1.0f, 0.7f, new Color(1f, 0.85f, 0.75f), 0.22f, new Color(0.06f, 0.04f, 0.12f), 18f, 14f, 0.2f, new Color(1f, 0.98f, 1.0f));
             FindVolume().isGlobal = true;
@@ -536,6 +619,14 @@ namespace MultiBash.EditorTools
             foreach (var p in new[] { new Vector3(-30, 0, 12), new Vector3(-44, 0, 8), new Vector3(-11, 0, 37), new Vector3(36, 0, 33), new Vector3(-36, 0, -34), new Vector3(20, 0, -32) })
                 MakePad(d, "BounceShroom", p, 20f, shroom, 1.4f, 1.2f);
 
+            // stage 2: night falls; stage 3: the blood moon rises
+            AddMoods(sun,
+                Mood(new Color(0.72f, 0.76f, 1f), 1.1f, new Color(0.3f, 0.32f, 0.48f), 195f, new Color(0.44f, 0.5f, 0.78f), new Color(0.46f, 0.45f, 0.56f),
+                    new Color(0.27f, 0.27f, 0.31f), new Color(0.05f, 0.07f, 0.2f), new Color(0.36f, 0.34f, 0.56f), new Color(0.32f, 0.3f, 0.48f),
+                    new Color(1f, 0.97f, 0.88f), 0.95f, 0f, 45f),
+                Mood(new Color(1f, 0.56f, 0.5f), 1.15f, new Color(0.36f, 0.18f, 0.24f), 175f, new Color(0.62f, 0.4f, 0.52f), new Color(0.56f, 0.36f, 0.42f),
+                    new Color(0.3f, 0.18f, 0.2f), new Color(0.12f, 0.02f, 0.06f), new Color(0.64f, 0.16f, 0.18f), new Color(0.42f, 0.12f, 0.16f),
+                    new Color(1f, 0.3f, 0.24f), 0.6f, 0f, 55f));
             var fx = ArenaSystems("Graveyard", fogColor);
             fx.ambientColorA = new Color(0.55f, 1f, 0.75f, 0.85f);    // fireflies and wisps
             fx.ambientColorB = new Color(0.85f, 0.7f, 1f, 0.75f);
@@ -726,6 +817,14 @@ namespace MultiBash.EditorTools
             foreach (var p in new[] { new Vector3(-22, 0, 26), new Vector3(-38, 0, -6), new Vector3(36, 0, 24), new Vector3(16, 0, -38), new Vector3(42, 0, -6), new Vector3(-8, 0, 30) })
                 MakePad(d, "IceGeyser", p, 21f, geyser, 1.4f, 1.15f);
 
+            // stage 2: the aurora storm; stage 3: the blizzard rolls in
+            AddMoods(sun,
+                Mood(new Color(0.76f, 0.86f, 1f), 1.1f, new Color(0.45f, 0.58f, 0.8f), 160f, new Color(0.55f, 0.66f, 0.95f), new Color(0.5f, 0.6f, 0.78f),
+                    new Color(0.62f, 0.7f, 0.84f), new Color(0.03f, 0.06f, 0.18f), new Color(0.3f, 0.46f, 0.68f), new Color(0.4f, 0.5f, 0.7f),
+                    new Color(0.9f, 0.95f, 1f), 1f, 1.9f, 220f),
+                Mood(new Color(0.8f, 0.86f, 0.98f), 0.95f, new Color(0.62f, 0.7f, 0.82f), 115f, new Color(0.62f, 0.68f, 0.86f), new Color(0.58f, 0.64f, 0.76f),
+                    new Color(0.66f, 0.7f, 0.8f), new Color(0.12f, 0.16f, 0.3f), new Color(0.52f, 0.6f, 0.74f), new Color(0.62f, 0.68f, 0.8f),
+                    new Color(0.9f, 0.95f, 1f), 0.5f, 1.4f, 420f));
             var fx = ArenaSystems("Frost", fogColor);
             fx.ambientSnow = true;
             fx.ambientColorA = new Color(1f, 1f, 1f, 0.95f);

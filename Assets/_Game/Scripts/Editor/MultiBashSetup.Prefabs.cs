@@ -176,6 +176,9 @@ namespace MultiBash.EditorTools
             Prop("FrozenWaterfall", 0f, PropCollider.None);
             Prop("FrostMountainA", 0f, PropCollider.None);
             Prop("FrostMountainB", 0f, PropCollider.None);
+            Prop("Pumpkin", 0.5f, PropCollider.Box);
+            Prop("Barrel", 0.5f, PropCollider.Capsule);
+            Prop("Urn", 0.4f, PropCollider.Capsule);
             // the windmill's blades turn
             var mill = Load<GameObject>($"{Prefabs}/Environment/Windmill.prefab");
             if (mill != null && mill.GetComponent<Spinner>() == null)

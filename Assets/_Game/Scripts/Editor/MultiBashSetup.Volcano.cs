@@ -146,7 +146,7 @@ namespace MultiBash.EditorTools
             // ---- atmosphere: smoky ember dusk (brighter than before so the swarm reads against the rock)
             var fogColor = new Color(0.34f, 0.2f, 0.27f);
             Lighting(VolcanoSkyMat, fogColor, 26f, 185f, new Color(0.58f, 0.56f, 0.76f), new Color(0.5f, 0.44f, 0.54f), new Color(0.56f, 0.3f, 0.2f));
-            Sun(new Vector3(42, -60, 0), new Color(1f, 0.8f, 0.62f), 1.5f);
+            var sun = Sun(new Vector3(42, -60, 0), new Color(1f, 0.8f, 0.62f), 1.5f);
             var vol = new GameObject("PostProcess").AddComponent<Volume>();
             vol.isGlobal = true;
             vol.sharedProfile = BuildVolcanoProfile();
@@ -266,6 +266,14 @@ namespace MultiBash.EditorTools
             foreach (var p in new[] { new Vector3(20, 0, 2), new Vector3(-6, 0, -26), new Vector3(-32, 0, 34), new Vector3(34, 0, 34), new Vector3(-36, 0, -12), new Vector3(16, 0, -40) })
                 if (H(p) > LavaLevel + 0.6f) MakePad(d, "SteamVent", p, 21f, steam, 1.4f, 1.1f);
 
+            // stage 2: the mountain rumbles; stage 3: eruption (red sky, ember storm)
+            AddMoods(sun,
+                Mood(new Color(1f, 0.72f, 0.52f), 1.55f, new Color(0.42f, 0.2f, 0.24f), 178f, new Color(0.6f, 0.52f, 0.72f), new Color(0.54f, 0.42f, 0.5f),
+                    new Color(0.62f, 0.3f, 0.18f), new Color(0.2f, 0.05f, 0.07f), new Color(0.9f, 0.36f, 0.14f), new Color(0.42f, 0.17f, 0.15f),
+                    Color.white, 0f, 0f, 75f),
+                Mood(new Color(1f, 0.56f, 0.36f), 1.6f, new Color(0.5f, 0.16f, 0.13f), 160f, new Color(0.64f, 0.44f, 0.5f), new Color(0.6f, 0.38f, 0.36f),
+                    new Color(0.72f, 0.3f, 0.12f), new Color(0.3f, 0.04f, 0.04f), new Color(1f, 0.42f, 0.12f), new Color(0.6f, 0.18f, 0.1f),
+                    Color.white, 0f, 0f, 130f));
             var fx = ArenaSystems("Volcano", fogColor);
             fx.ambientColorA = new Color(1f, 0.55f, 0.15f, 0.95f);
             fx.ambientColorB = new Color(1f, 0.3f, 0.08f, 0.85f);

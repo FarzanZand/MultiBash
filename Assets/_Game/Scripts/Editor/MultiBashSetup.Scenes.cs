@@ -178,6 +178,14 @@ namespace MultiBash.EditorTools
             return fx;
         }
 
+        static void Fireflies(FxManager fx)
+        {
+            fx.ambientColorA = new Color(1f, 0.85f, 0.4f, 0.9f);
+            fx.ambientColorB = new Color(0.6f, 1f, 0.6f, 0.8f);
+            fx.ambientRate = 14f;
+            fx.ambientRise = 0.06f;
+        }
+
         static void Backdrop(Transform parent, float radius, int count, int seed)
         {
             var rng = new System.Random(seed);
@@ -196,11 +204,7 @@ namespace MultiBash.EditorTools
         static void BuildMenuScene(string path)
         {
             var scene = NewScene();
-            Atmosphere(25f, 220f);
-            Sun(new Vector3(35, -40, 0), new Color(1f, 0.95f, 0.85f), 1.35f);
-            GrassPlane(300);
-            PostVolume();
-            var deco = new GameObject("Props").transform;
+            var deco = FrontEndSet("MenuTerrain", 5);
 
             var pivot = new GameObject("Pivot").transform;
             pivot.position = new Vector3(0.4f, 0, 0);
@@ -218,31 +222,25 @@ namespace MultiBash.EditorTools
                 var h = PlaceModel(Model("Characters", heroes[i]), new Vector3(i * 1.4f, 0, 0), 180f + (i - 1.5f) * -8f, 1.05f);
                 h.AddComponent<ProceduralRig>();
             }
+            // the horde gathering on the road behind the heroes
             var rng = new System.Random(3);
-            for (int i = 0; i < 16; i++)
+            string[] horde = { "Skeleton", "Slime", "Skeleton", "Ghoul", "Skeleton", "BombShroom", "SkeletonArcher", "Slime", "Ghoul", "Skeleton", "Golem", "IceWolf" };
+            for (int i = 0; i < 18; i++)
             {
-                float x = -8f + (float)rng.NextDouble() * 20f, z = 6f + (float)rng.NextDouble() * 10f;
-                var model = i % 3 == 0 ? Model("Creatures", "Slime") : Model("Creatures", "Skeleton");
-                var e = PlaceModel(model, new Vector3(x, 0, z), 180f + (float)rng.NextDouble() * 40f - 20f, i % 3 == 0 ? 1.1f : 1f);
-                e.AddComponent<ProceduralRig>();
+                float x = -8f + (float)rng.NextDouble() * 20f, z = 7f + (float)rng.NextDouble() * 12f;
+                string n = horde[i % horde.Length];
+                var e = PlaceModel(Model("Creatures", n), new Vector3(x, 0, z), 180f + (float)rng.NextDouble() * 40f - 20f, n == "Golem" ? 1.5f : n == "IceWolf" ? 1.2f : n == "Slime" ? 1.1f : 1f);
+                e.AddComponent<ProceduralRig>().blob = n == "Slime";
             }
-            Place("TowerRuin", new Vector3(-12, 0, 18), 20, 1.2f, deco);
-            Place("TowerRuin", new Vector3(22, 0, 26), 70, 1f, deco);
-            Place("WallRuin", new Vector3(6, 0, 20), 5, 1f, deco);
-            Place("TreeA", new Vector3(-7, 0, 9), 30, 1.1f, deco);
-            Place("TreeB", new Vector3(12, 0, 11), 120, 1f, deco);
-            Place("TreePine", new Vector3(-16, 0, 30), 0, 1.3f, deco);
-            Place("TreePine", new Vector3(30, 0, 40), 0, 1.5f, deco);
-            Place("Bush", new Vector3(-3.5f, 0, 2.5f), 10, 1f, deco);
-            Place("Log", new Vector3(8, 0, 3), 60, 1f, deco);
-            Place("RockB", new Vector3(15, 0, 6), 40, 1f, deco);
+            foreach (var x in new[] { -3f, 6.5f })
+                Place("Brazier", new Vector3(x, 0, 1.8f), 0, 1.1f, deco);
             Place("LanternPost", new Vector3(-2.5f, 0, -1.5f), 0, 1f, deco);
-            for (int i = 0; i < 60; i++)
-                Place("GrassTuft", new Vector3(-20 + (float)rng.NextDouble() * 45, 0, -6 + (float)rng.NextDouble() * 30), (float)rng.NextDouble() * 360, 0.8f + (float)rng.NextDouble() * 0.6f, deco);
-            Backdrop(deco, 170f, 14, 5);
+            Place("Pumpkin", new Vector3(-2.2f, 0, 0.6f), 30, 1.3f, deco);
+            Place("Pumpkin", new Vector3(6.0f, 0, 0.2f), -20, 1.1f, deco);
+            Place("Barrel", new Vector3(7.2f, 0, 1.0f), 0, 1f, deco);
 
             new GameObject("MainMenuUI").AddComponent<MainMenuUI>();
-            MakeFx();
+            Fireflies(MakeFx());
             OrganizeScene(scene);
             EditorSceneManager.SaveScene(scene, path);
         }
@@ -252,11 +250,7 @@ namespace MultiBash.EditorTools
         static void BuildLobbyScene(string path)
         {
             var scene = NewScene();
-            Atmosphere(25f, 220f);
-            Sun(new Vector3(35, -25, 0), new Color(1f, 0.95f, 0.85f), 1.35f);
-            GrassPlane(300);
-            PostVolume();
-            var deco = new GameObject("Props").transform;
+            var deco = FrontEndSet("LobbyTerrain", 9);
 
             var cam = MakeCamera("LobbyCamera");
             cam.transform.position = new Vector3(1.6f, 2.4f, -6.5f);
@@ -277,22 +271,15 @@ namespace MultiBash.EditorTools
                 spot.rotation = Quaternion.Euler(0, 180, 0);
                 pedestals.Add(spot);
             }
-            Place("TowerRuin", new Vector3(-9, 0, 16), 30, 1.1f, deco);
-            Place("WallRuin", new Vector3(9, 0, 13), -10, 1f, deco);
-            Place("TreeA", new Vector3(-4, 0, 9), 40, 1f, deco);
-            Place("TreeB", new Vector3(14, 0, 9), 140, 1.1f, deco);
-            Place("TreePine", new Vector3(20, 0, 24), 0, 1.4f, deco);
             Place("LanternPost", new Vector3(-1.2f, 0, 3.4f), 0, 1f, deco);
             Place("LanternPost", new Vector3(6.6f, 0, 3.4f), 0, 1f, deco);
-            Place("Bush", new Vector3(8, 0, 5), 0, 1f, deco);
-            var rng = new System.Random(8);
-            for (int i = 0; i < 50; i++)
-                Place("GrassTuft", new Vector3(-12 + (float)rng.NextDouble() * 30, 0, -2 + (float)rng.NextDouble() * 20), (float)rng.NextDouble() * 360, 0.8f + (float)rng.NextDouble() * 0.6f, deco);
-            Backdrop(deco, 160f, 14, 9);
+            Place("Pumpkin", new Vector3(-1.8f, 0, 2.2f), 20, 1.2f, deco);
+            Place("Barrel", new Vector3(7.4f, 0, 2.6f), 0, 1f, deco);
+            Place("Brazier", new Vector3(8.6f, 0, 4.5f), 0, 1.1f, deco);
 
             var ui = new GameObject("LobbyUI").AddComponent<LobbyUI>();
             ui.pedestals = pedestals.ToArray();
-            MakeFx();
+            Fireflies(MakeFx());
             OrganizeScene(scene);
             EditorSceneManager.SaveScene(scene, path);
         }

@@ -801,6 +801,14 @@ namespace MultiBash
         // ---------------------------------------------------------------- ambient motes drifting around the camera
         ParticleSystem _ambient;
 
+        /// <summary>Change how many ambient motes drift around (stage moods: more embers, heavier snow).</summary>
+        public void SetAmbientRate(float rate)
+        {
+            if (_ambient == null) return;
+            var em = _ambient.emission;
+            em.rateOverTime = rate;
+        }
+
         void BuildAmbient()
         {
             _ambient = MakeSystem("AmbientMotes", ambientSnow ? alpha : additive, softTexture, ambientSnow ? 0.06f : -ambientRise, 0.2f);
