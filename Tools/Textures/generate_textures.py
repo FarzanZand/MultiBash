@@ -352,6 +352,30 @@ def radial(size, fn, levels=4):
 def vfx():
     save(radial(16, lambda r: (1 - r) ** 1.5), "Art", "VFX", "T_SoftParticle.png")
     save(radial(48, lambda r: ((r > 0.86) & (r < 0.97)).astype(float) + ((r > 0.8) & (r <= 0.86)) * 0.5, 3), "Art", "VFX", "T_Ring.png")
+    # holy aura: crisp outer ring, inner rune band, faint glow fill (128 px so big auras stay crisp)
+    S = 128
+    y, x = np.mgrid[0:S, 0:S]
+    c = (S - 1) / 2
+    r = np.sqrt((x - c) ** 2 + (y - c) ** 2) / c
+    ang = (np.degrees(np.arctan2(y - c, x - c)) + 360) % 360
+    a = np.zeros((S, S))
+    a += ((r > 0.92) & (r < 0.975)) * 1.0
+    a += ((r > 0.775) & (r < 0.8)) * 0.8
+    seg = ang % 22.5
+    rune = ((r > 0.82) & (r < 0.895)) & (((seg > 4) & (seg < 6.5)) | ((seg > 9) & (seg < 13.5) & (r > 0.85)) | ((seg > 15.5) & (seg < 17.5) & (r < 0.86)))
+    a += rune * 0.95
+    a += ((r > 0.6) & (r < 0.775)) * 0.06 * (r - 0.6) / 0.175     # only a faint glow just inside the rune band
+    a = np.clip(a, 0, 1)
+    a[r >= 1] = 0
+    img = np.zeros((S, S, 4), np.uint8)
+    img[..., :3] = 255
+    img[..., 3] = (np.round(a * 6) / 6 * 255).astype(np.uint8)
+    save(Image.fromarray(img, "RGBA"), "Art", "VFX", "T_AuraRing.png")
+    a = ((r > 0.94) & (r < 0.985)) * 1.0 + (((r > 0.87) & (r < 0.9)) & ((ang % 10) < 4)) * 0.7
+    a[r >= 1] = 0
+    img[..., 3] = (np.clip(a, 0, 1) * 255).astype(np.uint8)
+    save(Image.fromarray(img, "RGBA"), "Art", "VFX", "T_ThinRing.png")
+
     spark = Image.new("RGBA", (8, 8), (0, 0, 0, 0))
     d = ImageDraw.Draw(spark)
     d.rectangle([2, 2, 5, 5], fill=(255, 255, 255, 255))

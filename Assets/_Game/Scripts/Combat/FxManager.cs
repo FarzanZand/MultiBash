@@ -21,6 +21,7 @@ namespace MultiBash
         public Texture2D softTexture;
         public Texture2D sparkTexture;
         public Texture2D ringTexture;
+        public Texture2D auraTexture, thinRingTexture;
         public Texture2D slashTexture;
         public Texture2D puddleTexture;
         public Texture2D lightningTexture;
@@ -312,8 +313,7 @@ namespace MultiBash
             {
                 float a = count == 1 ? 0f : -spread * 0.5f + spread * i / (count - 1);
                 var d = Quaternion.Euler(0, a, 0) * dir;
-                var t = GetModel(def != null ? def.projectileModel : null);
-                t.position = origin;
+                var t = GetModel(def != null ? def.projectileModel : null, origin);
                 t.rotation = Quaternion.LookRotation(d);
                 t.localScale = Vector3.one * 1.3f;
                 var shot = new Shot { t = t, vel = d * speed, life = life, pierceLeft = Mathf.Max(1, pierce), def = def };
@@ -329,8 +329,7 @@ namespace MultiBash
             {
                 float a = count == 1 ? 0f : -spread * 0.5f + spread * i / (count - 1);
                 var d = Quaternion.Euler(0, a, 0) * dir;
-                var t = GetModel(def != null ? def.projectileModel : null);
-                t.position = origin;
+                var t = GetModel(def != null ? def.projectileModel : null, origin);
                 t.localScale = Vector3.one * 1.6f;
                 _shots.Add(new Shot { t = t, vel = d * speed, life = 30f, outTime = life * 0.5f, pierceLeft = 9999, def = def, returnTo = owner, spin = 900f });
             }
@@ -341,8 +340,7 @@ namespace MultiBash
             for (int i = 0; i < count; i++)
             {
                 var d = Quaternion.Euler(Random.Range(-25f, -5f), -60f + 120f * (count == 1 ? 0.5f : i / (float)(count - 1)), 0) * dir;
-                var t = GetModel(def != null ? def.projectileModel : null);
-                t.position = origin + Vector3.up * 0.4f;
+                var t = GetModel(def != null ? def.projectileModel : null, origin + Vector3.up * 0.4f);
                 t.rotation = Quaternion.LookRotation(d);
                 t.localScale = Vector3.one * 1.4f;
                 _shots.Add(new Shot { t = t, vel = d * speed, life = life, pierceLeft = Mathf.Max(1, pierce), def = def, turn = turn });
@@ -366,9 +364,8 @@ namespace MultiBash
         {
             var col = def != null ? def.fxColor : new Color(1f, 0.5f, 0.2f);
             Telegraph(target, radius, delay, new Color(1f, 0.5f, 0.15f));
-            var t = GetModel(def != null ? def.projectileModel : null);
             var start = target + new Vector3(Random.Range(-6f, 6f), 18f, Random.Range(-6f, 6f));
-            t.position = start;
+            var t = GetModel(def != null ? def.projectileModel : null, start);
             t.localScale = Vector3.one * (1.2f + radius * 0.35f);
             _flights.Add(new Flight { t = t, from = start, to = target, duration = delay, radius = radius, def = def, meteor = true });
         }
@@ -539,10 +536,10 @@ namespace MultiBash
 
         public void Nova(Vector3 center, float radius, Color color)
         {
-            var ring = CreateGroundDecal("Nova", ringTexture, true);
-            ring.position = new Vector3(center.x, Ground.Height(center) + 0.1f, center.z);
+            var ring = CreateGroundDecal("Nova", (thinRingTexture != null ? thinRingTexture : ringTexture), true);
+            ring.position = new Vector3(center.x, Ground.Cover(center, radius * 1.15f) + 0.02f, center.z);
             AddTimed(ring, 0.45f, color, Vector3.one * radius * 2.3f, true, true);
-            var ring2 = CreateGroundDecal("Nova2", ringTexture, true);
+            var ring2 = CreateGroundDecal("Nova2", (thinRingTexture != null ? thinRingTexture : ringTexture), true);
             ring2.position = ring.position + Vector3.up * 0.05f;
             AddTimed(ring2, 0.3f, Color.white, Vector3.one * radius * 1.6f, true, true);
             for (int i = 0; i < 22; i++)
@@ -557,7 +554,7 @@ namespace MultiBash
         public void Telegraph(Vector3 pos, float radius, float time, Color color)
         {
             var outer = CreateGroundDecal("Telegraph", ringTexture, true);
-            outer.position = new Vector3(pos.x, Ground.Height(pos) + 0.07f, pos.z);
+            outer.position = new Vector3(pos.x, Ground.Cover(pos, radius * 1.15f), pos.z);
             var c = color;
             c.a = 0.9f;
             _timed.Add(new Timed { t = outer, r = outer.GetComponent<Renderer>(), life = time, color = c, baseScale = Vector3.one * radius * 2.3f, fadeIn = 0.1f, holdAlpha = true });
@@ -572,7 +569,7 @@ namespace MultiBash
         public void Shockwave(Vector3 pos, float radius, Color color, bool explosion)
         {
             var ring = CreateGroundDecal("Shockwave", ringTexture, true);
-            ring.position = new Vector3(pos.x, Ground.Height(pos) + 0.1f, pos.z);
+            ring.position = new Vector3(pos.x, Ground.Cover(pos, radius * 1.2f) + 0.02f, pos.z);
             AddTimed(ring, 0.4f, color, Vector3.one * radius * 2.4f, true, true);
             Burst(pos + Vector3.up * 0.5f, explosion ? new Color(1f, 0.6f, 0.2f) : color, explosion ? 26 : 14, explosion ? 11f : 7f, 0.5f, 0.5f, 6f, true);
             Burst(pos + Vector3.up * 0.3f, Color.white, explosion ? 6 : 3, 4f, 0.9f, 0.18f, 0f, true);
@@ -613,7 +610,7 @@ namespace MultiBash
         {
             Lightning(pos + new Vector3(Random.Range(-1f, 1f), 14f, Random.Range(-1f, 1f)), pos, color);
             var ring = CreateGroundDecal("StrikeRing", ringTexture, true);
-            ring.position = new Vector3(pos.x, Ground.Height(pos) + 0.08f, pos.z);
+            ring.position = new Vector3(pos.x, Ground.Cover(pos, 1.5f), pos.z);
             AddTimed(ring, 0.35f, color, Vector3.one * 3f, true, true);
         }
 
@@ -629,8 +626,7 @@ namespace MultiBash
 
         public void Flask(Vector3 from, Vector3 to, float flightTime, float radius, float duration, WeaponDefinition def)
         {
-            var t = GetModel(def != null ? def.projectileModel : null);
-            t.position = from;
+            var t = GetModel(def != null ? def.projectileModel : null, from);
             t.localScale = Vector3.one * 1.4f;
             _flights.Add(new Flight { t = t, from = from, to = to, duration = flightTime, radius = radius, puddleLife = duration, def = def });
         }
@@ -874,12 +870,13 @@ namespace MultiBash
             return lr;
         }
 
-        Transform GetModel(GameObject prefab)
+        Transform GetModel(GameObject prefab, Vector3 at)
         {
             if (prefab == null)
             {
                 var q = GetQuad(true, sparkTexture);
                 q.localScale = Vector3.one * 0.6f;
+                q.position = at;
                 return q;
             }
             if (!_modelPools.TryGetValue(prefab, out var pool)) _modelPools[prefab] = pool = new Stack<Transform>();
@@ -892,6 +889,8 @@ namespace MultiBash
                 foreach (var r in t.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 AttachTrail(t, new Color(1f, 1f, 1f, 0.7f), 0.14f);
             }
+            // place it BEFORE clearing the trail: otherwise a reused model draws a streak from where it last died
+            t.position = at;
             t.gameObject.SetActive(true);
             var trail = t.GetComponent<TrailRenderer>();
             if (trail != null) trail.Clear();
@@ -1057,7 +1056,7 @@ namespace MultiBash
                     var col = fl.def != null ? fl.def.fxColor : Color.green;
                     Burst(fl.to, col, 12, 6f, 0.3f, 0.5f, 12f, false);
                     var puddle = CreateGroundDecal("Puddle", puddleTexture, false);
-                    puddle.position = fl.to + Vector3.up * 0.03f;
+                    puddle.position = new Vector3(fl.to.x, Ground.Cover(fl.to, fl.radius) - 0.04f, fl.to.z);
                     puddle.Rotate(0, 0, Random.Range(0f, 360f), Space.Self);
                     var timed = new Timed
                     {

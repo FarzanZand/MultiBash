@@ -74,26 +74,26 @@ namespace MultiBash.EditorTools
 
             // ---------------------------------------------------------------- enemies
             string E = Content + "/Enemies";
-            BuildEnemyPrefab($"{E}/Skeleton/Skeleton.prefab", Model("Enemies", "Skeleton"), 1f, false);
-            BuildEnemyPrefab($"{E}/Slime/Slime.prefab", Model("Enemies", "Slime"), 1.15f, true);
-            BuildEnemyPrefab($"{E}/Slime/SlimeSmall.prefab", Model("Enemies", "Slime"), 0.6f, true);
-            BuildEnemyPrefab($"{E}/Bat/Bat.prefab", Model("Enemies", "Bat"), 1.1f, false);
-            BuildEnemyPrefab($"{E}/SkeletonArcher/SkeletonArcher.prefab", Model("Enemies", "SkeletonArcher"), 1f, false);
-            BuildEnemyPrefab($"{E}/BombShroom/BombShroom.prefab", Model("Enemies", "BombShroom"), 1f, true);
-            BuildEnemyPrefab($"{E}/Golem/Golem.prefab", Model("Enemies", "Golem"), 1.6f, false);
-            BuildEnemyPrefab($"{E}/MagmaSlime/MagmaSlime.prefab", Model("Enemies", "MagmaSlime"), 1.15f, true);
-            BuildEnemyPrefab($"{E}/MagmaSlime/MagmaSlimeSmall.prefab", Model("Enemies", "MagmaSlime"), 0.6f, true);
-            BuildEnemyPrefab($"{E}/FireImp/FireImp.prefab", Model("Enemies", "FireImp"), 1.1f, false);
-            BuildEnemyPrefab($"{E}/TreasureSlime/TreasureSlime.prefab", Model("Enemies", "TreasureSlime"), 1.0f, true);
-            BuildEnemyPrefab($"{E}/Ghoul/Ghoul.prefab", Model("Enemies", "Ghoul"), 1.0f, false);
-            BuildEnemyPrefab($"{E}/Wraith/Wraith.prefab", Model("Enemies", "Wraith"), 1.0f, false);
-            BuildEnemyPrefab($"{E}/ObsidianBrute/ObsidianBrute.prefab", Model("Enemies", "ObsidianBrute"), 1.3f, false);
-            BuildEnemyPrefab($"{E}/IceWolf/IceWolf.prefab", Model("Enemies", "IceWolf"), 1.05f, false);
-            BuildEnemyPrefab($"{E}/Yeti/Yeti.prefab", Model("Enemies", "Yeti"), 1.45f, false);
-            BuildEnemyPrefab($"{E}/Snowman/Snowman.prefab", Model("Enemies", "Snowman"), 1.0f, false);
-            BuildEnemyPrefab($"{E}/Frost/FrostSlime.prefab", Model("Enemies", "FrostSlime"), 1.15f, true);
-            BuildEnemyPrefab($"{E}/Frost/FrostSlimeSmall.prefab", Model("Enemies", "FrostSlime"), 0.6f, true);
-            BuildEnemyPrefab($"{E}/Frost/FrostBat.prefab", Model("Enemies", "FrostBat"), 1.1f, false);
+            BuildEnemyPrefab($"{E}/Skeleton/Skeleton.prefab", Model("Creatures", "Skeleton"), 1f, false);
+            BuildEnemyPrefab($"{E}/Slime/Slime.prefab", Model("Creatures", "Slime"), 1.15f, true);
+            BuildEnemyPrefab($"{E}/Slime/SlimeSmall.prefab", Model("Creatures", "Slime"), 0.6f, true);
+            BuildEnemyPrefab($"{E}/Bat/Bat.prefab", Model("Creatures", "Bat"), 1.1f, false);
+            BuildEnemyPrefab($"{E}/SkeletonArcher/SkeletonArcher.prefab", Model("Creatures", "SkeletonArcher"), 1f, false);
+            BuildEnemyPrefab($"{E}/BombShroom/BombShroom.prefab", Model("Creatures", "BombShroom"), 1f, false);
+            BuildEnemyPrefab($"{E}/Golem/Golem.prefab", Model("Creatures", "Golem"), 1.6f, false);
+            BuildEnemyPrefab($"{E}/MagmaSlime/MagmaSlime.prefab", Model("Creatures", "MagmaSlime"), 1.15f, true);
+            BuildEnemyPrefab($"{E}/MagmaSlime/MagmaSlimeSmall.prefab", Model("Creatures", "MagmaSlime"), 0.6f, true);
+            BuildEnemyPrefab($"{E}/FireImp/FireImp.prefab", Model("Creatures", "FireImp"), 1.1f, false);
+            BuildEnemyPrefab($"{E}/TreasureSlime/TreasureSlime.prefab", Model("Creatures", "TreasureSlime"), 1.0f, true);
+            BuildEnemyPrefab($"{E}/Ghoul/Ghoul.prefab", Model("Creatures", "Ghoul"), 1.0f, false);
+            BuildEnemyPrefab($"{E}/Wraith/Wraith.prefab", Model("Creatures", "Wraith"), 1.0f, false);
+            BuildEnemyPrefab($"{E}/ObsidianBrute/ObsidianBrute.prefab", Model("Creatures", "ObsidianBrute"), 1.3f, false);
+            BuildEnemyPrefab($"{E}/IceWolf/IceWolf.prefab", Model("Creatures", "IceWolf"), 1.3f, false);
+            BuildEnemyPrefab($"{E}/Yeti/Yeti.prefab", Model("Creatures", "Yeti"), 1.25f, false);
+            BuildEnemyPrefab($"{E}/Snowman/Snowman.prefab", Model("Creatures", "Snowman"), 1.0f, false);
+            BuildEnemyPrefab($"{E}/Frost/FrostSlime.prefab", Model("Creatures", "FrostSlime"), 1.15f, true);
+            BuildEnemyPrefab($"{E}/Frost/FrostSlimeSmall.prefab", Model("Creatures", "FrostSlime"), 0.6f, true);
+            BuildEnemyPrefab($"{E}/Frost/FrostBat.prefab", Model("Creatures", "FrostBat"), 1.1f, false);
 
             // ---------------------------------------------------------------- pickups
             string Pk = Content + "/Pickups";
@@ -202,9 +202,19 @@ namespace MultiBash.EditorTools
             AssetDatabase.SaveAssets();
         }
 
+        /// <summary>True when an existing enemy prefab was built from a different model (e.g. a creature remake).</summary>
+        static bool ModelChanged(string path, GameObject model, float scale = -1f)
+        {
+            var pf = Load<GameObject>(path);
+            var m = pf != null ? pf.transform.Find("Visual/Model") : null;
+            if (m == null || model == null) return model != null;
+            if (scale > 0f && Mathf.Abs(m.parent.localScale.x - scale) > 0.001f) return true;
+            return PrefabUtility.GetCorrespondingObjectFromSource(m.gameObject) != model;
+        }
+
         static void BuildEnemyPrefab(string path, GameObject model, float scale, bool blob)
         {
-            if (!NeedPrefab(path)) return;
+            if (!NeedPrefab(path) && !ModelChanged(path, model, scale)) return;
             var go = new GameObject(Path.GetFileNameWithoutExtension(path));
             go.layer = LayerMask.NameToLayer("Enemy");
             go.AddComponent<NetworkObject>();

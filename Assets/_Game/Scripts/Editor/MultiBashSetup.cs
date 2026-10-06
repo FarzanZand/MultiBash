@@ -159,7 +159,7 @@ namespace MultiBash.EditorTools
                 var mi = (ModelImporter)AssetImporter.GetAtPath(path);
                 bool dirty = false;
                 // heroes are skinned meshes with an armature (Tools/Blender/characters.py): generic rig, no avatar, axis baked
-                bool skinned = path.Contains("/Characters/");
+                bool skinned = path.Contains("/Characters/") || path.Contains("/Creatures/");
                 var anim = skinned ? ModelImporterAnimationType.Generic : ModelImporterAnimationType.None;
                 if (mi.animationType != anim) { mi.animationType = anim; dirty = true; }
                 if (skinned && mi.avatarSetup != ModelImporterAvatarSetup.NoAvatar) { mi.avatarSetup = ModelImporterAvatarSetup.NoAvatar; dirty = true; }

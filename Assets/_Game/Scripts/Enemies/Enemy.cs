@@ -103,7 +103,7 @@ namespace MultiBash
             _renderers = GetComponentsInChildren<Renderer>();
             // only the torso casts a shadow: big swarms stay cheap to render
             foreach (var r in _renderers)
-                if (r.name != "Body") r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                if (r.name != "Body" && !(r is SkinnedMeshRenderer)) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             _mpb = new MaterialPropertyBlock();
             _rig = GetComponentInChildren<ProceduralRig>();
             _lastHealth = Health;

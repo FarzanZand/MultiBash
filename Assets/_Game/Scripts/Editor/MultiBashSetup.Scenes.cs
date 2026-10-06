@@ -168,6 +168,8 @@ namespace MultiBash.EditorTools
             fx.softTexture = Load<Texture2D>(Vfx + "/T_SoftParticle.png");
             fx.sparkTexture = Load<Texture2D>(Vfx + "/T_Spark.png");
             fx.ringTexture = Load<Texture2D>(Vfx + "/T_Ring.png");
+            fx.auraTexture = Load<Texture2D>(Vfx + "/T_AuraRing.png");
+            fx.thinRingTexture = Load<Texture2D>(Vfx + "/T_ThinRing.png");
             fx.slashTexture = Load<Texture2D>(Vfx + "/T_Slash.png");
             fx.puddleTexture = Load<Texture2D>(Vfx + "/T_Puddle.png");
             fx.lightningTexture = Load<Texture2D>(Vfx + "/T_Lightning.png");
@@ -220,7 +222,7 @@ namespace MultiBash.EditorTools
             for (int i = 0; i < 16; i++)
             {
                 float x = -8f + (float)rng.NextDouble() * 20f, z = 6f + (float)rng.NextDouble() * 10f;
-                var model = i % 3 == 0 ? Model("Enemies", "Slime") : Model("Enemies", "Skeleton");
+                var model = i % 3 == 0 ? Model("Creatures", "Slime") : Model("Creatures", "Skeleton");
                 var e = PlaceModel(model, new Vector3(x, 0, z), 180f + (float)rng.NextDouble() * 40f - 20f, i % 3 == 0 ? 1.1f : 1f);
                 e.AddComponent<ProceduralRig>();
             }
