@@ -38,7 +38,8 @@ namespace MultiBash
         [Networked] public byte Rerolls { get; set; }
         /// <summary>Power Surges taken (fallback upgrade once everything is maxed).</summary>
         [Networked] public int PowerSurges { get; set; }
-        public const float SurgeDamage = 0.06f, SurgeHealth = 6f;
+        public static float SurgeDamage => ProgressionManager.Settings.powerSurgeDamage;
+        public static float SurgeHealth => ProgressionManager.Settings.powerSurgeHealth;
         /// <summary>Level-ups that came from chests (rolled with extra luck).</summary>
         [Networked] public int TreasurePicks { get; set; }
         [Networked] public NetworkBool OfferIsTreasure { get; set; }
@@ -50,7 +51,7 @@ namespace MultiBash
         [Networked] public int Combo { get; set; }
         [Networked] public int FrenzyTick { get; set; }
         float _comboTimer;
-        int _lastFrenzy, _nextFrenzy = 50, _frenzyGap = 50;
+        int _lastFrenzy, _nextFrenzy = -1, _frenzyGap;
 
         [Networked] TickTimer SlideTimer { get; set; }
         [Networked] TickTimer SlideCooldown { get; set; }
@@ -119,7 +120,7 @@ namespace MultiBash
             LoadoutVersion++;
             RecalcStats();
             Health = _stats.MaxHealth;
-            Rerolls = (byte)Mathf.Clamp(db.config.rerollsPerRun, 0, 255);
+            Rerolls = (byte)Mathf.Clamp(ProgressionManager.Settings.rerollsPerRun, 0, 255);
         }
 
         public override void Spawned()
@@ -206,7 +207,7 @@ namespace MultiBash
             var db = GameDatabase.Instance;
             if (Def == null) Def = db.GetCharacter(CharacterIndex);
             _stats.Clear();
-            _stats.Add(db.config.baseStats);
+            _stats.Add(CombatManager.Settings.baseStats);
             if (Def != null) _stats.Add(Def.statBonuses);
             for (int i = 0; i < db.powerups.Count && i < MaxPowerupSlots; i++)
             {
@@ -218,6 +219,12 @@ namespace MultiBash
                 _stats.Add(new StatModifier(StatType.Damage, SurgeDamage), PowerSurges);
                 _stats.Add(new StatModifier(StatType.MaxHealth, SurgeHealth), PowerSurges);
             }
+            // global knobs from the CombatManager
+            var C = CombatManager.Settings;
+            _stats.Scale(StatType.Damage, C.damageMultiplier);
+            _stats.Scale(StatType.Cooldown, C.cooldownMultiplier);
+            _stats.Scale(StatType.Area, C.areaMultiplier);
+            _stats.Scale(StatType.MoveSpeed, C.moveSpeedMultiplier);
             _statsVersion = LoadoutVersion;
         }
 
@@ -331,12 +338,12 @@ namespace MultiBash
                 {
                     var sd = dir.sqrMagnitude > 0.01f ? dir.normalized : transform.forward;
                     SlideDir = sd;
-                    SlideTimer = TickTimer.CreateFromSeconds(Runner, cfg.slideDuration);
-                    SlideCooldown = TickTimer.CreateFromSeconds(Runner, cfg.slideCooldown);
+                    SlideTimer = TickTimer.CreateFromSeconds(Runner, CombatManager.Settings.slideDuration);
+                    SlideCooldown = TickTimer.CreateFromSeconds(Runner, CombatManager.Settings.slideCooldown);
                     sliding = true;
                     SlideTick = Runner.Tick;
                     var v = _cc.Velocity;
-                    var hv = sd * speed * cfg.slideSpeedMultiplier;
+                    var hv = sd * speed * CombatManager.Settings.slideSpeedMultiplier;
                     _cc.Velocity = new Vector3(hv.x, v.y, hv.z);
                 }
 
@@ -346,7 +353,7 @@ namespace MultiBash
                     if (_cc.Grounded)
                     {
                         if (sliding) Momentum = true;
-                        _cc.Jump(false, cfg.jumpImpulse);
+                        _cc.Jump(false, CombatManager.Settings.jumpImpulse);
                         JumpTick = Runner.Tick;
                     }
                     else if (AirJumps < Stats.ExtraJumps)
@@ -355,7 +362,7 @@ namespace MultiBash
                         AirJumps++;
                         var v = _cc.Velocity;
                         _cc.Velocity = new Vector3(v.x, 0f, v.z);
-                        _cc.Jump(true, cfg.jumpImpulse * 0.95f);
+                        _cc.Jump(true, CombatManager.Settings.jumpImpulse * 0.95f);
                         JumpTick = Runner.Tick;
                         AirJumpTick = Runner.Tick;
                     }
@@ -364,12 +371,12 @@ namespace MultiBash
                 float max = speed;
                 if (sliding)
                 {
-                    max = speed * cfg.slideSpeedMultiplier;
+                    max = speed * CombatManager.Settings.slideSpeedMultiplier;
                     dir = SlideDir;
                 }
                 else if (Momentum)
                 {
-                    max = speed * 1.45f;
+                    max = speed * CombatManager.Settings.momentumSpeed;
                 }
 
                 _cc.maxSpeed = max;
@@ -391,21 +398,21 @@ namespace MultiBash
                 foreach (var p in All)
                 {
                     if (p == this || !p.IsAlive) continue;
-                    if ((p.transform.position - transform.position).sqrMagnitude <= cfg.reviveRadius * cfg.reviveRadius)
+                    if ((p.transform.position - transform.position).sqrMagnitude <= ProgressionManager.Settings.reviveRadius * ProgressionManager.Settings.reviveRadius)
                     {
                         helped = true;
                         break;
                     }
                 }
                 ReviveProgress = helped
-                    ? ReviveProgress + dt / cfg.reviveSeconds
-                    : Mathf.Max(0f, ReviveProgress - dt / cfg.reviveSeconds * 0.5f);
+                    ? ReviveProgress + dt / ProgressionManager.Settings.reviveSeconds
+                    : Mathf.Max(0f, ReviveProgress - dt / ProgressionManager.Settings.reviveSeconds * 0.5f);
 
                 if (ReviveProgress >= 1f)
                 {
                     Downed = false;
                     ReviveProgress = 0f;
-                    Health = Stats.MaxHealth * cfg.reviveHealthPercent;
+                    Health = Stats.MaxHealth * ProgressionManager.Settings.reviveHealthPercent;
                     HurtInvuln = TickTimer.CreateFromSeconds(Runner, 2f);
                     ReviveTick = Runner.Tick;
                 }
@@ -432,7 +439,7 @@ namespace MultiBash
             if (Combo > 0)
             {
                 _comboTimer -= dt;
-                if (_comboTimer <= 0f) { Combo = 0; _nextFrenzy = 50; _frenzyGap = 50; }
+                if (_comboTimer <= 0f) { Combo = 0; _nextFrenzy = -1; }
             }
             if (Stats.HealthRegen > 0f) Health = Mathf.Min(Stats.MaxHealth, Health + Stats.HealthRegen * dt);
             if (Health > Stats.MaxHealth) Health = Stats.MaxHealth;
@@ -450,10 +457,11 @@ namespace MultiBash
         {
             if (!HasStateAuthority || !IsAlive || DevGodMode) return;
             if (!HurtInvuln.ExpiredOrNotRunning(Runner)) return;
-            float dmg = Mathf.Max(1f, amount - Stats.Armor);
+            var C = CombatManager.Settings;
+            float dmg = Mathf.Max(C.minDamageTaken, amount * C.damageTakenMultiplier - Stats.Armor);
             Health -= dmg;
             DamageFromHits += dmg;
-            HurtInvuln = TickTimer.CreateFromSeconds(Runner, 0.33f);
+            HurtInvuln = TickTimer.CreateFromSeconds(Runner, C.hurtInvulnerability);
             if (Health <= 0f) GoDown();
         }
 
@@ -463,36 +471,40 @@ namespace MultiBash
             if (Stats.Revives > RevivesUsed)
             {
                 RevivesUsed++;
-                Health = Stats.MaxHealth * 0.6f;
+                var C = CombatManager.Settings;
+                Health = Stats.MaxHealth * C.phoenixHealPercent;
                 HurtInvuln = TickTimer.CreateFromSeconds(Runner, 3f);
                 PhoenixTick = Runner.Tick;
                 // the rebirth blasts nearby enemies away
                 EnemyRegistry.EnsureGrid(Runner.Tick);
                 var near = new List<Enemy>();
-                EnemyRegistry.Query(transform.position, 6f, near);
-                foreach (var e in near) if (e != null && e.IsAlive) e.TakeDamage(40f + Stats.MaxHealth * 0.4f, transform.position, 14f, this);
+                EnemyRegistry.Query(transform.position, C.phoenixBlastRadius, near);
+                foreach (var e in near)
+                    if (e != null && e.IsAlive) e.TakeDamage(C.phoenixBlastDamage + Stats.MaxHealth * C.phoenixBlastPerMaxHealth, transform.position, 14f, this);
                 GameManager.Instance?.Announce($"{DisplayName} rises from the ashes!");
                 return;
             }
             Health = 0f;
             Downed = true;
             ReviveProgress = 0f;
-            DownedTimer = TickTimer.CreateFromSeconds(Runner, GameDatabase.Config.downedSeconds);
+            DownedTimer = TickTimer.CreateFromSeconds(Runner, ProgressionManager.Settings.downedSeconds);
             GameManager.Instance?.CheckDefeat();
         }
 
         /// <summary>Host: a kill by this player feeds the combo; every 50 chained kills = FRENZY (heal + vacuum).</summary>
         public void AddKill()
         {
+            var P = ProgressionManager.Settings;
+            if (_nextFrenzy < 0) { _nextFrenzy = P.frenzyFirst; _frenzyGap = P.frenzyFirst; }
             Combo++;
-            _comboTimer = 2.5f;
+            _comboTimer = P.comboWindow;
             if (Data != null && Combo > Data.BestCombo) Data.BestCombo = Combo;
             if (Combo < _nextFrenzy || !IsAlive) return;
-            _frenzyGap += 50;               // 50, 150, 300, 500 ... each FRENZY is harder to reach
+            _frenzyGap += P.frenzyGapGrowth;   // 50, 150, 300, 500 ... each FRENZY is harder to reach
             _nextFrenzy += _frenzyGap;
-            Heal(Stats.MaxHealth * 0.1f);
+            Heal(Stats.MaxHealth * P.frenzyHeal);
             foreach (var g in Pickup.All)
-                if (g != null && g.Kind == PickupKind.XP && !g.Target.IsValid && (g.transform.position - transform.position).sqrMagnitude < 30f * 30f)
+                if (g != null && g.Kind == PickupKind.XP && !g.Target.IsValid && (g.transform.position - transform.position).sqrMagnitude < P.frenzyVacuumRadius * P.frenzyVacuumRadius)
                     g.Target = Object.Id;
             FrenzyTick = Runner.Tick;
         }
@@ -503,7 +515,7 @@ namespace MultiBash
             float t = Stats.Thorns;
             if (t <= 0f || attacker == null || !attacker.IsAlive) return;
             var at = attacker.transform.position;
-            attacker.TakeDamage(hit * t + 4f, transform.position, 3f, this);
+            attacker.TakeDamage(hit * t + CombatManager.Settings.thornsFlat, transform.position, 3f, this);
             Rpc_Thorns(at);
         }
 
@@ -574,7 +586,7 @@ namespace MultiBash
         public void Rpc_Skip()
         {
             if (PendingLevelUps <= 0 || Choices.Get(0) == 0) return;
-            Heal(Stats.MaxHealth * GameDatabase.Config.skipHealPercent);
+            Heal(Stats.MaxHealth * ProgressionManager.Settings.skipHealPercent);
             ConsumeOffer();
         }
 
@@ -784,12 +796,13 @@ namespace MultiBash
                 if (IsLocal) CameraRig.Instance?.Shake(0.5f);
             }
             // low health: heartbeat for the local player
-            if (IsLocal && !Downed && !Dead && lib != null && Health < MaxHealth * 0.3f && gameStatePlaying())
+            float warn = CombatManager.Settings.lowHealthWarning;
+            if (IsLocal && !Downed && !Dead && lib != null && Health < MaxHealth * warn && gameStatePlaying())
             {
                 _heartTimer -= Time.deltaTime;
                 if (_heartTimer <= 0f)
                 {
-                    _heartTimer = Mathf.Lerp(0.55f, 1.0f, Health / Mathf.Max(1f, MaxHealth * 0.3f));
+                    _heartTimer = Mathf.Lerp(0.55f, 1.0f, Health / Mathf.Max(1f, MaxHealth * warn));
                     AudioManager.PlayUI(lib.heartbeat, 0.75f);
                 }
             }

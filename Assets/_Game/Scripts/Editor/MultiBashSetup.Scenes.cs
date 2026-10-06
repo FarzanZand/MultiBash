@@ -238,6 +238,7 @@ namespace MultiBash.EditorTools
 
             new GameObject("MainMenuUI").AddComponent<MainMenuUI>();
             MakeFx();
+            OrganizeScene(scene);
             EditorSceneManager.SaveScene(scene, path);
         }
 
@@ -287,6 +288,7 @@ namespace MultiBash.EditorTools
             var ui = new GameObject("LobbyUI").AddComponent<LobbyUI>();
             ui.pedestals = pedestals.ToArray();
             MakeFx();
+            OrganizeScene(scene);
             EditorSceneManager.SaveScene(scene, path);
         }
 
@@ -574,6 +576,7 @@ namespace MultiBash.EditorTools
 
             new GameObject("HUD").AddComponent<HUD>();
 
+            OrganizeScene(scene);
             EditorSceneManager.SaveScene(scene, path);
         }
     }

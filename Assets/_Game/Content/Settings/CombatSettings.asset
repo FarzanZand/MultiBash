@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 185fc54823c43fa4e8f01374b813c204, type: 3}
+  m_Name: CombatSettings
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.CombatSettings
+  baseStats:
+  - stat: 0
+    value: 100
+  - stat: 1
+    value: 0.3
+  - stat: 3
+    value: 7
+  - stat: 4
+    value: 1
+  - stat: 5
+    value: 1
+  - stat: 6
+    value: 1
+  - stat: 8
+    value: 1
+  - stat: 9
+    value: 1
+  - stat: 10
+    value: 3.2
+  - stat: 11
+    value: 1
+  - stat: 13
+    value: 0.08
+  - stat: 14
+    value: 2
+  damageMultiplier: 1
+  cooldownMultiplier: 1
+  areaMultiplier: 1
+  moveSpeedMultiplier: 1
+  minCooldown: 0.25
+  jumpImpulse: 8.5
+  slideSpeedMultiplier: 1.9
+  slideDuration: 0.45
+  slideCooldown: 0.8
+  momentumSpeed: 1.45
+  damageSpread: 0.1
+  critChancePerLuck: 0.05
+  minCritMultiplier: 1.5
+  knockbackMultiplier: 1
+  maxKnockback: 14
+  damageTakenMultiplier: 1
+  minDamageTaken: 1
+  hurtInvulnerability: 0.33
+  enemyDamageMultiplier: 1
+  thornsFlat: 4
+  executeCap: 0.3
+  phoenixHealPercent: 0.6
+  phoenixBlastRadius: 6
+  phoenixBlastDamage: 40
+  phoenixBlastPerMaxHealth: 0.4
+  screenShake: 1
+  showDamageNumbers: 1
+  maxDamageNumbers: 40
+  deathEffectsPerSecond: 50
+  lowHealthWarning: 0.3

@@ -68,7 +68,7 @@ namespace MultiBash
             var cfg = db.config;
             bool treasure = pc.TreasurePicks > 0;
             pc.OfferIsTreasure = treasure;
-            float luck = pc.Stats.Luck + (treasure ? 2.5f : 0f);
+            float luck = pc.Stats.Luck + (treasure ? ProgressionManager.Settings.treasureLuckBonus : 0f);
             Candidates.Clear();
 
             // an available evolution is always offered first
@@ -88,7 +88,7 @@ namespace MultiBash
                 if (w.isEvolution && lvl == 0) continue;   // evolutions come from evolving, but level up like any weapon
                 if (lvl > 0 && lvl < w.MaxLevel)
                     Candidates.Add(new Candidate { code = (short)(i + 1), weight = RarityWeight(w.rarity, luck) * (treasure ? 3f : 1.6f) });
-                else if (lvl == 0 && weaponCount < cfg.maxWeapons)
+                else if (lvl == 0 && weaponCount < ProgressionManager.Settings.maxWeapons)
                     Candidates.Add(new Candidate { code = (short)(i + 1), weight = RarityWeight(w.rarity, luck) });
             }
 
@@ -99,11 +99,11 @@ namespace MultiBash
                 int lvl = pc.PowerupLevels.Get(i);
                 if (lvl > 0 && lvl < p.maxLevel)
                     Candidates.Add(new Candidate { code = (short)(1000 + i), weight = RarityWeight(p.rarity, luck) * 1.2f });
-                else if (lvl == 0 && powerCount < cfg.maxPowerups)
+                else if (lvl == 0 && powerCount < ProgressionManager.Settings.maxPowerups)
                     Candidates.Add(new Candidate { code = (short)(1000 + i), weight = RarityWeight(p.rarity, luck) });
             }
 
-            int n = Mathf.Min(cfg.choicesPerLevel, pc.Choices.Length);
+            int n = Mathf.Min(ProgressionManager.Settings.choicesPerLevel, pc.Choices.Length);
             for (int slot = firstSlot; slot < n; slot++)
             {
                 if (Candidates.Count == 0)
@@ -139,7 +139,7 @@ namespace MultiBash
             }
             else if (IsWeapon(code)) pc.AddOrLevelWeapon(WeaponIndex(code));
             else if (IsPowerup(code)) pc.AddPowerup(PowerupIndex(code));
-            else if (code == Heal) pc.Heal(pc.Stats.MaxHealth * GameDatabase.Config.healChoicePercent);
+            else if (code == Heal) pc.Heal(pc.Stats.MaxHealth * ProgressionManager.Settings.healChoicePercent);
             else if (code == PowerSurge) { pc.PowerSurges++; pc.LoadoutVersion++; }
         }
 
@@ -285,7 +285,7 @@ namespace MultiBash
                 Add(Delta("Max HP", $"{st.MaxHealth:0}", $"{st.MaxHealth + PlayerCharacter.SurgeHealth:0}"));
                 return sb.ToString();
             }
-            return Delta("Health", $"{pc.Health:0}", $"{Mathf.Min(pc.MaxHealth, pc.Health + pc.MaxHealth * GameDatabase.Config.healChoicePercent):0}");
+            return Delta("Health", $"{pc.Health:0}", $"{Mathf.Min(pc.MaxHealth, pc.Health + pc.MaxHealth * ProgressionManager.Settings.healChoicePercent):0}");
         }
 
         /// <summary>"NEW!" or "Lv 2 → 3" plus what it does.</summary>
@@ -321,7 +321,7 @@ namespace MultiBash
             }
             levelText = "";
             if (code == PowerSurge) return "Permanent damage and health boost.";
-            return $"Heal {GameDatabase.Config.healChoicePercent * 100f:0}% of your max HP.";
+            return $"Heal {ProgressionManager.Settings.healChoicePercent * 100f:0}% of your max HP.";
         }
     }
 }

@@ -59,8 +59,9 @@ namespace MultiBash
         /// <summary>Called by the spawner inside Runner.Spawn's onBeforeSpawned (host).</summary>
         public void Init(int defIndex, bool elite, float healthMul, float damageMul, bool boss = false, int stage = 0)
         {
+            var P = ProgressionManager.Settings;
             Stage = (byte)(boss ? 0 : Mathf.Clamp(stage, 0, 2));
-            float stageMul = 1f + 0.1f * Stage;   // veterans hit and take a bit more
+            float stageMul = 1f + P.stageBonus * Stage;   // veterans hit and take a bit more
             healthMul *= stageMul;
             damageMul *= stageMul;
             var def = GameDatabase.Instance.GetEnemy(defIndex);
@@ -77,9 +78,9 @@ namespace MultiBash
             else
             {
                 // fodder never gets tougher: late hordes are about numbers, not HP
-                MaxHealth = def.maxHealth * (def.fodder ? 1f : healthMul) * (elite ? cfg.eliteHealthMultiplier : 1f);
-                ContactDamage = def.contactDamage * damageMul * (elite ? 1.5f : 1f);
-                ScaleMul = (elite ? cfg.eliteScale : 1f) * Mathf.Max(0.2f, def.scale) * (Stage == 2 ? 1.1f : 1f);
+                MaxHealth = def.maxHealth * (def.fodder ? 1f : healthMul) * (elite ? ProgressionManager.Settings.eliteHealthMultiplier : 1f);
+                ContactDamage = def.contactDamage * damageMul * (elite ? P.eliteDamageMultiplier : 1f);
+                ScaleMul = (elite ? P.eliteScale : 1f) * Mathf.Max(0.2f, def.scale) * (Stage == 2 ? P.stage3Scale : 1f);
             }
             Health = MaxHealth;
         }
@@ -412,9 +413,10 @@ namespace MultiBash
             d.y = 0;
             if (d.sqrMagnitude > 0.0001f)
             {
-                float k = knockback * (1f - Def.knockbackResist) * (Boss ? 0f : Elite ? 0.25f : 1f);
+                var C = CombatManager.Settings;
+                float k = knockback * C.knockbackMultiplier * (1f - Def.knockbackResist) * (Boss ? 0f : Elite ? 0.25f : 1f);
                 _knock += d.normalized * k;
-                if (_knock.magnitude > 14f) _knock = _knock.normalized * 14f;
+                if (_knock.magnitude > C.maxKnockback) _knock = _knock.normalized * C.maxKnockback;
             }
 
             if (Health <= 0f)

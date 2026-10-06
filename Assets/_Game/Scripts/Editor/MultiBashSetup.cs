@@ -53,6 +53,7 @@ namespace MultiBash.EditorTools
             BuildContent();
             Force = false;
             BuildPrefabs();          // only creates prefabs that are missing (new enemies / props)
+            WireAudioMixer();
             Force = true;
             LinkContent();
             Force = false;
@@ -94,6 +95,7 @@ namespace MultiBash.EditorTools
             BuildThemeAndAudio();
             BuildContent();
             BuildPrefabs();
+            WireAudioMixer();
             LinkContent();
             RefreshDatabase();
             BuildScenes();

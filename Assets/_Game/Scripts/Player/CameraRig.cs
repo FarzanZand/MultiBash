@@ -53,7 +53,7 @@ namespace MultiBash
             if (pc != null) _focus = pc.transform.position;
         }
 
-        public void Shake(float amount) => _shake = Mathf.Max(_shake, amount);
+        public void Shake(float amount) => _shake = Mathf.Max(_shake, amount * CombatManager.Settings.screenShake);
 
         public static bool MenuOpen;
 

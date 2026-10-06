@@ -13,6 +13,10 @@ namespace MultiBash
     public class GameDatabase : ScriptableObject
     {
         public GameConfig config;
+        [Tooltip("Default progression tuning (a scene's ProgressionManager can point at its own copy).")]
+        public ProgressionSettings progression;
+        [Tooltip("Default combat tuning (a scene's CombatManager can point at its own copy).")]
+        public CombatSettings combat;
         public AudioLibrary audio;
 
         [Header("Content (auto-filled by MultiBash/Refresh Database)")]

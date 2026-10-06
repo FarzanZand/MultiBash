@@ -81,8 +81,9 @@ namespace MultiBash
         /// <summary>Damage roll: ±10% spread and a 10% (+luck) chance to crit for double damage.</summary>
         float Dmg(WeaponLevel lvl, PlayerStats stats)
         {
-            float d = lvl.damage * stats.Damage * Random.Range(0.9f, 1.1f);
-            PendingCrit = Random.value < stats.CritChance + stats.Luck * 0.05f;
+            var C = CombatManager.Settings;
+            float d = lvl.damage * stats.Damage * Random.Range(1f - C.damageSpread, 1f + C.damageSpread);
+            PendingCrit = Random.value < stats.CritChance + stats.Luck * C.critChancePerLuck;
             if (PendingCrit) d *= stats.CritDamage;
             return d;
         }

@@ -72,7 +72,7 @@ namespace MultiBash
         public bool isEvolution;
 
         /// <summary>Weapons can evolve from this level on (they keep levelling to MaxLevel otherwise).</summary>
-        public const int EvolveLevel = 5;
+        public static int EvolveLevel => ProgressionManager.Settings.evolveLevel;
         public int EvolveAt => Mathf.Min(EvolveLevel, levels.Length);
 
         public int MaxLevel => levels.Length;

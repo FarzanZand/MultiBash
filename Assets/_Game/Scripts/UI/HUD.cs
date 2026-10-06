@@ -262,7 +262,7 @@ namespace MultiBash
         {
             _pause = UIKit.Stretch(_root, "Pause");
             UIKit.AddImage(_pause, null, new Color(0, 0, 0, 0.55f)).raycastTarget = true;
-            var p = UIKit.Panel(_pause, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560, 640), "Paused");
+            var p = UIKit.Panel(_pause, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560, 720), "Paused");
             p.pivot = new Vector2(0.5f, 0.5f);
             p.anchoredPosition = new Vector2(-400, 0);
             BuildBuildPanel();
@@ -270,11 +270,14 @@ namespace MultiBash
             UIKit.Button(p, "Resume", new Vector2(0.5f, 1), new Vector2(0, -120), new Vector2(440, 72), () => SetPause(false), T.buttonBlue, 45);
             UIKit.Label(p, "Mouse sensitivity", 27, T.text, new Vector2(0.5f, 1), new Vector2(0, -212), new Vector2(440, 32), TextAnchor.MiddleLeft);
             BuildSlider(p, new Vector2(0, -250), CameraRig.Sensitivity, 0.2f, 3f, v => CameraRig.Sensitivity = v);
+            // three mixer channels, each player sets their own (saved locally)
             UIKit.Label(p, "Music volume", 27, T.text, new Vector2(0.5f, 1), new Vector2(0, -296), new Vector2(440, 32), TextAnchor.MiddleLeft);
-            BuildSlider(p, new Vector2(0, -334), PlayerPrefs.GetFloat("musicVolume", 1f), 0f, 1f, AudioManager.SetMusicVolume);
+            BuildSlider(p, new Vector2(0, -334), AudioManager.GetVolume(AudioManager.Channel.Music), 0f, 1f, v => AudioManager.SetVolume(AudioManager.Channel.Music, v));
             UIKit.Label(p, "Effects volume", 27, T.text, new Vector2(0.5f, 1), new Vector2(0, -380), new Vector2(440, 32), TextAnchor.MiddleLeft);
-            BuildSlider(p, new Vector2(0, -418), AudioManager.Instance != null ? AudioManager.Instance.sfxVolume : 0.8f, 0f, 1f, AudioManager.SetSfxVolume);
-            UIKit.Button(p, "Leave Party", new Vector2(0.5f, 1), new Vector2(0, -500), new Vector2(440, 64), () => GameLauncher.Instance?.Leave(), T.buttonRed, 36);
+            BuildSlider(p, new Vector2(0, -418), AudioManager.GetVolume(AudioManager.Channel.SFX), 0f, 1f, v => AudioManager.SetVolume(AudioManager.Channel.SFX, v));
+            UIKit.Label(p, "Interface volume", 27, T.text, new Vector2(0.5f, 1), new Vector2(0, -464), new Vector2(440, 32), TextAnchor.MiddleLeft);
+            BuildSlider(p, new Vector2(0, -502), AudioManager.GetVolume(AudioManager.Channel.UI), 0f, 1f, v => AudioManager.SetVolume(AudioManager.Channel.UI, v));
+            UIKit.Button(p, "Leave Party", new Vector2(0.5f, 1), new Vector2(0, -584), new Vector2(440, 64), () => GameLauncher.Instance?.Leave(), T.buttonRed, 36);
             _pause.gameObject.SetActive(false);
         }
 
@@ -291,7 +294,7 @@ namespace MultiBash
                 var icon = UIKit.AddImage(UIKit.Box(ib, "I", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(48, 48)), null, Color.white);
                 var title = UIKit.Label(row, "", 27, T.text, new Vector2(0, 1), new Vector2(84, -2), new Vector2(460, 32), TextAnchor.UpperLeft, UIFont.Header);
                 title.horizontalOverflow = HorizontalWrapMode.Overflow;
-                var tag = UIKit.Label(row, "", 16, T.accent, new Vector2(1, 1), new Vector2(-6, -8), new Vector2(420, 24), TextAnchor.UpperRight, UIFont.Body);
+                var tag = UIKit.Label(row, "", 16, T.accent, new Vector2(1, 1), new Vector2(-6, -52), new Vector2(460, 20), TextAnchor.UpperRight, UIFont.Body);
                 var body = UIKit.Label(row, "", 16, T.mutedText, new Vector2(0, 1), new Vector2(84, -34), new Vector2(760, 40), TextAnchor.UpperLeft, UIFont.Body);
                 body.horizontalOverflow = HorizontalWrapMode.Overflow;
                 body.verticalOverflow = VerticalWrapMode.Truncate;
@@ -475,7 +478,7 @@ namespace MultiBash
             var df = _damageFlash.color;
             var meNow = PlayerCharacter.Local;
             float floor = 0f;
-            if (meNow != null && meNow.IsAlive && meNow.Health < meNow.MaxHealth * 0.3f)
+            if (meNow != null && meNow.IsAlive && meNow.Health < meNow.MaxHealth * CombatManager.Settings.lowHealthWarning)
                 floor = 0.07f + 0.05f * Mathf.Sin(Time.time * 7f);   // low HP: pulsing red edge
             df.a = Mathf.Max(floor, Mathf.MoveTowards(df.a, 0f, Time.deltaTime * 1.6f));
             _damageFlash.color = df;

@@ -59,10 +59,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f65e4c877f51e67459a4b99182d754f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MultiBash.AudioManager
+  mixer: {fileID: 24100000, guid: 3ff4cadd45037f94daca762fb7ed67c6, type: 2}
+  musicGroup: {fileID: -8697540333513669621, guid: 3ff4cadd45037f94daca762fb7ed67c6, type: 2}
+  sfxGroup: {fileID: 3395463412317531498, guid: 3ff4cadd45037f94daca762fb7ed67c6, type: 2}
+  uiGroup: {fileID: 8967934520366640160, guid: 3ff4cadd45037f94daca762fb7ed67c6, type: 2}
+  defaultMusicVolume: 1
+  defaultSfxVolume: 0.8
+  defaultUiVolume: 0.9
   voices: 32
   maxSameClip: 4
   sameClipMinInterval: 0.035
-  sfxVolume: 0.8
+  uiVoices: 6
 --- !u!114 &1341896230073680227
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -774,29 +774,7 @@ namespace MultiBash.EditorTools
             Asset<GameConfig>(Content + "/GameConfig.asset", c =>
             {
                 c.waves = waves;
-                c.baseStats = new List<StatModifier>
-                {
-                    new(StatType.MaxHealth, 100f), new(StatType.HealthRegen, 0.3f), new(StatType.MoveSpeed, 7f),
-                    new(StatType.Damage, 1f), new(StatType.Area, 1f), new(StatType.Cooldown, 1f), new(StatType.ProjectileSpeed, 1f),
-                    new(StatType.Duration, 1f), new(StatType.PickupRadius, 3.2f), new(StatType.XPGain, 1f),
-                    new(StatType.CritChance, 0.08f), new(StatType.CritDamage, 2f),
-                };
-                // enemies grow in NUMBERS more than HP: ~2x HP at minute 9 (was ~8x), hordes do the rest
-                c.healthPerMinute = 0.12f;
-                c.healthPerMinuteSquared = 0f;
-                c.speedPerMinute = 0.05f;
-                c.healthPerExtraPlayer = 0.2f;
-                c.spawnRatePerExtraPlayer = 0.3f;
-                c.damagePerMinute = 0.08f;
-                c.maxEnemies = 420;
-                c.xpFirstLevel = 6;
-                c.xpPerLevel = 6;
-                c.xpQuadratic = 1.1f;
-                c.healthPerTeamLevel = 0.03f;
-                c.healthPerTeamLevelSquared = 0.0045f;
                 c.eliteCrown = Model("Enemies", "Crown");
-                c.stage2At = 0.36f;
-                c.stage3At = 0.63f;
                 c.stageGear = new[] { Model("Enemies", "GearHelmet"), Model("Enemies", "GearWarHelm") };
                 c.xpGemPrefab = Load<GameObject>($"{Pk}/XPGem.prefab")?.GetComponent<NetworkObject>();
                 c.healthOrbPrefab = Load<GameObject>($"{Pk}/HealthOrb.prefab")?.GetComponent<NetworkObject>();
@@ -808,11 +786,29 @@ namespace MultiBash.EditorTools
             });
         }
 
+        /// <summary>
+        /// The two tuning assets behind the ProgressionManager / CombatManager. Created once with the defaults written
+        /// in ProgressionSettings.cs / CombatSettings.cs and then never overwritten by the setup tools (they are yours
+        /// to tweak; use the inspector's "Reset" to go back to the defaults).
+        /// </summary>
+        static void BuildSettings()
+        {
+            string dir = Content + "/Settings";
+            System.IO.Directory.CreateDirectory(dir);
+            if (Load<ProgressionSettings>(dir + "/ProgressionSettings.asset") == null)
+                AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<ProgressionSettings>(), dir + "/ProgressionSettings.asset");
+            if (Load<CombatSettings>(dir + "/CombatSettings.asset") == null)
+                AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<CombatSettings>(), dir + "/CombatSettings.asset");
+        }
+
         [MenuItem("MultiBash/Refresh Database", priority = 20)]
         public static void RefreshDatabase()
         {
             var db = Asset<GameDatabase>(Content + "/Resources/GameDatabase.asset", d => { });
             db.config = Load<GameConfig>(Content + "/GameConfig.asset");
+            BuildSettings();
+            db.progression = Load<ProgressionSettings>(Content + "/Settings/ProgressionSettings.asset");
+            db.combat = Load<CombatSettings>(Content + "/Settings/CombatSettings.asset");
             db.audio = Load<AudioLibrary>(AudioDir + "/AudioLibrary.asset");
             db.playerDataPrefab = Load<GameObject>(Prefabs + "/Network/PlayerData.prefab")?.GetComponent<NetworkObject>();
             db.playerCharacterPrefab = Load<GameObject>(Prefabs + "/Network/PlayerCharacter.prefab")?.GetComponent<NetworkObject>();

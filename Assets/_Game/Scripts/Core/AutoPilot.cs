@@ -75,7 +75,7 @@ namespace MultiBash
         {
             var gm = GameManager.Instance;
             if (gm == null || gm.Object == null || !gm.Object.HasStateAuthority || gm.State != RunState.Playing) return;
-            gm.RunTime = Mathf.Min(gm.RunTime + seconds, GameDatabase.Config.runDurationSeconds - 1f);
+            gm.RunTime = Mathf.Min(gm.RunTime + seconds, ProgressionManager.Settings.runDurationSeconds - 1f);
         }
 
         void LogTelemetry(GameManager gm)

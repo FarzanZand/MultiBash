@@ -35,8 +35,8 @@ namespace MultiBash
 
         public WaveDefinition Waves => map != null && map.waves != null ? map.waves : GameDatabase.Config.waves;
 
-        public float EnemySpeedMul => 1f + Mathf.Min(RunTime / 60f * GameDatabase.Config.speedPerMinute, 0.35f);
-        public float TimeLeft => Mathf.Max(0f, GameDatabase.Config.runDurationSeconds - RunTime);
+        public float EnemySpeedMul => ProgressionManager.Settings.EnemySpeedMultiplier(RunTime / 60f);
+        public float TimeLeft => Mathf.Max(0f, ProgressionManager.Settings.runDurationSeconds - RunTime);
         public int AlivePlayerCount { get; private set; }
 
         EnemySpawner _spawner;
@@ -60,7 +60,7 @@ namespace MultiBash
                 StateTimer = TickTimer.CreateFromSeconds(Runner, 3f);
                 TeamLevel = 1;
                 TeamXP = 0;
-                XPToNext = GameDatabase.Config.XPForLevel(1, Mathf.Max(1, PlayerData.All.Count));
+                XPToNext = ProgressionManager.Settings.XPForLevel(1, Mathf.Max(1, PlayerData.All.Count));
                 foreach (var p in PlayerData.All) p.ResetRunStats();
                 Announce("Survive the night!");
             }
@@ -111,8 +111,7 @@ namespace MultiBash
                     RunTime += dt;
                     {
                         // announce when the horde moves into its next stage (new looks, gear and enemy types)
-                        float frac = RunTime / Mathf.Max(1f, cfg.runDurationSeconds);
-                        int st = frac >= cfg.stage3At ? 2 : frac >= cfg.stage2At ? 1 : 0;
+                        int st = ProgressionManager.Settings.StageAt(RunTime);
                         if (st > _stage)
                         {
                             _stage = st;
@@ -123,7 +122,7 @@ namespace MultiBash
                     _spawner.Tick(dt);
                     CombatWorld.Tick(Runner.Tick, dt);
                     CheckDefeat();
-                    if (RunTime >= cfg.runDurationSeconds) EndRun(true);
+                    if (RunTime >= ProgressionManager.Settings.runDurationSeconds) EndRun(true);
                     break;
 
                 case RunState.Victory:
@@ -174,7 +173,7 @@ namespace MultiBash
         void EndRun(bool victory)
         {
             State = victory ? RunState.Victory : RunState.Defeat;
-            StateTimer = TickTimer.CreateFromSeconds(Runner, GameDatabase.Config.resultsSeconds);
+            StateTimer = TickTimer.CreateFromSeconds(Runner, ProgressionManager.Settings.resultsSeconds);
             Announce(victory ? "VICTORY!" : "The party has fallen...");
             if (victory)
             {
@@ -203,7 +202,7 @@ namespace MultiBash
         public void AddXP(float amount)
         {
             if (!HasStateAuthority || State != RunState.Playing) return;
-            _xpRemainder += amount;
+            _xpRemainder += amount * ProgressionManager.Settings.xpMultiplier;
             int whole = Mathf.FloorToInt(_xpRemainder);
             _xpRemainder -= whole;
             TeamXP += whole;
@@ -212,7 +211,7 @@ namespace MultiBash
             {
                 TeamXP -= XPToNext;
                 TeamLevel++;
-                XPToNext = cfg.XPForLevel(TeamLevel, Mathf.Max(1, PlayerCharacter.All.Count));
+                XPToNext = ProgressionManager.Settings.XPForLevel(TeamLevel, Mathf.Max(1, PlayerCharacter.All.Count));
                 foreach (var p in PlayerCharacter.All)
                     if (p != null && !p.Dead) p.PendingLevelUps++;
             }
@@ -224,21 +223,17 @@ namespace MultiBash
         {
             if (def == null || def.prefab == null) return;
             var db = GameDatabase.Instance;
-            var cfg = db.config;
+            var P = ProgressionManager.Settings;
             int idx = db.IndexOf(def);
             if (idx < 0) return;
             float minute = RunTime / 60f;
             int players = Mathf.Max(1, PlayerCharacter.All.Count);
-            // enemies keep up with the team's power: toughness from time AND team level (fodder only half of the level part)
-            float L = Mathf.Max(0, TeamLevel - 1);
-            float levelMul = 1f + cfg.healthPerTeamLevel * L + cfg.healthPerTeamLevelSquared * L * L;
-            if (def.fodder) levelMul = 1f + (levelMul - 1f) * 0.35f;
-            float hpMul = (1f + cfg.healthPerMinute * minute + cfg.healthPerMinuteSquared * minute * minute) * (1f + cfg.healthPerExtraPlayer * (players - 1))
-                          * (map != null ? map.difficulty : 1f) * levelMul;
-            float dmgMul = 1f + cfg.damagePerMinute * minute;
+            // all scaling formulas live in ProgressionSettings (time, team level, party size, map difficulty)
+            float hpMul = P.EnemyHealthMultiplier(minute, TeamLevel, players, map != null ? map.difficulty : 1f, def.fodder);
+            float dmgMul = P.EnemyDamageMultiplier(minute) * CombatManager.Settings.enemyDamageMultiplier;
+            if (boss) { hpMul *= P.bossHealthMultiplier; dmgMul *= P.bossDamageMultiplier; }
             var rot = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
-            float frac = RunTime / Mathf.Max(1f, cfg.runDurationSeconds);
-            int stage = frac >= cfg.stage3At ? 2 : frac >= cfg.stage2At ? 1 : 0;
+            int stage = P.StageAt(RunTime);
             Runner.Spawn(def.prefab, pos, rot, null, (r, o) => o.GetComponent<Enemy>().Init(idx, elite, hpMul, dmgMul, boss, stage));
         }
 
@@ -258,7 +253,8 @@ namespace MultiBash
                 // boss loot: a chest for everyone, a magnet, a heal and a big pile of XP
                 Announce($"{e.DisplayName} has fallen!  +1 reroll");
                 Rpc_BossDefeated(pos);
-                foreach (var p in PlayerCharacter.All) if (p != null && p.Rerolls < 250) p.Rerolls++;
+                foreach (var p in PlayerCharacter.All)
+                    if (p != null) p.Rerolls = (byte)Mathf.Clamp(p.Rerolls + ProgressionManager.Settings.rerollsPerBossKill, 0, 250);
                 int chests = Mathf.Max(1, PlayerCharacter.All.Count);
                 for (int i = 0; i < chests; i++) Pickup.Spawn(Runner, cfg.chestPrefab, pos + RandomOffset() * 3f, PickupKind.Chest, 0);
                 Pickup.Spawn(Runner, cfg.magnetPrefab, pos + RandomOffset() * 2f, PickupKind.Magnet, 0);
@@ -301,7 +297,7 @@ namespace MultiBash
         {
             var def = GameDatabase.Instance.GetEnemy(defIndex);
             if (def == null) return;
-            float scale = elite ? GameDatabase.Config.eliteScale : 1f;
+            float scale = elite ? ProgressionManager.Settings.eliteScale : 1f;
             FxManager.Instance?.DeathBurst(pos, def.deathColor, scale);
             AudioManager.Play(def.deathSound, pos, elite ? 1f : 0.55f);
             if (elite) CameraRig.Instance?.Shake(0.35f);

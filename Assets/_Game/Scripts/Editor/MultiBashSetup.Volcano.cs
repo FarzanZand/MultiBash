@@ -342,6 +342,7 @@ namespace MultiBash.EditorTools
 
             new GameObject("HUD").AddComponent<HUD>();
 
+            OrganizeScene(scene);
             EditorSceneManager.SaveScene(scene, path);
         }
     }

@@ -27,7 +27,6 @@ namespace MultiBash
 
         [Header("Damage numbers")]
         public Font font;
-        public int maxNumbers = 40;
 
         [Header("Audio")]
         public AudioClip flaskShatter;
@@ -149,8 +148,9 @@ namespace MultiBash
 
         public void DamageNumber(Vector3 world, float amount, bool onPlayer, bool crit = false)
         {
-            if (font == null || amount < 0.5f) return;
-            if (_numbers.Count >= maxNumbers)
+            var C = CombatManager.Settings;
+            if (font == null || amount < 0.5f || !C.showDamageNumbers) return;
+            if (_numbers.Count >= C.maxDamageNumbers)
             {
                 var oldest = _numbers[0];
                 _numbers.RemoveAt(0);
@@ -208,7 +208,7 @@ namespace MultiBash
         {
             float s = Mathf.Sqrt(scale);
             float now = Time.unscaledTime;
-            _deathBudget = Mathf.Min(40f, _deathBudget + (now - _deathBudgetTime) * 50f);
+            _deathBudget = Mathf.Min(40f, _deathBudget + (now - _deathBudgetTime) * CombatManager.Settings.deathEffectsPerSecond);
             _deathBudgetTime = now;
             bool full = _deathBudget >= 1f || scale > 1.2f;
             _deathBudget -= 1f;

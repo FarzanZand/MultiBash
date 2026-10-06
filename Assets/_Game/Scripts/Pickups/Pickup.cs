@@ -44,13 +44,14 @@ namespace MultiBash
                 if (p.Kind != PickupKind.XP) continue;
                 gems++;
                 // merge into an idle gem lying right next to it: fewer, juicier gems in big fights
-                if (!p.Target.IsValid && (p.transform.position - pos).sqrMagnitude < 1.4f * 1.4f)
+                float merge = ProgressionManager.Settings.gemMergeRadius;
+                if (!p.Target.IsValid && (p.transform.position - pos).sqrMagnitude < merge * merge)
                 {
                     p.Value += value;
                     return;
                 }
             }
-            if (gems >= cfg.maxGems)
+            if (gems >= ProgressionManager.Settings.maxGems)
             {
                 // too many gems on the map: merge into the oldest idle one
                 foreach (var p in All)
@@ -171,7 +172,7 @@ namespace MultiBash
                     gm.AddXP(Value * p.Stats.XPGain);
                     break;
                 case PickupKind.Health:
-                    p.Heal(p.Stats.MaxHealth * cfg.healthOrbHeal);
+                    p.Heal(p.Stats.MaxHealth * ProgressionManager.Settings.healthOrbHeal);
                     break;
                 case PickupKind.Magnet:
                     foreach (var g in All)

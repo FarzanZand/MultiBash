@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: GameDatabase
   m_EditorClassIdentifier: Assembly-CSharp::MultiBash.GameDatabase
   config: {fileID: 11400000, guid: 14322eed085887b47a530463e5acd010, type: 2}
+  progression: {fileID: 11400000, guid: cef9579aa3387e844be9d92d9d472436, type: 2}
+  combat: {fileID: 11400000, guid: 3544de9febf139f4a9f3a1706b348af1, type: 2}
   audio: {fileID: 11400000, guid: 41dc1e4fffa23c54a9ff119c5759194e, type: 2}
   characters:
   - {fileID: 11400000, guid: 08d7e314753bed54ea3c567d24069f66, type: 2}

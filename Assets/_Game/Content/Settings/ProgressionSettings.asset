@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b294a9a38c1b724d9ef842b16b42fba, type: 3}
+  m_Name: ProgressionSettings
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.ProgressionSettings
+  runDurationSeconds: 600
+  resultsSeconds: 15
+  xpFirstLevel: 6
+  xpPerLevel: 6
+  xpQuadratic: 1.1
+  xpPerExtraPlayer: 0.35
+  xpMultiplier: 1
+  choicesPerLevel: 3
+  maxWeapons: 4
+  maxPowerups: 6
+  rerollsPerRun: 3
+  rerollsPerBossKill: 1
+  evolveLevel: 5
+  treasureLuckBonus: 2.5
+  healChoicePercent: 0.3
+  skipHealPercent: 0.15
+  powerSurgeDamage: 0.06
+  powerSurgeHealth: 6
+  healthPerMinute: 0.12
+  healthPerMinuteSquared: 0
+  healthPerTeamLevel: 0.03
+  healthPerTeamLevelSquared: 0.0045
+  fodderLevelScaling: 0.35
+  healthPerExtraPlayer: 0.2
+  damagePerMinute: 0.08
+  speedPerMinute: 0.05
+  maxSpeedBonus: 0.35
+  eliteHealthMultiplier: 8
+  eliteDamageMultiplier: 1.5
+  eliteScale: 1.8
+  bossHealthMultiplier: 1
+  bossDamageMultiplier: 1
+  stage2At: 0.36
+  stage3At: 0.63
+  stageBonus: 0.1
+  stage3Scale: 1.1
+  spawnRateMultiplier: 1
+  burstSizeMultiplier: 1
+  spawnRatePerExtraPlayer: 0.3
+  maxEnemies: 420
+  spawnDistanceMin: 22
+  spawnDistanceMax: 30
+  hordeShakeThreshold: 40
+  healthOrbHeal: 0.25
+  maxGems: 220
+  gemMergeRadius: 1.4
+  comboWindow: 2.5
+  frenzyFirst: 50
+  frenzyGapGrowth: 50
+  frenzyHeal: 0.1
+  frenzyVacuumRadius: 30
+  downedSeconds: 30
+  reviveSeconds: 2.5
+  reviveRadius: 2.5
+  reviveHealthPercent: 0.5

@@ -25,20 +25,20 @@ namespace MultiBash
 
             float minute = _gm.RunTime / 60f;
             int players = Mathf.Max(1, PlayerCharacter.All.Count);
-            float playerMul = 1f + cfg.spawnRatePerExtraPlayer * (players - 1);
+            float playerMul = 1f + ProgressionManager.Settings.spawnRatePerExtraPlayer * (players - 1);
 
             foreach (var entry in waves.entries)
             {
                 if (entry.enemy == null || minute < entry.startMinute || minute >= entry.endMinute) continue;
                 float span = Mathf.Max(0.01f, entry.endMinute - entry.startMinute);
                 float t = Mathf.Pow(Mathf.Clamp01((minute - entry.startMinute) / span), Mathf.Max(0.1f, entry.rampCurve));
-                float rate = Mathf.Lerp(entry.rateAtStart, entry.rateAtEnd, t) * playerMul;
+                float rate = Mathf.Lerp(entry.rateAtStart, entry.rateAtEnd, t) * playerMul * ProgressionManager.Settings.spawnRateMultiplier;
                 _accumulators.TryGetValue(entry, out float acc);
                 acc += rate * dt;
                 while (acc >= 1f)
                 {
                     acc -= 1f;
-                    if (EnemyRegistry.All.Count >= cfg.maxEnemies) { acc = 0f; break; }
+                    if (EnemyRegistry.All.Count >= ProgressionManager.Settings.maxEnemies) { acc = 0f; break; }
                     SpawnGroup(entry.enemy, Mathf.Max(1, entry.groupSize), entry.eliteChance);
                 }
                 _accumulators[entry] = acc;
@@ -59,7 +59,7 @@ namespace MultiBash
             var center = PickSpawnPoint(anchor.transform.position);
             for (int i = 0; i < size; i++)
             {
-                if (EnemyRegistry.All.Count >= GameDatabase.Config.maxEnemies) return;
+                if (EnemyRegistry.All.Count >= ProgressionManager.Settings.maxEnemies) return;
                 var p = center + new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f));
                 _gm.SpawnEnemy(def, ClampArena(p), Random.value < eliteChance);
             }
@@ -78,14 +78,15 @@ namespace MultiBash
                 return;
             }
             int elitesLeft = b.elites;
-            if (b.count >= 40) _gm.Rpc_Horde(b.count);
+            int total = Mathf.Max(1, Mathf.RoundToInt(b.count * ProgressionManager.Settings.burstSizeMultiplier));
+            if (total >= ProgressionManager.Settings.hordeShakeThreshold) _gm.Rpc_Horde(total);
             foreach (var anchor in Alive)
             {
-                int count = Mathf.CeilToInt(b.count / (float)Alive.Count);
+                int count = Mathf.CeilToInt(total / (float)Alive.Count);
                 var c = anchor.transform.position;
                 for (int i = 0; i < count; i++)
                 {
-                    if (EnemyRegistry.All.Count >= GameDatabase.Config.maxEnemies) return;
+                    if (EnemyRegistry.All.Count >= ProgressionManager.Settings.maxEnemies) return;
                     Vector3 p;
                     if (b.ring)
                     {
@@ -109,13 +110,13 @@ namespace MultiBash
             for (int tries = 0; tries < 6; tries++)
             {
                 float a = Random.Range(0f, Mathf.PI * 2f);
-                float d = Random.Range(cfg.spawnDistanceMin, cfg.spawnDistanceMax);
+                float d = Random.Range(ProgressionManager.Settings.spawnDistanceMin, ProgressionManager.Settings.spawnDistanceMax);
                 var p = ClampArena(around + new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * d);
                 // prefer points that stayed far from every player after clamping to the arena
                 float minDist = float.MaxValue;
                 foreach (var pl in Alive) minDist = Mathf.Min(minDist, (pl.transform.position - p).magnitude);
                 if (minDist > bestScore) { bestScore = minDist; best = p; }
-                if (minDist >= cfg.spawnDistanceMin * 0.8f) break;
+                if (minDist >= ProgressionManager.Settings.spawnDistanceMin * 0.8f) break;
             }
             return best;
         }

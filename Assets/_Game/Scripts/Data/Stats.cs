@@ -101,7 +101,7 @@ namespace MultiBash
         public float MoveSpeed => _v[(int)StatType.MoveSpeed];
         public float Damage => _v[(int)StatType.Damage];
         public float Area => _v[(int)StatType.Area];
-        public float Cooldown => Mathf.Max(0.25f, _v[(int)StatType.Cooldown]);
+        public float Cooldown => Mathf.Max(CombatManager.Settings.minCooldown, _v[(int)StatType.Cooldown]);
         public int ProjectileCount => Mathf.RoundToInt(_v[(int)StatType.ProjectileCount]);
         public float ProjectileSpeed => _v[(int)StatType.ProjectileSpeed];
         public float Duration => _v[(int)StatType.Duration];
@@ -109,14 +109,17 @@ namespace MultiBash
         public float XPGain => _v[(int)StatType.XPGain];
         public float Luck => _v[(int)StatType.Luck];
         public float CritChance => _v[(int)StatType.CritChance];
-        public float CritDamage => Mathf.Max(1.5f, _v[(int)StatType.CritDamage]);
+        public float CritDamage => Mathf.Max(CombatManager.Settings.minCritMultiplier, _v[(int)StatType.CritDamage]);
         public float Lifesteal => _v[(int)StatType.Lifesteal];
         public int ExtraJumps => Mathf.RoundToInt(_v[(int)StatType.ExtraJumps]);
         public float Thorns => _v[(int)StatType.Thorns];
-        public float Execute => Mathf.Min(0.3f, _v[(int)StatType.Execute]);
+        public float Execute => Mathf.Min(CombatManager.Settings.executeCap, _v[(int)StatType.Execute]);
         public int Revives => Mathf.RoundToInt(_v[(int)StatType.Revives]);
 
         public void Clear() => Array.Clear(_v, 0, _v.Length);
+
+        /// <summary>Multiply one final stat (global knobs from CombatSettings).</summary>
+        public void Scale(StatType s, float mul) => _v[(int)s] *= mul;
 
         public void Add(StatModifier m, float times = 1f) => _v[(int)m.stat] += m.value * times;
 
