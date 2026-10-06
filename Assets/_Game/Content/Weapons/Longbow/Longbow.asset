@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc1fb2f1ceac0749b04409fe13897d2, type: 3}
+  m_Name: Longbow
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WeaponDefinition
+  displayName: Longbow
+  description: Fires piercing arrows at the nearest enemy.
+  icon: {fileID: 21300000, guid: 19f8eab5bead33745a780c23e2933912, type: 3}
+  rarity: 0
+  kind: 1
+  levels:
+  - upgradeText: 
+    damage: 11
+    cooldown: 0.85
+    amount: 1
+    area: 1
+    pierce: 2
+    duration: 0.95
+    speed: 28
+    knockback: 3
+  - upgradeText: +1 arrow
+    damage: 11
+    cooldown: 0.85
+    amount: 2
+    area: 1
+    pierce: 2
+    duration: 0.95
+    speed: 28
+    knockback: 3
+  - upgradeText: Arrows pierce 2 more enemies
+    damage: 14
+    cooldown: 0.8
+    amount: 2
+    area: 1
+    pierce: 4
+    duration: 1
+    speed: 30
+    knockback: 3
+  - upgradeText: +1 arrow, faster
+    damage: 14
+    cooldown: 0.65
+    amount: 3
+    area: 1
+    pierce: 4
+    duration: 1
+    speed: 30
+    knockback: 3
+  - upgradeText: 'MAX: +1 arrow, +40% damage, pierce 7'
+    damage: 20
+    cooldown: 0.6
+    amount: 4
+    area: 1
+    pierce: 7
+    duration: 1.1
+    speed: 34
+    knockback: 4
+  heldModel: {fileID: 919132149155446097, guid: 6247f3eb9ac038a44bc7a24e7e025519, type: 3}
+  projectileModel: {fileID: 919132149155446097, guid: cbc86a7d13d05cf4793a38c790b76748, type: 3}
+  fxColor: {r: 0.78431374, g: 1, b: 0.6039216, a: 1}
+  fireSound: {fileID: 8300000, guid: a5b55b06f13ca6c4383641b1ef9b0942, type: 3}
+  hitSound: {fileID: 8300000, guid: 5dea75be813610a46a877bfd3bc4a981, type: 3}

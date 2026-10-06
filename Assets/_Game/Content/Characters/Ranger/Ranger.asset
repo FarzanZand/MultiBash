@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a88f7216cd11e44a0d4bb1862cb441, type: 3}
+  m_Name: Ranger
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.CharacterDefinition
+  displayName: Ranger
+  description: Fast and precise. Keep moving and let the arrows do the work.
+  portrait: {fileID: 21300000, guid: 87fca31891e798c4f9d2dd42b29067d4, type: 3}
+  color: {r: 0.37254903, g: 0.7529412, b: 0.2901961, a: 1}
+  model: {fileID: 919132149155446097, guid: 5c30cd1113009924390a0ad5f8a81f66, type: 3}
+  startingWeapon: {fileID: 11400000, guid: 096fcd3bf058d3e4d9f8cbb2feab4ad3, type: 2}
+  statBonuses:
+  - stat: 3
+    value: 1.2
+  - stat: 10
+    value: 1

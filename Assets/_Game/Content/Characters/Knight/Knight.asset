@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a88f7216cd11e44a0d4bb1862cb441, type: 3}
+  m_Name: Knight
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.CharacterDefinition
+  displayName: Knight
+  description: A walking fortress. Wades into the horde and cleaves everything in
+    reach.
+  portrait: {fileID: 21300000, guid: ca6f239977a263b47a9d0244df579e21, type: 3}
+  color: {r: 0.30980393, g: 0.5254902, b: 0.9411765, a: 1}
+  model: {fileID: 919132149155446097, guid: f20a2fbdf95dc5a43a3eb1b7a475f473, type: 3}
+  startingWeapon: {fileID: 11400000, guid: 0b9464c86e6c46e418ab3d079a616ddd, type: 2}
+  statBonuses:
+  - stat: 0
+    value: 30
+  - stat: 2
+    value: 2

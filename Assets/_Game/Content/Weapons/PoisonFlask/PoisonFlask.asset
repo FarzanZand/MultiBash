@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc1fb2f1ceac0749b04409fe13897d2, type: 3}
+  m_Name: PoisonFlask
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WeaponDefinition
+  displayName: Poison Flask
+  description: Throws flasks that leave a toxic puddle. Damage every 0.5s.
+  icon: {fileID: 21300000, guid: 25d78c63401e5eb4b8395a7760dfdd56, type: 3}
+  rarity: 0
+  kind: 3
+  levels:
+  - upgradeText: 
+    damage: 7
+    cooldown: 2.2
+    amount: 1
+    area: 2.4
+    pierce: 0
+    duration: 3
+    speed: 0
+    knockback: 0.5
+  - upgradeText: Bigger puddles
+    damage: 7
+    cooldown: 2.2
+    amount: 1
+    area: 3
+    pierce: 0
+    duration: 3
+    speed: 0
+    knockback: 0.5
+  - upgradeText: +1 flask
+    damage: 8
+    cooldown: 2.1
+    amount: 2
+    area: 3
+    pierce: 0
+    duration: 3.5
+    speed: 0
+    knockback: 0.5
+  - upgradeText: +40% damage, lasts longer
+    damage: 11
+    cooldown: 2
+    amount: 2
+    area: 3
+    pierce: 0
+    duration: 4.5
+    speed: 0
+    knockback: 0.5
+  - upgradeText: 'MAX: +1 flask, bigger puddles'
+    damage: 14
+    cooldown: 1.8
+    amount: 3
+    area: 3.3
+    pierce: 0
+    duration: 5
+    speed: 0
+    knockback: 0.5
+  heldModel: {fileID: 919132149155446097, guid: a47bae6bb5fb1e74d9724489e17745e7, type: 3}
+  projectileModel: {fileID: 919132149155446097, guid: a47bae6bb5fb1e74d9724489e17745e7, type: 3}
+  fxColor: {r: 0.6117647, g: 1, b: 0.22745098, a: 1}
+  fireSound: {fileID: 8300000, guid: ee36cc7b484ef21419cd4ea8f48dadeb, type: 3}
+  hitSound: {fileID: 8300000, guid: 4b4c922779f34374686d75c4dfcb1a70, type: 3}

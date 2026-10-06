@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc1fb2f1ceac0749b04409fe13897d2, type: 3}
+  m_Name: OrbitingBlades
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WeaponDefinition
+  displayName: Orbiting Blades
+  description: Blades circle around you, shredding anything they touch.
+  icon: {fileID: 21300000, guid: c015d94f655ff924a9579ae6380730f4, type: 3}
+  rarity: 1
+  kind: 4
+  levels:
+  - upgradeText: 
+    damage: 10
+    cooldown: 0.55
+    amount: 2
+    area: 2.6
+    pierce: 0
+    duration: 0
+    speed: 210
+    knockback: 6
+  - upgradeText: +1 blade
+    damage: 10
+    cooldown: 0.55
+    amount: 3
+    area: 2.6
+    pierce: 0
+    duration: 0
+    speed: 210
+    knockback: 6
+  - upgradeText: +40% damage, wider orbit
+    damage: 14
+    cooldown: 0.5
+    amount: 3
+    area: 3.1
+    pierce: 0
+    duration: 0
+    speed: 230
+    knockback: 7
+  - upgradeText: +1 blade, spins faster
+    damage: 14
+    cooldown: 0.45
+    amount: 4
+    area: 3.1
+    pierce: 0
+    duration: 0
+    speed: 280
+    knockback: 7
+  - upgradeText: 'MAX: +1 blade, +40% damage'
+    damage: 20
+    cooldown: 0.4
+    amount: 5
+    area: 3.4
+    pierce: 0
+    duration: 0
+    speed: 300
+    knockback: 8
+  heldModel: {fileID: 0}
+  projectileModel: {fileID: 919132149155446097, guid: 9ffbc29f47064584d9421e260d9306f3, type: 3}
+  fxColor: {r: 0.8156863, g: 0.65882355, b: 1, a: 1}
+  fireSound: {fileID: 0}
+  hitSound: {fileID: 8300000, guid: 4b4233bda3a43a14d9f9d0f3552d72d1, type: 3}

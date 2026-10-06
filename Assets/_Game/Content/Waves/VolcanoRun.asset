@@ -1,0 +1,150 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b32848b60911d84e853afb624bb523f, type: 3}
+  m_Name: VolcanoRun
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WaveDefinition
+  entries:
+  - enemy: {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
+    startMinute: 0
+    endMinute: 10
+    rateAtStart: 0.5
+    rateAtEnd: 7.5
+    rampCurve: 1.6
+    groupSize: 2
+    eliteChance: 0.008
+  - enemy: {fileID: 11400000, guid: d3f0133d089eae44eb4dd13ec674a873, type: 2}
+    startMinute: 0.75
+    endMinute: 10
+    rateAtStart: 0.12
+    rateAtEnd: 4.5
+    rampCurve: 1.6
+    groupSize: 1
+    eliteChance: 0.012
+  - enemy: {fileID: 11400000, guid: 9814521879f445b41b580bc620c92602, type: 2}
+    startMinute: 1.5
+    endMinute: 10
+    rateAtStart: 0.06
+    rateAtEnd: 1.3
+    rampCurve: 1.6
+    groupSize: 2
+    eliteChance: 0.01
+  - enemy: {fileID: 11400000, guid: 45386d41657be884787122c3369843cf, type: 2}
+    startMinute: 2
+    endMinute: 10
+    rateAtStart: 0.1
+    rateAtEnd: 1.2
+    rampCurve: 1.6
+    groupSize: 5
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: d3f0133d089eae44eb4dd13ec674a873, type: 2}
+    startMinute: 3
+    endMinute: 10
+    rateAtStart: 0.06
+    rateAtEnd: 0.6
+    rampCurve: 1.6
+    groupSize: 6
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: c044b12571842894f9886fd05be9213b, type: 2}
+    startMinute: 2.75
+    endMinute: 10
+    rateAtStart: 0.1
+    rateAtEnd: 0.9
+    rampCurve: 1.6
+    groupSize: 1
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: 24e61111c6ba45842b954a1fae683571, type: 2}
+    startMinute: 4
+    endMinute: 10
+    rateAtStart: 0.05
+    rateAtEnd: 0.6
+    rampCurve: 1.6
+    groupSize: 2
+    eliteChance: 0.01
+  - enemy: {fileID: 11400000, guid: 2c7633f47dffbae4a9dfa347f103356f, type: 2}
+    startMinute: 3.5
+    endMinute: 10
+    rateAtStart: 0.04
+    rateAtEnd: 0.25
+    rampCurve: 1.6
+    groupSize: 1
+    eliteChance: 0.05
+  bursts:
+  - minute: 1.5
+    enemy: {fileID: 11400000, guid: d3f0133d089eae44eb4dd13ec674a873, type: 2}
+    count: 10
+    ring: 1
+    elites: 1
+    announcement: The ground boils!
+    boss: 0
+  - minute: 2.5
+    enemy: {fileID: 11400000, guid: 9814521879f445b41b580bc620c92602, type: 2}
+    count: 12
+    ring: 0
+    elites: 1
+    announcement: Imps rain fire from above!
+    boss: 0
+  - minute: 3.25
+    enemy: {fileID: 11400000, guid: c044b12571842894f9886fd05be9213b, type: 2}
+    count: 14
+    ring: 1
+    elites: 0
+    announcement: Something is ticking...
+    boss: 0
+  - minute: 4.25
+    enemy: {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
+    count: 60
+    ring: 1
+    elites: 2
+    announcement: The ashen dead march!
+    boss: 0
+  - minute: 5.5
+    enemy: {fileID: 11400000, guid: d3f0133d089eae44eb4dd13ec674a873, type: 2}
+    count: 30
+    ring: 1
+    elites: 1
+    announcement: THE MAGMA QUEEN ERUPTS!
+    boss: 1
+  - minute: 6.5
+    enemy: {fileID: 11400000, guid: 9814521879f445b41b580bc620c92602, type: 2}
+    count: 30
+    ring: 1
+    elites: 2
+    announcement: The sky burns!
+    boss: 0
+  - minute: 7.5
+    enemy: {fileID: 11400000, guid: 2c7633f47dffbae4a9dfa347f103356f, type: 2}
+    count: 30
+    ring: 1
+    elites: 1
+    announcement: AN ANCIENT GOLEM AWAKENS!
+    boss: 1
+  - minute: 8.25
+    enemy: {fileID: 11400000, guid: d3f0133d089eae44eb4dd13ec674a873, type: 2}
+    count: 60
+    ring: 1
+    elites: 3
+    announcement: Lava tide!
+    boss: 0
+  - minute: 9
+    enemy: {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
+    count: 30
+    ring: 1
+    elites: 1
+    announcement: THE BONE KING RISES FROM THE ASH!
+    boss: 1
+  - minute: 9.5
+    enemy: {fileID: 11400000, guid: 9814521879f445b41b580bc620c92602, type: 2}
+    count: 50
+    ring: 0
+    elites: 3
+    announcement: FINAL ERUPTION!
+    boss: 0

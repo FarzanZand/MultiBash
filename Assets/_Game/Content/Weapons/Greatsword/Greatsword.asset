@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc1fb2f1ceac0749b04409fe13897d2, type: 3}
+  m_Name: Greatsword
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WeaponDefinition
+  displayName: Greatsword
+  description: Cleaves everything in a wide arc in front of you.
+  icon: {fileID: 21300000, guid: 0767f2e6a95f126489eec8139f548fe2, type: 3}
+  rarity: 0
+  kind: 0
+  levels:
+  - upgradeText: 
+    damage: 15
+    cooldown: 0.95
+    amount: 1
+    area: 3.6
+    pierce: 0
+    duration: 0
+    speed: 0
+    knockback: 7
+  - upgradeText: +30% damage
+    damage: 20
+    cooldown: 0.95
+    amount: 1
+    area: 3.6
+    pierce: 0
+    duration: 0
+    speed: 0
+    knockback: 7
+  - upgradeText: Much bigger swing
+    damage: 22
+    cooldown: 1
+    amount: 1
+    area: 4.3
+    pierce: 0
+    duration: 0
+    speed: 0
+    knockback: 8
+  - upgradeText: Also swings behind you
+    damage: 26
+    cooldown: 1
+    amount: 2
+    area: 4.3
+    pierce: 0
+    duration: 0
+    speed: 0
+    knockback: 8
+  - upgradeText: 'MAX: huge damage, faster swings'
+    damage: 36
+    cooldown: 0.8
+    amount: 2
+    area: 4.8
+    pierce: 0
+    duration: 0
+    speed: 0
+    knockback: 10
+  heldModel: {fileID: 919132149155446097, guid: f2c04dd3b86729149afc08ac02164963, type: 3}
+  projectileModel: {fileID: 0}
+  fxColor: {r: 0.62352943, g: 0.76862746, b: 1, a: 1}
+  fireSound: {fileID: 8300000, guid: 01dec089f8d69244999cc97b5789b791, type: 3}
+  hitSound: {fileID: 8300000, guid: 4b4233bda3a43a14d9f9d0f3552d72d1, type: 3}

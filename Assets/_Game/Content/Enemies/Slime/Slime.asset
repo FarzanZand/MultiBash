@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfa4861c1b13514fb502afb4e0d0d61, type: 3}
+  m_Name: Slime
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.EnemyDefinition
+  displayName: Slime
+  prefab: {fileID: 1609748063426886556, guid: 0b5d4ecae2466d74a92be0b99806d9f1, type: 3}
+  maxHealth: 24
+  moveSpeed: 3.3
+  contactDamage: 7
+  attackInterval: 1
+  attackRange: 0.9
+  radius: 0.6
+  knockbackResist: 0.3
+  movement: 1
+  hopRest: 0.6
+  hopTime: 0.5
+  hopHeight: 1.3
+  attack: 0
+  attackDistance: 9
+  specialCooldown: 3
+  telegraphTime: 0.9
+  specialRadius: 3.5
+  specialDamageMul: 1.6
+  projectileSpeed: 12
+  specialColor: {r: 1, g: 0.3, b: 0.2, a: 1}
+  specialSound: {fileID: 0}
+  xpValue: 2
+  healthOrbChance: 0.02
+  magnetChance: 0.003
+  splitInto: {fileID: 11400000, guid: e4ad3d895fc23f6409edd07a013b00bb, type: 2}
+  splitCount: 2
+  bossName: Slime Mother
+  bossHealthMultiplier: 110
+  bossDamageMultiplier: 2
+  bossScale: 3.6
+  bossSplitCount: 8
+  hitSound: {fileID: 8300000, guid: 7de622bc23022cf49ba41f40a215b248, type: 3}
+  deathSound: {fileID: 8300000, guid: 9e663c0184fe9c54aa95fbbdd67861d7, type: 3}
+  moveSound: {fileID: 8300000, guid: e1703cbb5b839624c932211fa724af64, type: 3}
+  deathColor: {r: 0.49411765, g: 0.8784314, b: 0.2901961, a: 1}

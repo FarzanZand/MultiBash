@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfa4861c1b13514fb502afb4e0d0d61, type: 3}
+  m_Name: Bat
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.EnemyDefinition
+  displayName: Bat
+  prefab: {fileID: 557381998195250587, guid: c69ab5b0e58fe58458ef819634f90cc7, type: 3}
+  maxHealth: 6
+  moveSpeed: 6
+  contactDamage: 4
+  attackInterval: 0.8
+  attackRange: 0.9
+  radius: 0.35
+  knockbackResist: 0
+  movement: 2
+  hopRest: 0.7
+  hopTime: 0.45
+  hopHeight: 1.2
+  attack: 0
+  attackDistance: 9
+  specialCooldown: 3
+  telegraphTime: 0.9
+  specialRadius: 3.5
+  specialDamageMul: 1.6
+  projectileSpeed: 12
+  specialColor: {r: 1, g: 0.3, b: 0.2, a: 1}
+  specialSound: {fileID: 0}
+  xpValue: 1
+  healthOrbChance: 0.006
+  magnetChance: 0.002
+  splitInto: {fileID: 0}
+  splitCount: 0
+  bossName: 
+  bossHealthMultiplier: 150
+  bossDamageMultiplier: 2.5
+  bossScale: 3.2
+  bossSplitCount: 0
+  hitSound: {fileID: 8300000, guid: ed78027ea8372f34aacc2488f38f3b28, type: 3}
+  deathSound: {fileID: 8300000, guid: 2d7bc6161191d6e4c94dc08c3da7f24c, type: 3}
+  moveSound: {fileID: 0}
+  deathColor: {r: 0.41568628, g: 0.22745098, b: 0.65882355, a: 1}

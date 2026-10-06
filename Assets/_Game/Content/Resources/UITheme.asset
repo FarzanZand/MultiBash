@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3d2480f72525fe48ab8e1daafa3826d, type: 3}
+  m_Name: UITheme
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.UITheme
+  headerFont: {fileID: 12800000, guid: 46f73190d54713e4b8bff27d8060ecc0, type: 3}
+  bodyFont: {fileID: 12800000, guid: 3e0f34acda840014b9c72d3350b20d25, type: 3}
+  numberFont: {fileID: 12800000, guid: 3e0f34acda840014b9c72d3350b20d25, type: 3}
+  panel: {fileID: 21300000, guid: d2ce0bfdc39b4fe4cab9eddf6ce2665e, type: 3}
+  titleBar: {fileID: 21300000, guid: ba5ec2083d2eebe4f87fcbba4ed547e6, type: 3}
+  roundRect: {fileID: 21300000, guid: 2b5064c6626a5cd41b93c2ae09e841b5, type: 3}
+  button: {fileID: 21300000, guid: 3db851569a5b7e04189a5f1dc3fcd3c7, type: 3}
+  card: {fileID: 21300000, guid: 46ed0c63f26223a468170154fc5769a2, type: 3}
+  slot: {fileID: 21300000, guid: 94f2537437bda5d43a167085e84db389, type: 3}
+  outline: {fileID: 21300000, guid: 18bf2ca0eb722d341b0ad44661383c34, type: 3}
+  circle: {fileID: 21300000, guid: 2c1e78d9bacb9bf4bad0cc4de785bdf3, type: 3}
+  glow: {fileID: 21300000, guid: 801df9c9a85346f4ebbf4876e2387e70, type: 3}
+  gradient: {fileID: 21300000, guid: 34dd32880cfffb5478995c13376e24b3, type: 3}
+  arrow: {fileID: 21300000, guid: 7c56a517711946b4b9348e2f04376a3e, type: 3}
+  clock: {fileID: 21300000, guid: 2db07dabf9c06bd46af200bf017f1709, type: 3}
+  skull: {fileID: 21300000, guid: 40519ead3b702604190cf70d5f2f3c63, type: 3}
+  heart: {fileID: 21300000, guid: bd170a5448a6d294a96500b1dcbc6faa, type: 3}
+  lockIcon: {fileID: 21300000, guid: ab24eb1fcbfb5d94fac9e778046576b0, type: 3}
+  star: {fileID: 21300000, guid: b67de96e83a8b60468bcc90753218853, type: 3}
+  text: {r: 0.96, g: 0.95, b: 0.9, a: 1}
+  mutedText: {r: 0.68, g: 0.72, b: 0.7, a: 1}
+  accent: {r: 1, g: 0.82, b: 0.25, a: 1}
+  good: {r: 0.45, g: 1, b: 0.45, a: 1}
+  bad: {r: 1, g: 0.3, b: 0.25, a: 1}
+  health: {r: 0.9, g: 0.1, b: 0.1, a: 1}
+  xp: {r: 0.15, g: 0.65, b: 1, a: 1}
+  buttonBlue: {r: 0.25, g: 0.5, b: 0.85, a: 1}
+  buttonGrey: {r: 0.45, g: 0.5, b: 0.5, a: 1}
+  buttonRed: {r: 0.8, g: 0.22, b: 0.2, a: 1}
+  buttonGreen: {r: 0.25, g: 0.65, b: 0.3, a: 1}
+  common: {r: 0.2, g: 0.55, b: 0.28, a: 1}
+  rare: {r: 0.18, g: 0.38, b: 0.8, a: 1}
+  epic: {r: 0.55, g: 0.2, b: 0.75, a: 1}

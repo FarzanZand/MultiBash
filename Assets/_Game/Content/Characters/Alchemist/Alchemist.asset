@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a88f7216cd11e44a0d4bb1862cb441, type: 3}
+  m_Name: Alchemist
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.CharacterDefinition
+  displayName: Alchemist
+  description: Hurls toxic flasks that turn the ground into a death zone.
+  portrait: {fileID: 21300000, guid: e89cd04f822e66a42b0479296818a667, type: 3}
+  color: {r: 0.9411765, g: 0.5921569, b: 0.22745098, a: 1}
+  model: {fileID: 919132149155446097, guid: 1f1a4fc0afea14340a3e8f2395b43a06, type: 3}
+  startingWeapon: {fileID: 11400000, guid: d8b5b83373425d941a2bdde4be75b733, type: 2}
+  statBonuses:
+  - stat: 5
+    value: 0.2
+  - stat: 9
+    value: 0.2

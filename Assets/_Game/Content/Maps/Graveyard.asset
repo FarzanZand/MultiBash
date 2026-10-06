@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a085a627737c21e48abebe19e93e8f63, type: 3}
+  m_Name: Graveyard
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.MapDefinition
+  displayName: Haunted Keep
+  description: Ruined castle grounds full of bones, slimes and old magic. A good
+    first run.
+  sceneName: Game
+  waves: {fileID: 11400000, guid: 0168ac5aa3280994ca5ffc5fb9742a65, type: 2}
+  music: {fileID: 8300000, guid: 52e7fd0ecf6cda94385c6235a3f864f8, type: 3}
+  accent: {r: 0.3529412, g: 0.84705883, b: 1, a: 1}
+  preview: {fileID: 21300000, guid: 7a8083affc4de6c49b204de3c2d1cbc6, type: 3}
+  difficulty: 1

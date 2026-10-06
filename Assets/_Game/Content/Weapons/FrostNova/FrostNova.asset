@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc1fb2f1ceac0749b04409fe13897d2, type: 3}
+  m_Name: FrostNova
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WeaponDefinition
+  displayName: Frost Nova
+  description: An icy blast around you that damages and slows everything it touches.
+  icon: {fileID: 21300000, guid: 0c30ae1fab95b474ab817fc8249438d8, type: 3}
+  rarity: 1
+  kind: 8
+  levels:
+  - upgradeText: 
+    damage: 10
+    cooldown: 2.4
+    amount: 1
+    area: 4
+    pierce: 0
+    duration: 2
+    speed: 0
+    knockback: 6
+  - upgradeText: Bigger blast
+    damage: 10
+    cooldown: 2.4
+    amount: 1
+    area: 4.8
+    pierce: 0
+    duration: 2
+    speed: 0
+    knockback: 6
+  - upgradeText: +60% damage
+    damage: 16
+    cooldown: 2.3
+    amount: 1
+    area: 4.8
+    pierce: 0
+    duration: 2.2
+    speed: 0
+    knockback: 7
+  - upgradeText: Longer slow, more often
+    damage: 16
+    cooldown: 1.9
+    amount: 1
+    area: 5.3
+    pierce: 0
+    duration: 3
+    speed: 0
+    knockback: 7
+  - upgradeText: 'MAX: huge blast, +50% damage'
+    damage: 24
+    cooldown: 1.7
+    amount: 1
+    area: 6.3
+    pierce: 0
+    duration: 3.2
+    speed: 0
+    knockback: 9
+  heldModel: {fileID: 0}
+  projectileModel: {fileID: 919132149155446097, guid: 5f624b426b0492c4e9e1201305ad1e11, type: 3}
+  fxColor: {r: 0.62352943, g: 0.9019608, b: 1, a: 1}
+  fireSound: {fileID: 8300000, guid: ae3d55cc7b097484d8c7d00357821f34, type: 3}
+  hitSound: {fileID: 0}

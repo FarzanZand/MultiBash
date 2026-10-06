@@ -1,0 +1,8 @@
+# Unity YAML: merge with Unity's Smart Merge if configured, keep line endings as-is
+*.unity    merge=unityyamlmerge -text
+*.prefab   merge=unityyamlmerge -text
+*.asset    merge=unityyamlmerge -text
+*.mat      merge=unityyamlmerge -text
+*.anim     merge=unityyamlmerge -text
+*.controller merge=unityyamlmerge -text
+*.meta     -text

@@ -1,0 +1,164 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b32848b60911d84e853afb624bb523f, type: 3}
+  m_Name: DefaultRun
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WaveDefinition
+  entries:
+  - enemy: {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
+    startMinute: 0
+    endMinute: 10
+    rateAtStart: 0.45
+    rateAtEnd: 9
+    rampCurve: 1.6
+    groupSize: 2
+    eliteChance: 0.008
+  - enemy: {fileID: 11400000, guid: 1b90f4b589daf7c4cb471e27e5764768, type: 2}
+    startMinute: 1
+    endMinute: 10
+    rateAtStart: 0.2
+    rateAtEnd: 4.5
+    rampCurve: 1.6
+    groupSize: 1
+    eliteChance: 0.012
+  - enemy: {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
+    startMinute: 2.5
+    endMinute: 10
+    rateAtStart: 0.1
+    rateAtEnd: 1
+    rampCurve: 1.6
+    groupSize: 8
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: 1b90f4b589daf7c4cb471e27e5764768, type: 2}
+    startMinute: 4
+    endMinute: 10
+    rateAtStart: 0.06
+    rateAtEnd: 0.6
+    rampCurve: 1.6
+    groupSize: 6
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: 45386d41657be884787122c3369843cf, type: 2}
+    startMinute: 1.25
+    endMinute: 10
+    rateAtStart: 0.12
+    rateAtEnd: 1.6
+    rampCurve: 1.6
+    groupSize: 5
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: 24e61111c6ba45842b954a1fae683571, type: 2}
+    startMinute: 2.25
+    endMinute: 10
+    rateAtStart: 0.08
+    rateAtEnd: 0.9
+    rampCurve: 1.6
+    groupSize: 2
+    eliteChance: 0.01
+  - enemy: {fileID: 11400000, guid: c044b12571842894f9886fd05be9213b, type: 2}
+    startMinute: 3.25
+    endMinute: 10
+    rateAtStart: 0.08
+    rateAtEnd: 0.8
+    rampCurve: 1.6
+    groupSize: 1
+    eliteChance: 0
+  - enemy: {fileID: 11400000, guid: 2c7633f47dffbae4a9dfa347f103356f, type: 2}
+    startMinute: 4
+    endMinute: 10
+    rateAtStart: 0.03
+    rateAtEnd: 0.22
+    rampCurve: 1.6
+    groupSize: 1
+    eliteChance: 0.05
+  bursts:
+  - minute: 1.5
+    enemy: {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
+    count: 24
+    ring: 1
+    elites: 1
+    announcement: A ring of bones closes in!
+    boss: 0
+  - minute: 2.25
+    enemy: {fileID: 11400000, guid: 45386d41657be884787122c3369843cf, type: 2}
+    count: 28
+    ring: 0
+    elites: 0
+    announcement: A swarm of bats!
+    boss: 0
+  - minute: 3
+    enemy: {fileID: 11400000, guid: 1b90f4b589daf7c4cb471e27e5764768, type: 2}
+    count: 22
+    ring: 0
+    elites: 1
+    announcement: Slime tide!
+    boss: 0
+  - minute: 3.75
+    enemy: {fileID: 11400000, guid: c044b12571842894f9886fd05be9213b, type: 2}
+    count: 12
+    ring: 1
+    elites: 0
+    announcement: Something is ticking...
+    boss: 0
+  - minute: 6.25
+    enemy: {fileID: 11400000, guid: 24e61111c6ba45842b954a1fae683571, type: 2}
+    count: 24
+    ring: 1
+    elites: 2
+    announcement: Archers on the ridge!
+    boss: 0
+  - minute: 7.5
+    enemy: {fileID: 11400000, guid: 2c7633f47dffbae4a9dfa347f103356f, type: 2}
+    count: 30
+    ring: 1
+    elites: 1
+    announcement: THE ANCIENT GOLEM STIRS!
+    boss: 1
+  - minute: 4.5
+    enemy: {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
+    count: 60
+    ring: 1
+    elites: 2
+    announcement: The dead march!
+    boss: 0
+  - minute: 5.5
+    enemy: {fileID: 11400000, guid: 1b90f4b589daf7c4cb471e27e5764768, type: 2}
+    count: 30
+    ring: 1
+    elites: 1
+    announcement: THE SLIME MOTHER AWAKENS!
+    boss: 1
+  - minute: 7
+    enemy: {fileID: 11400000, guid: 1b90f4b589daf7c4cb471e27e5764768, type: 2}
+    count: 50
+    ring: 1
+    elites: 2
+    announcement: The swamp awakens!
+    boss: 0
+  - minute: 8.5
+    enemy: {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
+    count: 90
+    ring: 1
+    elites: 3
+    announcement: Hold the line!
+    boss: 0
+  - minute: 9
+    enemy: {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
+    count: 30
+    ring: 1
+    elites: 1
+    announcement: THE BONE KING RISES!
+    boss: 1
+  - minute: 9.5
+    enemy: {fileID: 11400000, guid: 1b90f4b589daf7c4cb471e27e5764768, type: 2}
+    count: 70
+    ring: 0
+    elites: 3
+    announcement: FINAL SURGE!
+    boss: 0
