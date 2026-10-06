@@ -24,6 +24,10 @@ namespace MultiBash
         public float runSpeed = 6f;
         [Tooltip("Squash & stretch for blob models like slimes.")]
         public bool blob;
+        [Tooltip("Seconds for a melee swing / a cast gesture (heroes use slower, weightier gestures).")]
+        public float attackTime = 0.42f, castTime = 0.35f;
+        [Tooltip("Arms held slightly away from the body (degrees) so they don't clip through wide torsos.")]
+        public float armSpread = 0f;
 
         Transform _body, _head, _armL, _armR, _foreL, _foreR, _legL, _legR, _shinL, _shinR, _wingL, _wingR;
         Quaternion _wingLRot, _wingRRot;
@@ -33,7 +37,7 @@ namespace MultiBash
         // differ (skinned bones from an armature) exactly like the old axis-aligned parts
         readonly System.Collections.Generic.Dictionary<Transform, Quaternion> _rel = new();
 
-        float _phase, _speed, _vy, _run;
+        float _phase, _speed, _vy, _run, _headLag;
         bool _air, _wasAir, _sliding;
         float _attackT = 1f, _castT = 1f, _hitT = 1f, _landT = 1f, _downed, _slide, _airBlend, _idleT;
 
@@ -109,8 +113,9 @@ namespace MultiBash
         }
 
         public void SetSliding(bool sliding) => _sliding = sliding;
-        public void Attack() => _attackT = 0f;
-        public void Cast() => _castT = 0f;
+        // re-triggering while a gesture is still playing would snap the arm back: let it finish first
+        public void Attack() { if (_attackT > 0.75f) _attackT = 0f; }
+        public void Cast() { if (_castT > 0.7f && _attackT >= 1f) _castT = 0f; }
         public void Hit() => _hitT = 0f;
         public void SetDowned(bool downed) => _downed = downed ? 1f : 0f;
 
@@ -135,8 +140,8 @@ namespace MultiBash
         {
             float dt = Time.deltaTime;
             _idleT += dt;
-            _attackT += dt / 0.42f;
-            _castT += dt / 0.35f;
+            _attackT += dt / Mathf.Max(0.05f, attackTime);
+            _castT += dt / Mathf.Max(0.05f, castTime);
             _hitT += dt / 0.18f;
             if (_wasAir && !_air) _landT = 0f;
             _wasAir = _air;
@@ -224,8 +229,9 @@ namespace MultiBash
                 bodyTwistExtra = -10f * k;
             }
 
-            if (_armL) _armL.localRotation = Pose(_armL, _armLRot, armL, 0, 0);
-            if (_armR) _armR.localRotation = Pose(_armR, _armRRot, armR, 0, armRSide);
+            float spread = armSpread + 4f * run;
+            if (_armL) _armL.localRotation = Pose(_armL, _armLRot, armL, 0, spread);
+            if (_armR) _armR.localRotation = Pose(_armR, _armRRot, armR, 0, armRSide - spread);
             if (_foreL) _foreL.localRotation = Pose(_foreL, _foreLRot, elbowL, 0, 0);
             if (_foreR) _foreR.localRotation = Pose(_foreR, _foreRRot, elbowR, 0, 0);
 
@@ -237,14 +243,17 @@ namespace MultiBash
                 float recoil = (1f - Mathf.Clamp01(_hitT)) * 14f;
                 float lean = 10f * run - 8f * _slide;
                 float twist = s * 9f * run + bodyTwistExtra;
+                float roll = Mathf.Cos(_phase) * 3.5f * run + Mathf.Sin(_idleT * 0.9f) * 1.2f * idle;   // hip sway / idle shift
                 _body.localPosition = _bodyPos + BodyUp() * (bob + crouch + breathe * 0.006f * idle);
-                _body.localRotation = Pose(_body, _bodyRot, lean - recoil + 6f * _airBlend, twist, 0);
+                _body.localRotation = Pose(_body, _bodyRot, lean - recoil + 6f * _airBlend, twist, roll);
+                _headLag = Mathf.Lerp(_headLag, twist + roll, 1f - Mathf.Exp(-6f * dt));
             }
             if (_head)
             {
                 float nod = Mathf.Sin(_phase * 2f) * 3f * run + breathe * 1.5f * idle;
-                float look = -Mathf.Sin(_phase) * 6f * run - bodyTwistExtra * 0.4f;
-                _head.localRotation = Pose(_head, _headRot, nod - 4f * run, look, 0);
+                // the head lags behind the torso and stays level: a little follow-through instead of a rigid stack
+                float look = -Mathf.Sin(_phase) * 6f * run - bodyTwistExtra * 0.4f - _headLag * 0.5f;
+                _head.localRotation = Pose(_head, _headRot, nod - 4f * run, look, -_headLag * 0.3f);
             }
 
             // ---- whole model: lie down when downed, lean back while sliding, squash on landing

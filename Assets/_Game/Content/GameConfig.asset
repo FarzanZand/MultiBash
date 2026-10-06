@@ -57,8 +57,8 @@ MonoBehaviour:
   healthPerMinute: 0.12
   healthPerMinuteSquared: 0
   speedPerMinute: 0.05
-  healthPerExtraPlayer: 0.25
-  spawnRatePerExtraPlayer: 0.4
+  healthPerExtraPlayer: 0.2
+  spawnRatePerExtraPlayer: 0.3
   damagePerMinute: 0.08
   healthPerTeamLevel: 0.03
   healthPerTeamLevelSquared: 0.0045

@@ -168,6 +168,16 @@ namespace MultiBash
             _rig = visualRoot.GetComponent<ProceduralRig>();
             if (_rig == null) _rig = visualRoot.gameObject.AddComponent<ProceduralRig>();
             _rig.Rebind(); // the model was just instantiated under the rig
+            // heroes: a long, grounded stride instead of a frantic scurry (about 2 strides a second at full run)
+            _rig.stepFrequency = 0.62f;
+            _rig.runSpeed = 7f;
+            _rig.legSwing = 46f;
+            _rig.kneeBend = 72f;
+            _rig.armSwing = 34f;
+            _rig.bobHeight = 0.06f;
+            _rig.attackTime = 0.6f;
+            _rig.castTime = 0.5f;
+            _rig.armSpread = 6f;
             _hand = _rig.FindPart("Hand_R");
             if (_hand == null)
             {

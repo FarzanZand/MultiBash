@@ -48,8 +48,8 @@ MonoBehaviour:
   - enemy: {fileID: 11400000, guid: 9599aef6caaa28941ab72de9440c917b, type: 2}
     startMinute: 2.5
     endMinute: 10
-    rateAtStart: 0.2
-    rateAtEnd: 3.2
+    rateAtStart: 0.12
+    rateAtEnd: 2.8
     rampCurve: 1.3
     groupSize: 6
     eliteChance: 0
@@ -102,9 +102,9 @@ MonoBehaviour:
     groupSize: 2
     eliteChance: 0.01
   - enemy: {fileID: 11400000, guid: c044b12571842894f9886fd05be9213b, type: 2}
-    startMinute: 3.25
+    startMinute: 3.5
     endMinute: 10
-    rateAtStart: 0.08
+    rateAtStart: 0.06
     rateAtEnd: 0.8
     rampCurve: 1.6
     groupSize: 1
@@ -155,14 +155,14 @@ MonoBehaviour:
     boss: 0
   - minute: 3
     enemy: {fileID: 11400000, guid: 1b90f4b589daf7c4cb471e27e5764768, type: 2}
-    count: 22
+    count: 15
     ring: 0
     elites: 1
     announcement: Slime tide!
     boss: 0
-  - minute: 3.75
+  - minute: 3.9
     enemy: {fileID: 11400000, guid: c044b12571842894f9886fd05be9213b, type: 2}
-    count: 12
+    count: 8
     ring: 1
     elites: 0
     announcement: Something is ticking...

@@ -670,14 +670,14 @@ namespace MultiBash.EditorTools
                     new() { enemy = slime, startMinute = 1f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 4.5f, groupSize = 1, eliteChance = 0.012f },
                     new() { enemy = skel, startMinute = 2.5f, endMinute = 10f, rateAtStart = 0.1f, rateAtEnd = 1.0f, groupSize = 8, eliteChance = 0f },
                     new() { enemy = slime, startMinute = 4f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 0.6f, groupSize = 6, eliteChance = 0f },
-                    new() { enemy = rabble, startMinute = 2.5f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 3.2f, groupSize = 6, rampCurve = 1.3f, eliteChance = 0f },
+                    new() { enemy = rabble, startMinute = 2.5f, endMinute = 10f, rateAtStart = 0.12f, rateAtEnd = 2.8f, groupSize = 6, rampCurve = 1.3f, eliteChance = 0f },
                     new() { enemy = slimeling, startMinute = 4f, endMinute = 10f, rateAtStart = 0.15f, rateAtEnd = 2.2f, groupSize = 8, rampCurve = 1.3f, eliteChance = 0f },
                     new() { enemy = ghoul, startMinute = 3.6f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 2.0f, groupSize = 3, eliteChance = 0.01f },
                     new() { enemy = wraith, startMinute = 6.2f, endMinute = 10f, rateAtStart = 0.25f, rateAtEnd = 1.4f, groupSize = 3, eliteChance = 0.01f },
                     new() { enemy = brute, startMinute = 6.5f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 0.35f, groupSize = 1, eliteChance = 0.04f },
                     new() { enemy = bat, startMinute = 1.25f, endMinute = 10f, rateAtStart = 0.12f, rateAtEnd = 2.2f, groupSize = 6, eliteChance = 0f },
                     new() { enemy = archer, startMinute = 2.25f, endMinute = 10f, rateAtStart = 0.08f, rateAtEnd = 0.9f, groupSize = 2, eliteChance = 0.01f },
-                    new() { enemy = shroom, startMinute = 3.25f, endMinute = 10f, rateAtStart = 0.08f, rateAtEnd = 0.8f, groupSize = 1, eliteChance = 0f },
+                    new() { enemy = shroom, startMinute = 3.5f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 0.8f, groupSize = 1, eliteChance = 0f },
                     new() { enemy = golem, startMinute = 4f, endMinute = 10f, rateAtStart = 0.03f, rateAtEnd = 0.22f, groupSize = 1, eliteChance = 0.05f },
                 };
                 w.bursts = new List<WaveBurst>
@@ -687,8 +687,8 @@ namespace MultiBash.EditorTools
                     new() { minute = 5.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
                     new() { minute = 8.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
                     new() { minute = 2.25f, enemy = bat, count = 28, ring = false, elites = 0, announcement = "A swarm of bats!" },
-                    new() { minute = 3f, enemy = slime, count = 22, ring = false, elites = 1, announcement = "Slime tide!" },
-                    new() { minute = 3.75f, enemy = shroom, count = 12, ring = true, elites = 0, announcement = "Something is ticking..." },
+                    new() { minute = 3f, enemy = slime, count = 15, ring = false, elites = 1, announcement = "Slime tide!" },
+                    new() { minute = 3.9f, enemy = shroom, count = 8, ring = true, elites = 0, announcement = "Something is ticking..." },
                     new() { minute = 6.25f, enemy = archer, count = 24, ring = true, elites = 2, announcement = "Archers on the ridge!" },
                     new() { minute = 7.5f, enemy = golem, boss = true, announcement = "THE ANCIENT GOLEM STIRS!" },
                     new() { minute = 4.5f, enemy = skel, count = 60, ring = true, elites = 2, announcement = "The dead march!" },
@@ -785,8 +785,8 @@ namespace MultiBash.EditorTools
                 c.healthPerMinute = 0.12f;
                 c.healthPerMinuteSquared = 0f;
                 c.speedPerMinute = 0.05f;
-                c.healthPerExtraPlayer = 0.25f;
-                c.spawnRatePerExtraPlayer = 0.4f;
+                c.healthPerExtraPlayer = 0.2f;
+                c.spawnRatePerExtraPlayer = 0.3f;
                 c.damagePerMinute = 0.08f;
                 c.maxEnemies = 420;
                 c.xpFirstLevel = 6;
