@@ -12,72 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c049059d32d634cb13385d534c8190, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: Assembly-CSharp::MultiBash.GameConfig
-  runDurationSeconds: 600
   waves: {fileID: 11400000, guid: 0168ac5aa3280994ca5ffc5fb9742a65, type: 2}
-  resultsSeconds: 15
-  baseStats:
-  - stat: 0
-    value: 100
-  - stat: 1
-    value: 0.3
-  - stat: 3
-    value: 7
-  - stat: 4
-    value: 1
-  - stat: 5
-    value: 1
-  - stat: 6
-    value: 1
-  - stat: 8
-    value: 1
-  - stat: 9
-    value: 1
-  - stat: 10
-    value: 3.2
-  - stat: 11
-    value: 1
-  - stat: 13
-    value: 0.08
-  - stat: 14
-    value: 2
-  jumpImpulse: 8.5
-  slideSpeedMultiplier: 1.9
-  slideDuration: 0.45
-  slideCooldown: 0.8
-  xpFirstLevel: 6
-  xpPerLevel: 6
-  xpQuadratic: 1.1
-  xpPerExtraPlayer: 0.35
-  choicesPerLevel: 3
-  maxWeapons: 4
-  maxPowerups: 6
-  healChoicePercent: 0.3
-  rerollsPerRun: 3
-  skipHealPercent: 0.15
-  healthPerMinute: 0.12
-  healthPerMinuteSquared: 0
-  speedPerMinute: 0.05
-  healthPerExtraPlayer: 0.2
-  spawnRatePerExtraPlayer: 0.3
-  damagePerMinute: 0.08
-  healthPerTeamLevel: 0.03
-  healthPerTeamLevelSquared: 0.0045
-  maxEnemies: 420
-  spawnDistanceMin: 22
-  spawnDistanceMax: 30
-  eliteHealthMultiplier: 8
-  eliteScale: 1.8
+  arenaHalfSize: 58
   eliteCrown: {fileID: 919132149155446097, guid: 8225c4fd8cf36e1459b6a8f70e08c598, type: 3}
   stageGear:
   - {fileID: 919132149155446097, guid: 53498be7bfba52945bbfa7db57acc04a, type: 3}
   - {fileID: 919132149155446097, guid: 9fa0f9125d09998468d52619915f8c8e, type: 3}
-  stage2At: 0.36
-  stage3At: 0.63
-  arenaHalfSize: 58
-  downedSeconds: 30
-  reviveSeconds: 2.5
-  reviveRadius: 2.5
-  reviveHealthPercent: 0.5
   xpGemPrefab: {fileID: 2896899667546450794, guid: 5852566cdd7acc04b8d72fe0945e4739, type: 3}
   healthOrbPrefab: {fileID: 1670481910353055049, guid: 9836d99be791d604f8ef65e2352b8204, type: 3}
   magnetPrefab: {fileID: 7212339308308698714, guid: 20907914ce4f1ee4f841afe9f2091900, type: 3}
@@ -90,5 +30,3 @@ MonoBehaviour:
   - {fileID: 919132149155446097, guid: b4eba4fef4cbbad488f17f9bf8b904ae, type: 3}
   - {fileID: 919132149155446097, guid: a47bae6bb5fb1e74d9724489e17745e7, type: 3}
   - {fileID: 919132149155446097, guid: 8225c4fd8cf36e1459b6a8f70e08c598, type: 3}
-  healthOrbHeal: 0.25
-  maxGems: 220

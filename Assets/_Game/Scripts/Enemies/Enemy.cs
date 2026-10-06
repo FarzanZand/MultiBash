@@ -499,8 +499,11 @@ namespace MultiBash
 
         void ApplyStageLook()
         {
-            if (Stage == 0 || Def == null) return;
-            _stageTint = StageTints[Stage];
+            if (Def == null) return;
+            bool recolor = Def.tint != Color.white;
+            if (Stage == 0 && !recolor) return;
+            _stageTint = StageTints[Stage] * Def.tint;
+            int key = Stage + 4 * (recolor ? DefIndex + 1 : 0);
             // shared tinted material copies (one per original material and stage) so big swarms still batch
             foreach (var r in _renderers)
             {
@@ -510,17 +513,17 @@ namespace MultiBash
                 {
                     var m = mats[i];
                     if (m == null || !m.HasProperty(BaseColorId)) continue;
-                    if (!StageMats.TryGetValue((m, Stage), out var v))
+                    if (!StageMats.TryGetValue((m, key), out var v))
                     {
-                        v = new Material(m) { name = m.name + "_S" + Stage };
+                        v = new Material(m) { name = m.name + "_S" + key };
                         v.SetColor(BaseColorId, m.GetColor(BaseColorId) * _stageTint);
-                        StageMats[(m, Stage)] = v;
+                        StageMats[(m, key)] = v;
                     }
                     mats[i] = v;
                 }
                 r.sharedMaterials = mats;
             }
-            if (Def.fodder || Boss) return;
+            if (Def.fodder || Boss || Stage == 0) return;
             var gearSet = GameDatabase.Config.stageGear;
             var gear = gearSet != null && gearSet.Length >= Stage ? gearSet[Stage - 1] : null;
             if (gear == null) return;

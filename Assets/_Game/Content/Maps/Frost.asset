@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a085a627737c21e48abebe19e93e8f63, type: 3}
+  m_Name: Frost
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.MapDefinition
+  displayName: Frostfall Peaks
+  description: Snowy peaks under the aurora. Wolf packs, yetis, grumpy snowmen and
+    a frozen lake you can glide across. Hardest.
+  intro: The pack is hunting. Stay together!
+  sceneName: Frost
+  waves: {fileID: 11400000, guid: e0593cb8231855e48b201e0708b0a41d, type: 2}
+  music: {fileID: 8300000, guid: 36ba3bf84859a1f46bfbea2945c7070d, type: 3}
+  ambience: {fileID: 8300000, guid: 44ea3ded4f302b04aa3deefbfae84d5e, type: 3}
+  ambienceVolume: 0.36
+  accent: {r: 0.62352943, g: 0.95686275, b: 1, a: 1}
+  preview: {fileID: 0}
+  difficulty: 1.18

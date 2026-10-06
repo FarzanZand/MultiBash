@@ -35,6 +35,10 @@ MonoBehaviour:
   lavaSizzle: {fileID: 8300000, guid: b51624d636d8b234c9ca9db316589748, type: 3}
   heartbeat: {fileID: 8300000, guid: fe6bf87db46b78546817ca0d33dbe86d, type: 3}
   crit: {fileID: 8300000, guid: e37e9d8fa5142a04a9d93d36e8bb7f1d, type: 3}
+  footstep: {fileID: 8300000, guid: 353ddd8f72d1d814cbb0e9fe15bf6956, type: 3}
+  land: {fileID: 8300000, guid: 6ddfb0c60d5443742aa02dd90758276d, type: 3}
+  bounce: {fileID: 8300000, guid: db2ea49b1aca5ba48b79ad197e6bb92c, type: 3}
+  smash: {fileID: 8300000, guid: 27a8399cc95bdcf47b0780c0dd218e33, type: 3}
   gem: {fileID: 8300000, guid: b0df2dd7387a4ab4baeeedd50ba60d58, type: 3}
   health: {fileID: 8300000, guid: 9cb9246a36ef8b543ba3a257570d8bef, type: 3}
   magnet: {fileID: 8300000, guid: 979df233e76636d4eb5965093f5b046d, type: 3}

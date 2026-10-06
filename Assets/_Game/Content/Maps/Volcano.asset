@@ -15,9 +15,12 @@ MonoBehaviour:
   displayName: Molten Caldera
   description: Basalt ridges over rivers of lava. Imps, magma slimes, and lava that
     burns. Harder.
+  intro: The caldera wakes. Don't touch the lava!
   sceneName: Volcano
   waves: {fileID: 11400000, guid: b81fc7da249582d4380bd471e25a27e0, type: 2}
   music: {fileID: 8300000, guid: 339a79d23420274419c82855071f9ce4, type: 3}
+  ambience: {fileID: 8300000, guid: 886ee809b5527374482d4265648580fd, type: 3}
+  ambienceVolume: 0.38
   accent: {r: 1, g: 0.47843137, b: 0.16470589, a: 1}
   preview: {fileID: 21300000, guid: 1a5a2c7fa3e09fb4bad398540359f2f0, type: 3}
   difficulty: 1.1

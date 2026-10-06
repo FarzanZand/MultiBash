@@ -135,6 +135,7 @@ namespace MultiBash
                 bool remove = p.life <= 0f || p.owner == null;
                 if (!remove)
                 {
+                    Breakables.HitSphere(p.pos, p.radius);
                     EnemyRegistry.Query(p.pos, p.radius, Hits);
                     foreach (var e in Hits)
                     {
@@ -162,6 +163,7 @@ namespace MultiBash
                 if (b.delay > 0f) { Blasts[i] = b; continue; }
                 Blasts.RemoveAt(i);
                 if (b.owner == null) continue;
+                Breakables.HitSphere(b.pos, b.radius);
                 EnemyRegistry.Query(b.pos, b.radius, Hits);
                 foreach (var e in Hits)
                 {

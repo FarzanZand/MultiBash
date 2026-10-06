@@ -37,6 +37,8 @@ namespace MultiBash
         public float ambientRate = 22f;
         [Tooltip("Upward drift of ambient motes (embers rise).")]
         public float ambientRise = 0.05f;
+        [Tooltip("Falling snow instead of drifting motes (Frostfall Peaks).")]
+        public bool ambientSnow;
 
         static readonly int ColorId = Shader.PropertyToID("_Color");
 
@@ -805,11 +807,11 @@ namespace MultiBash
 
         void BuildAmbient()
         {
-            _ambient = MakeSystem("AmbientMotes", additive, softTexture, -ambientRise, 0.2f);
+            _ambient = MakeSystem("AmbientMotes", ambientSnow ? alpha : additive, softTexture, ambientSnow ? 0.06f : -ambientRise, 0.2f);
             var main = _ambient.main;
-            main.maxParticles = 300;
+            main.maxParticles = ambientSnow ? 900 : 300;
             main.startLifetime = new ParticleSystem.MinMaxCurve(5f, 9f);
-            main.startSize = new ParticleSystem.MinMaxCurve(0.08f, 0.18f);
+            main.startSize = ambientSnow ? new ParticleSystem.MinMaxCurve(0.12f, 0.26f) : new ParticleSystem.MinMaxCurve(0.08f, 0.18f);
             main.startSpeed = new ParticleSystem.MinMaxCurve(0.1f, 0.5f);
             main.startColor = new ParticleSystem.MinMaxGradient(ambientColorA, ambientColorB);
             var em = _ambient.emission;
@@ -818,10 +820,10 @@ namespace MultiBash
             var shape = _ambient.shape;
             shape.enabled = true;
             shape.shapeType = ParticleSystemShapeType.Box;
-            shape.scale = new Vector3(50f, 8f, 50f);
+            shape.scale = ambientSnow ? new Vector3(60f, 4f, 60f) : new Vector3(50f, 8f, 50f);
             var noise = _ambient.noise;
             noise.enabled = true;
-            noise.strength = 0.4f;
+            noise.strength = ambientSnow ? 0.9f : 0.4f;
             noise.frequency = 0.3f;
             var col = _ambient.colorOverLifetime;
             var g = new Gradient();
@@ -928,7 +930,7 @@ namespace MultiBash
             float dt = Time.deltaTime;
             var cam = Cam;
             if (_ambient != null && cam != null)
-                _ambient.transform.position = cam.transform.position + cam.transform.forward * 14f + Vector3.up * 1f;
+                _ambient.transform.position = cam.transform.position + cam.transform.forward * 14f + Vector3.up * (ambientSnow ? 9f : 1f);
             var camRot = cam != null ? cam.transform.rotation : Quaternion.identity;
 
             // slashes, rings, decals, bolts

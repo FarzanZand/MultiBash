@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfa4861c1b13514fb502afb4e0d0d61, type: 3}
+  m_Name: Yeti
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.EnemyDefinition
+  displayName: Yeti
+  prefab: {fileID: 6171304977336831058, guid: ab8a1db26ecdaba4481369edc76455c4, type: 3}
+  maxHealth: 110
+  moveSpeed: 2.9
+  contactDamage: 13
+  attackInterval: 1.4
+  attackRange: 0.9
+  radius: 0.95
+  knockbackResist: 0.8
+  movement: 0
+  hopRest: 0.7
+  hopTime: 0.45
+  hopHeight: 1.2
+  fodder: 0
+  scale: 1
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  gearSize: 1.2
+  xpChance: 1
+  flees: 0
+  lifetime: 0
+  dropChests: 0
+  attack: 2
+  attackDistance: 4
+  specialCooldown: 4.2
+  telegraphTime: 1
+  specialRadius: 4.4
+  specialDamageMul: 1.5
+  projectileSpeed: 12
+  specialColor: {r: 0.62352943, g: 0.95686275, b: 1, a: 1}
+  specialSound: {fileID: 8300000, guid: 979bf58c8f756594f86d328c669f15f7, type: 3}
+  xpValue: 8
+  healthOrbChance: 0.15
+  magnetChance: 0.02
+  splitInto: {fileID: 0}
+  splitCount: 0
+  bossName: Yeti King
+  bossHealthMultiplier: 170
+  bossDamageMultiplier: 2.1
+  bossScale: 2.5
+  bossSplitCount: 0
+  hitSound: {fileID: 8300000, guid: 9a5022d8df8b69947af11864bf14ee4e, type: 3}
+  deathSound: {fileID: 8300000, guid: c5b8e3d730c74a04ca1178707e8dbffc, type: 3}
+  moveSound: {fileID: 0}
+  deathColor: {r: 0.9098039, g: 0.93333334, b: 0.9490196, a: 1}

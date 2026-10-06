@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfa4861c1b13514fb502afb4e0d0d61, type: 3}
+  m_Name: FrostSkeleton
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.EnemyDefinition
+  displayName: Frost Skeleton
+  prefab: {fileID: 3372610931317505851, guid: b3da9cf9c2f3e1049bed1bb4226def43, type: 3}
+  maxHealth: 15
+  moveSpeed: 3.6
+  contactDamage: 6
+  attackInterval: 1.1
+  attackRange: 0.9
+  radius: 0.42
+  knockbackResist: 0
+  movement: 0
+  hopRest: 0.7
+  hopTime: 0.45
+  hopHeight: 1.2
+  fodder: 0
+  scale: 1
+  tint: {r: 0.72, g: 0.9, b: 1.3, a: 1}
+  gearSize: 1.4
+  xpChance: 1
+  flees: 0
+  lifetime: 0
+  dropChests: 0
+  attack: 0
+  attackDistance: 9
+  specialCooldown: 3
+  telegraphTime: 0.9
+  specialRadius: 3.5
+  specialDamageMul: 1.6
+  projectileSpeed: 12
+  specialColor: {r: 1, g: 0.3, b: 0.2, a: 1}
+  specialSound: {fileID: 0}
+  xpValue: 1
+  healthOrbChance: 0.015
+  magnetChance: 0.002
+  splitInto: {fileID: 0}
+  splitCount: 0
+  bossName: The Frost Lich King
+  bossHealthMultiplier: 500
+  bossDamageMultiplier: 3
+  bossScale: 3.3
+  bossSplitCount: 0
+  hitSound: {fileID: 8300000, guid: 5dea75be813610a46a877bfd3bc4a981, type: 3}
+  deathSound: {fileID: 8300000, guid: da99a5cd73d889e4db86414610a9f42c, type: 3}
+  moveSound: {fileID: 0}
+  deathColor: {r: 0.78431374, g: 0.9411765, b: 1, a: 1}

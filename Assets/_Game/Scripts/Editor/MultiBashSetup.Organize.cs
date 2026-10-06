@@ -82,14 +82,15 @@ namespace MultiBash.EditorTools
         {
             if (go.GetComponent<GameManager>() || go.GetComponent<ProgressionManager>() || go.GetComponent<CombatManager>() || go.GetComponent<FxManager>())
                 return GManagers;
-            if (go.GetComponent<Shrine>() || go.GetComponent<LavaZone>()) return GGameplay;
+            if (go.GetComponent<Shrine>() || go.GetComponent<LavaZone>() || go.GetComponent<Breakables>() || go.GetComponent<IceZone>() || go.name == "JumpPads")
+                return GGameplay;
             if (go.GetComponent<CameraRig>() || go.GetComponent<Camera>() || go.GetComponent<HUD>() || go.GetComponent<LobbyUI>() || go.GetComponent<MainMenuUI>()
                 || go.GetComponent<UnityEngine.EventSystems.EventSystem>())
                 return GCamUI;
             string n = go.name;
             if (n.StartsWith("Pedestal") || n.StartsWith("Spot") || n == "Pivot") return GShow;
             if (go.GetComponent<Light>() || go.GetComponent<UnityEngine.Rendering.Volume>() || go.GetComponent<Terrain>() || n == "Props" || n == "ArenaWalls"
-                || n == "Ground" || n == "LavaGlow")
+                || n == "Ground" || n == "LavaGlow" || n == "Water")
                 return GEnv;
             // menu showcase heroes / enemies (model holders)
             if (go.GetComponentInChildren<Renderer>() != null) return GShow;

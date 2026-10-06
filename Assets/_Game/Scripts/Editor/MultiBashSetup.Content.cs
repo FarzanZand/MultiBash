@@ -63,6 +63,10 @@ namespace MultiBash.EditorTools
                 a.bossWarning = Clip("SFX_BossWarning");
                 a.heartbeat = Clip("SFX_Heartbeat");
                 a.crit = Clip("SFX_Crit");
+                a.footstep = Clip("SFX_Footstep");
+                a.land = Clip("SFX_Land");
+                a.bounce = Clip("SFX_Bounce");
+                a.smash = Clip("SFX_Smash");
                 a.treasure = Clip("SFX_Treasure");
                 a.click = Clip("SFX_UIClick");
                 a.hover = Clip("SFX_UIHover");
@@ -562,6 +566,83 @@ namespace MultiBash.EditorTools
                 e.deathColor = Hex("#ff7a1a");
             });
 
+            // ------------------------------------------------------------------ Frostfall Peaks
+            var frostSlimeling = Asset<EnemyDefinition>($"{E}/Frost/FrostSlimeling.asset", e =>
+            {
+                e.displayName = "Frost Slimeling";
+                e.fodder = true; e.scale = 0.85f; e.xpChance = 0.25f;
+                e.maxHealth = 3; e.moveSpeed = 4.6f; e.contactDamage = 3; e.attackInterval = 0.9f; e.radius = 0.3f;
+                e.movement = EnemyMovement.Hopper; e.hopRest = 0.25f; e.hopTime = 0.35f; e.hopHeight = 0.7f;
+                e.xpValue = 1; e.healthOrbChance = 0.002f;
+                e.hitSound = Clip("SFX_SnowCrunch"); e.deathSound = Clip("SFX_SlimeDeath");
+                e.deathColor = Hex("#9ff4ff");
+            });
+            Asset<EnemyDefinition>($"{E}/Frost/FrostSlime.asset", e =>
+            {
+                e.displayName = "Frost Slime";
+                e.maxHealth = 26; e.moveSpeed = 3.2f; e.contactDamage = 7; e.attackInterval = 1f; e.radius = 0.6f;
+                e.movement = EnemyMovement.Hopper; e.hopRest = 0.6f; e.hopTime = 0.5f; e.hopHeight = 1.3f;
+                e.xpValue = 2; e.healthOrbChance = 0.02f; e.magnetChance = 0.003f;
+                e.splitInto = frostSlimeling; e.splitCount = 2;
+                e.knockbackResist = 0.3f;
+                e.bossName = "Glacier Mother"; e.bossHealthMultiplier = 270f; e.bossDamageMultiplier = 2f; e.bossScale = 3.7f; e.bossSplitCount = 10;
+                e.hitSound = Clip("SFX_SlimeHit"); e.deathSound = Clip("SFX_IceShatter"); e.moveSound = Clip("SFX_SlimeHop");
+                e.deathColor = Hex("#9ff4ff");
+            });
+            Asset<EnemyDefinition>($"{E}/Frost/FrostSkeleton.asset", e =>
+            {
+                e.displayName = "Frost Skeleton";
+                e.tint = new Color(0.72f, 0.9f, 1.3f);
+                e.maxHealth = 15; e.moveSpeed = 3.6f; e.contactDamage = 6; e.attackInterval = 1.1f; e.radius = 0.42f;
+                e.movement = EnemyMovement.Walker;
+                e.bossName = "The Frost Lich King"; e.bossHealthMultiplier = 500f; e.bossDamageMultiplier = 3f; e.bossScale = 3.3f;
+                e.xpValue = 1; e.healthOrbChance = 0.015f; e.magnetChance = 0.002f;
+                e.hitSound = Clip("SFX_BoneHit"); e.deathSound = Clip("SFX_SkeletonDeath");
+                e.deathColor = Hex("#c8f0ff");
+            });
+            Asset<EnemyDefinition>($"{E}/Frost/FrostBat.asset", e =>
+            {
+                e.displayName = "Frost Bat";
+                e.maxHealth = 6; e.moveSpeed = 6.2f; e.contactDamage = 4; e.attackInterval = 0.8f; e.radius = 0.35f;
+                e.movement = EnemyMovement.Flyer;
+                e.xpValue = 1; e.healthOrbChance = 0.006f;
+                e.hitSound = Clip("SFX_BatScreech"); e.deathSound = Clip("SFX_BatDeath");
+                e.deathColor = Hex("#9ff4ff");
+            });
+            Asset<EnemyDefinition>($"{E}/IceWolf/IceWolf.asset", e =>
+            {
+                e.displayName = "Ice Wolf";
+                e.maxHealth = 13; e.moveSpeed = 6.4f; e.contactDamage = 6; e.attackInterval = 0.8f; e.radius = 0.5f;
+                e.movement = EnemyMovement.Walker; e.gearSize = 1.1f;
+                e.xpValue = 2; e.healthOrbChance = 0.012f; e.magnetChance = 0.002f;
+                e.hitSound = Clip("SFX_WolfBite"); e.deathSound = Clip("SFX_WolfDeath");
+                e.deathColor = Hex("#c8d4e0");
+            });
+            Asset<EnemyDefinition>($"{E}/Yeti/Yeti.asset", e =>
+            {
+                e.displayName = "Yeti";
+                e.maxHealth = 110; e.moveSpeed = 2.9f; e.contactDamage = 13; e.attackInterval = 1.4f; e.radius = 0.95f;
+                e.movement = EnemyMovement.Walker; e.gearSize = 1.2f;
+                e.attack = EnemyAttack.Stomp; e.attackDistance = 4f; e.specialCooldown = 4.2f; e.telegraphTime = 1.0f;
+                e.specialRadius = 4.4f; e.specialDamageMul = 1.5f; e.specialColor = Hex("#9ff4ff"); e.specialSound = Clip("SFX_GolemStomp");
+                e.knockbackResist = 0.8f;
+                e.bossName = "Yeti King"; e.bossHealthMultiplier = 170f; e.bossDamageMultiplier = 2.1f; e.bossScale = 2.5f;
+                e.xpValue = 8; e.healthOrbChance = 0.15f; e.magnetChance = 0.02f;
+                e.hitSound = Clip("SFX_YetiHit"); e.deathSound = Clip("SFX_YetiRoar");
+                e.deathColor = Hex("#e8eef2");
+            });
+            Asset<EnemyDefinition>($"{E}/Snowman/Snowman.asset", e =>
+            {
+                e.displayName = "Grumpy Snowman";
+                e.maxHealth = 16; e.moveSpeed = 4.4f; e.contactDamage = 6; e.attackInterval = 1f; e.radius = 0.5f;
+                e.movement = EnemyMovement.Walker;
+                e.attack = EnemyAttack.Explode; e.attackDistance = 2.6f; e.specialCooldown = 99f; e.telegraphTime = 0.95f;
+                e.specialRadius = 3.0f; e.specialDamageMul = 2.2f; e.specialColor = Hex("#9ff4ff"); e.specialSound = Clip("SFX_IceShatter");
+                e.xpValue = 2; e.healthOrbChance = 0.02f;
+                e.hitSound = Clip("SFX_SnowCrunch"); e.deathSound = Clip("SFX_SnowCrunch");
+                e.deathColor = Hex("#f4f8ff");
+            });
+
             Asset<EnemyDefinition>($"{E}/TreasureSlime/TreasureSlime.asset", e =>
             {
                 e.displayName = "Treasure Slime";
@@ -644,6 +725,13 @@ namespace MultiBash.EditorTools
             LinkEnemy($"{E}/Fodder/BoneRabble.asset", $"{E}/Skeleton/Skeleton.prefab");
             LinkEnemy($"{E}/Fodder/Slimeling.asset", $"{E}/Slime/SlimeSmall.prefab");
             LinkEnemy($"{E}/Fodder/Cinderling.asset", $"{E}/MagmaSlime/MagmaSlimeSmall.prefab");
+            LinkEnemy($"{E}/Frost/FrostSlimeling.asset", $"{E}/Frost/FrostSlimeSmall.prefab");
+            LinkEnemy($"{E}/Frost/FrostSlime.asset", $"{E}/Frost/FrostSlime.prefab");
+            LinkEnemy($"{E}/Frost/FrostSkeleton.asset", $"{E}/Skeleton/Skeleton.prefab");
+            LinkEnemy($"{E}/Frost/FrostBat.asset", $"{E}/Frost/FrostBat.prefab");
+            LinkEnemy($"{E}/IceWolf/IceWolf.asset", $"{E}/IceWolf/IceWolf.prefab");
+            LinkEnemy($"{E}/Yeti/Yeti.asset", $"{E}/Yeti/Yeti.prefab");
+            LinkEnemy($"{E}/Snowman/Snowman.asset", $"{E}/Snowman/Snowman.prefab");
             var rabble = Load<EnemyDefinition>($"{E}/Fodder/BoneRabble.asset");
             var slimeling = Load<EnemyDefinition>($"{E}/Fodder/Slimeling.asset");
             var cinder = Load<EnemyDefinition>($"{E}/Fodder/Cinderling.asset");
@@ -746,6 +834,51 @@ namespace MultiBash.EditorTools
                 w.bursts.AddRange(Hordes(cinder, rabble, "Cinderlings pour from the cracks!", "The ashen rabble swarms!", "The caldera overflows!", "An endless horde!", "THE MOUNTAIN SPITS FIRE!", "EVERYTHING AT ONCE!"));
             });
 
+            var fSkel = Load<EnemyDefinition>($"{E}/Frost/FrostSkeleton.asset");
+            var fSlime = Load<EnemyDefinition>($"{E}/Frost/FrostSlime.asset");
+            var fSlimeling = Load<EnemyDefinition>($"{E}/Frost/FrostSlimeling.asset");
+            var fBat = Load<EnemyDefinition>($"{E}/Frost/FrostBat.asset");
+            var wolf = Load<EnemyDefinition>($"{E}/IceWolf/IceWolf.asset");
+            var yeti = Load<EnemyDefinition>($"{E}/Yeti/Yeti.asset");
+            var snowman = Load<EnemyDefinition>($"{E}/Snowman/Snowman.asset");
+            var frostWaves = Asset<WaveDefinition>(Content + "/Waves/FrostRun.asset", w =>
+            {
+                w.entries = new List<WaveEntry>
+                {
+                    new() { enemy = fSkel, startMinute = 0f, endMinute = 10f, rateAtStart = 0.45f, rateAtEnd = 7f, groupSize = 2, eliteChance = 0.008f },
+                    new() { enemy = wolf, startMinute = 0.75f, endMinute = 10f, rateAtStart = 0.12f, rateAtEnd = 2.6f, groupSize = 3, eliteChance = 0.01f },
+                    new() { enemy = fSlime, startMinute = 1.25f, endMinute = 10f, rateAtStart = 0.15f, rateAtEnd = 3.6f, groupSize = 1, eliteChance = 0.012f },
+                    new() { enemy = fBat, startMinute = 1.75f, endMinute = 10f, rateAtStart = 0.1f, rateAtEnd = 1.8f, groupSize = 6, eliteChance = 0f },
+                    new() { enemy = snowman, startMinute = 2.5f, endMinute = 10f, rateAtStart = 0.08f, rateAtEnd = 1.0f, groupSize = 2, eliteChance = 0f },
+                    new() { enemy = fSlimeling, startMinute = 2.5f, endMinute = 10f, rateAtStart = 0.15f, rateAtEnd = 3.0f, groupSize = 8, rampCurve = 1.3f, eliteChance = 0f },
+                    new() { enemy = ghoul, startMinute = 3.6f, endMinute = 10f, rateAtStart = 0.18f, rateAtEnd = 1.6f, groupSize = 3, eliteChance = 0.01f },
+                    new() { enemy = yeti, startMinute = 3.75f, endMinute = 10f, rateAtStart = 0.04f, rateAtEnd = 0.3f, groupSize = 1, eliteChance = 0.05f },
+                    new() { enemy = rabble, startMinute = 4f, endMinute = 10f, rateAtStart = 0.15f, rateAtEnd = 2.2f, groupSize = 7, rampCurve = 1.3f, eliteChance = 0f },
+                    new() { enemy = wraith, startMinute = 6.2f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 1.2f, groupSize = 3, eliteChance = 0.01f },
+                    new() { enemy = archer, startMinute = 4.5f, endMinute = 10f, rateAtStart = 0.05f, rateAtEnd = 0.6f, groupSize = 2, eliteChance = 0.01f },
+                    new() { enemy = brute, startMinute = 6.5f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 0.35f, groupSize = 1, eliteChance = 0.04f },
+                };
+                w.bursts = new List<WaveBurst>
+                {
+                    new() { minute = 1.0f, enemy = wolf, count = 8, ring = true, elites = 1, announcement = "Wolves! The pack has your scent!" },
+                    new() { minute = 2.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
+                    new() { minute = 5.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
+                    new() { minute = 8.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
+                    new() { minute = 2.6f, enemy = fBat, count = 26, ring = false, elites = 0, announcement = "A blizzard of bats!" },
+                    new() { minute = 3.2f, enemy = snowman, count = 12, ring = true, elites = 0, announcement = "The snowmen look... grumpy." },
+                    new() { minute = 3.9f, enemy = wolf, count = 18, ring = true, elites = 2, announcement = "The whole pack howls!" },
+                    new() { minute = 4.5f, enemy = fSkel, count = 60, ring = true, elites = 2, announcement = "The frozen dead march!" },
+                    new() { minute = 5.5f, enemy = fSlime, boss = true, announcement = "THE GLACIER MOTHER CRACKS FREE!" },
+                    new() { minute = 6.25f, enemy = wraith, count = 14, ring = true, elites = 1, announcement = "Wraiths ride the blizzard!" },
+                    new() { minute = 7.5f, enemy = yeti, boss = true, announcement = "THE YETI KING ROARS!" },
+                    new() { minute = 8.25f, enemy = wolf, count = 40, ring = true, elites = 3, announcement = "Wolves from every ridge!" },
+                    new() { minute = 9f, enemy = fSkel, boss = true, announcement = "THE FROST LICH KING RISES!" },
+                    new() { minute = 9.5f, enemy = snowman, count = 40, ring = true, elites = 2, announcement = "FINAL AVALANCHE!" },
+                };
+                w.bursts.Add(new() { minute = 6.9f, enemy = yeti, count = 4, ring = true, elites = 1, announcement = "Yetis stomp down the slopes!" });
+                w.bursts.AddRange(Hordes(fSlimeling, rabble, "Frost slimelings pour over the snow!", "The frozen rabble swarms!", "The peaks overflow!", "An endless horde!", "THE MOUNTAIN WAKES!", "EVERYTHING AT ONCE!"));
+            });
+
             string Mp = Content + "/Maps";
             Asset<MapDefinition>($"{Mp}/Graveyard.asset", m =>
             {
@@ -757,6 +890,9 @@ namespace MultiBash.EditorTools
                 m.accent = Hex("#5ad8ff");
                 m.preview = Sprite(UIDir + "/Sprites/Map_Graveyard.png");
                 m.difficulty = 1f;
+                m.intro = "Survive until dawn!";
+                m.ambience = Clip("AMB_Keep");
+                m.ambienceVolume = 0.32f;
             });
             Asset<MapDefinition>($"{Mp}/Volcano.asset", m =>
             {
@@ -768,6 +904,23 @@ namespace MultiBash.EditorTools
                 m.accent = Hex("#ff7a2a");
                 m.preview = Sprite(UIDir + "/Sprites/Map_Volcano.png");
                 m.difficulty = 1.1f;
+                m.intro = "The caldera wakes. Don't touch the lava!";
+                m.ambience = Clip("AMB_Volcano");
+                m.ambienceVolume = 0.38f;
+            });
+            Asset<MapDefinition>($"{Mp}/Frost.asset", m =>
+            {
+                m.displayName = "Frostfall Peaks";
+                m.description = "Snowy peaks under the aurora. Wolf packs, yetis, grumpy snowmen and a frozen lake you can glide across. Hardest.";
+                m.sceneName = "Frost";
+                m.waves = frostWaves;
+                m.music = Clip("MUS_Frost");
+                m.accent = Hex("#9ff4ff");
+                m.preview = Sprite(UIDir + "/Sprites/Map_Frost.png");
+                m.difficulty = 1.18f;
+                m.intro = "The pack is hunting. Stay together!";
+                m.ambience = Clip("AMB_Frost");
+                m.ambienceVolume = 0.36f;
             });
 
             string Pk = Content + "/Pickups";
@@ -821,7 +974,7 @@ namespace MultiBash.EditorTools
                 "BladeTornado", "Sanctuary", "TwinMoons", "Armageddon", "AbsoluteZero", "PhantomLegion"));
             Merge(db.powerups, PreferredOrder<PowerupDefinition>());
             Merge(db.enemies, PreferredOrder<EnemyDefinition>("Skeleton", "Slime", "SlimeSmall"));
-            Merge(db.maps, PreferredOrder<MapDefinition>("Graveyard", "Volcano"));
+            Merge(db.maps, PreferredOrder<MapDefinition>("Graveyard", "Volcano", "Frost"));
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
             Debug.Log($"[MultiBash] Database: {db.characters.Count} characters, {db.weapons.Count} weapons, {db.powerups.Count} powerups, {db.enemies.Count} enemies, {db.maps.Count} maps.");

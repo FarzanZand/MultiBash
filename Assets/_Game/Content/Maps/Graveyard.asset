@@ -15,9 +15,12 @@ MonoBehaviour:
   displayName: Haunted Keep
   description: Ruined castle grounds full of bones, slimes and old magic. A good
     first run.
+  intro: Survive until dawn!
   sceneName: Game
   waves: {fileID: 11400000, guid: 0168ac5aa3280994ca5ffc5fb9742a65, type: 2}
   music: {fileID: 8300000, guid: 52e7fd0ecf6cda94385c6235a3f864f8, type: 3}
+  ambience: {fileID: 8300000, guid: 822ee7efa5546b84ba58749675dd20b7, type: 3}
+  ambienceVolume: 0.32
   accent: {r: 0.3529412, g: 0.84705883, b: 1, a: 1}
   preview: {fileID: 21300000, guid: 7a8083affc4de6c49b204de3c2d1cbc6, type: 3}
   difficulty: 1

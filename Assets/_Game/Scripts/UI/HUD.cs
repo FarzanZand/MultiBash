@@ -46,7 +46,7 @@ namespace MultiBash
         Text _buildFooter;
         // overlays
         Image _damageFlash, _downedVignette;
-        Text _downedText, _announce, _countdown, _combo, _frenzy;
+        Text _downedText, _announce, _countdown, _combo, _frenzy, _mapTitle, _mapSub;
         int _shownCombo;
         float _comboPunch, _frenzyT = 99f;
         float _announceT = 99f;
@@ -166,6 +166,9 @@ namespace MultiBash
             _announce.horizontalOverflow = HorizontalWrapMode.Wrap;
             _announce.verticalOverflow = VerticalWrapMode.Truncate;
             _countdown = Outlined(UIKit.Label(_root, "", 128, T.text, new Vector2(0.5f, 0.5f), new Vector2(0, 80), new Vector2(400, 190), TextAnchor.MiddleCenter, UIFont.Number, false), 5);
+            // map title card while the run counts down
+            _mapTitle = Outlined(UIKit.Label(_root, "", 96, T.accent, new Vector2(0.5f, 0.5f), new Vector2(0, 250), new Vector2(1500, 120), TextAnchor.MiddleCenter, UIFont.Header, false), 5);
+            _mapSub = Outlined(UIKit.Label(_root, "", 30, T.text, new Vector2(0.5f, 0.5f), new Vector2(0, 185), new Vector2(1400, 50), TextAnchor.MiddleCenter, UIFont.Body, false), 2);
             _combo = Outlined(UIKit.Label(_root, "", 40, T.text, new Vector2(0, 0.5f), new Vector2(30, 120), new Vector2(420, 60), TextAnchor.MiddleLeft, UIFont.Number, false), 3);
             _combo.rectTransform.pivot = new Vector2(0, 0.5f);
             _frenzy = Outlined(UIKit.Label(_root, "", 72, new Color(1f, 0.5f, 0.2f), new Vector2(0, 0.5f), new Vector2(30, 190), new Vector2(700, 90), TextAnchor.MiddleLeft, UIFont.Header, false), 4);
@@ -512,6 +515,23 @@ namespace MultiBash
             }
 
             _countdown.text = gm.State == RunState.Starting ? Mathf.CeilToInt(gm.StateTimer.RemainingTime(gm.Runner) ?? 0f).ToString() : "";
+            {
+                // title card: in during the countdown, out over the first seconds of the run
+                float a = gm.State == RunState.Starting ? 1f : gm.State == RunState.Playing ? Mathf.Clamp01(1f - (gm.RunTime - 1.2f) / 0.8f) : 0f;
+                var m = gm.map;
+                if (a > 0f && m != null)
+                {
+                    _mapTitle.text = m.displayName.ToUpperInvariant();
+                    var c = m.accent; c.a = a;
+                    _mapTitle.color = c;
+                    _mapTitle.rectTransform.localScale = Vector3.one * (1f + (1f - a) * 0.15f);
+                    _mapSub.text = m.description;
+                    var sc = T.text; sc.a = a * 0.9f;
+                    _mapSub.color = sc;
+                }
+                _mapTitle.gameObject.SetActive(a > 0f && m != null);
+                _mapSub.gameObject.SetActive(a > 0f && m != null);
+            }
 
             if (me != null)
             {

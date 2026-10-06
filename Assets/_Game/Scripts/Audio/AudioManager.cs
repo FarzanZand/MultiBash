@@ -46,6 +46,8 @@ namespace MultiBash
         readonly Dictionary<AudioClip, float> _lastPlayed = new();
         readonly float[] _volume = new float[3];
         AudioSource _music, _musicB;   // _music = current, _musicB = fading out
+        AudioSource _ambience;
+        float _ambienceTarget, _ambienceFade = 1.5f;
         float _fadeTime = 1f, _fadeT = 1f;
         int _next, _nextUi;
 
@@ -74,6 +76,12 @@ namespace MultiBash
             }
             _music = MusicSource();
             _musicB = MusicSource();
+            _ambience = gameObject.AddComponent<AudioSource>();
+            _ambience.loop = true;
+            _ambience.playOnAwake = false;
+            _ambience.spatialBlend = 0f;
+            _ambience.volume = 0f;
+            _ambience.outputAudioMixerGroup = sfxGroup;
             for (int i = 0; i < uiVoices; i++)
             {
                 var s = gameObject.AddComponent<AudioSource>();
@@ -108,6 +116,12 @@ namespace MultiBash
 
         void Update()
         {
+            if (_ambience != null && _ambience.clip != null)
+            {
+                float want = _ambienceTarget * Gain(Channel.SFX);
+                _ambience.volume = Mathf.MoveTowards(_ambience.volume, want, Time.unscaledDeltaTime / Mathf.Max(0.1f, _ambienceFade));
+                if (_ambience.volume <= 0.001f && _ambienceTarget <= 0f && _ambience.isPlaying) _ambience.Stop();
+            }
             if (_fadeT >= 1f) return;
             _fadeT = Mathf.Min(1f, _fadeT + Time.unscaledDeltaTime / Mathf.Max(0.01f, _fadeTime));
             float target = MusicTarget;
@@ -193,6 +207,17 @@ namespace MultiBash
             I._music.Play();
             I._fadeTime = fade;
             I._fadeT = 0f;
+        }
+
+        /// <summary>Looping ambient bed (wind, lava rumble) on the SFX channel; null fades it out.</summary>
+        public static void PlayAmbience(AudioClip clip, float volume = 0.5f)
+        {
+            if (Instance == null) return;
+            var a = Instance._ambience;
+            if (clip == null) { Instance._ambienceTarget = 0f; return; }
+            if (a.clip != clip) { a.clip = clip; a.volume = 0f; a.Play(); }
+            else if (!a.isPlaying) a.Play();
+            Instance._ambienceTarget = volume;
         }
 
         public static void StopMusic()

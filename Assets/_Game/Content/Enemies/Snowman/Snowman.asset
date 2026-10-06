@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfa4861c1b13514fb502afb4e0d0d61, type: 3}
+  m_Name: Snowman
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.EnemyDefinition
+  displayName: Grumpy Snowman
+  prefab: {fileID: 8304654428223135076, guid: 48df048830eb2914fa22938814f67e01, type: 3}
+  maxHealth: 16
+  moveSpeed: 4.4
+  contactDamage: 6
+  attackInterval: 1
+  attackRange: 0.9
+  radius: 0.5
+  knockbackResist: 0
+  movement: 0
+  hopRest: 0.7
+  hopTime: 0.45
+  hopHeight: 1.2
+  fodder: 0
+  scale: 1
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  gearSize: 1.4
+  xpChance: 1
+  flees: 0
+  lifetime: 0
+  dropChests: 0
+  attack: 3
+  attackDistance: 2.6
+  specialCooldown: 99
+  telegraphTime: 0.95
+  specialRadius: 3
+  specialDamageMul: 2.2
+  projectileSpeed: 12
+  specialColor: {r: 0.62352943, g: 0.95686275, b: 1, a: 1}
+  specialSound: {fileID: 8300000, guid: 9717e115c758ced45b62768550a6ccd8, type: 3}
+  xpValue: 2
+  healthOrbChance: 0.02
+  magnetChance: 0.002
+  splitInto: {fileID: 0}
+  splitCount: 0
+  bossName: 
+  bossHealthMultiplier: 150
+  bossDamageMultiplier: 2.5
+  bossScale: 3.2
+  bossSplitCount: 0
+  hitSound: {fileID: 8300000, guid: 1d65f87f624112b45a4618e0494b1fd0, type: 3}
+  deathSound: {fileID: 8300000, guid: 1d65f87f624112b45a4618e0494b1fd0, type: 3}
+  moveSound: {fileID: 0}
+  deathColor: {r: 0.95686275, g: 0.972549, b: 1, a: 1}

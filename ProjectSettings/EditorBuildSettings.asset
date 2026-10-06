@@ -17,5 +17,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Game/Scenes/Volcano.unity
     guid: 75f9ec376d310bd46af0d33033d1341e
+  - enabled: 1
+    path: Assets/_Game/Scenes/Frost.unity
+    guid: 4f1aa74cfd7099049878c2053a5070f7
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

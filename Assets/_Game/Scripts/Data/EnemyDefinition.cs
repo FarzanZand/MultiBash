@@ -54,6 +54,8 @@ namespace MultiBash
         public bool fodder;
         [Tooltip("Size multiplier for this enemy (lets several enemies share one prefab).")]
         public float scale = 1f;
+        [Tooltip("Colour multiplied over the model (recolored variants that share a prefab, e.g. frost skeletons).")]
+        public Color tint = Color.white;
         [Tooltip("Size of the stage gear (helmets) relative to the head/body width.")]
         public float gearSize = 1.4f;
         [Tooltip("Chance a kill drops its XP gem (fodder hordes drop less so levels don't fly by).")]

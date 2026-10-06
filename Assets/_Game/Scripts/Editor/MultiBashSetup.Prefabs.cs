@@ -88,6 +88,12 @@ namespace MultiBash.EditorTools
             BuildEnemyPrefab($"{E}/Ghoul/Ghoul.prefab", Model("Enemies", "Ghoul"), 1.0f, false);
             BuildEnemyPrefab($"{E}/Wraith/Wraith.prefab", Model("Enemies", "Wraith"), 1.0f, false);
             BuildEnemyPrefab($"{E}/ObsidianBrute/ObsidianBrute.prefab", Model("Enemies", "ObsidianBrute"), 1.3f, false);
+            BuildEnemyPrefab($"{E}/IceWolf/IceWolf.prefab", Model("Enemies", "IceWolf"), 1.05f, false);
+            BuildEnemyPrefab($"{E}/Yeti/Yeti.prefab", Model("Enemies", "Yeti"), 1.45f, false);
+            BuildEnemyPrefab($"{E}/Snowman/Snowman.prefab", Model("Enemies", "Snowman"), 1.0f, false);
+            BuildEnemyPrefab($"{E}/Frost/FrostSlime.prefab", Model("Enemies", "FrostSlime"), 1.15f, true);
+            BuildEnemyPrefab($"{E}/Frost/FrostSlimeSmall.prefab", Model("Enemies", "FrostSlime"), 0.6f, true);
+            BuildEnemyPrefab($"{E}/Frost/FrostBat.prefab", Model("Enemies", "FrostBat"), 1.1f, false);
 
             // ---------------------------------------------------------------- pickups
             string Pk = Content + "/Pickups";
@@ -139,6 +145,48 @@ namespace MultiBash.EditorTools
             Prop("AshMountainA", 0f, PropCollider.None);
             Prop("AshMountainB", 0f, PropCollider.None);
             Prop("VolcanoPeak", 0f, PropCollider.None);
+            // world pass 2 (Tools/Blender/world_models.py)
+            Prop("Keep", 7.5f, PropCollider.Mesh, withLight: true, lightHeight: 7.6f, lightColor: new Color(1f, 0.75f, 0.4f), lightRange: 16f, lightIntensity: 3f);
+            Prop("Mausoleum", 3.4f, PropCollider.Box);
+            Prop("Windmill", 2.4f, PropCollider.Capsule);
+            Prop("Bridge", 0f, PropCollider.Mesh);
+            Prop("HangingTree", 1.3f, PropCollider.Capsule);
+            Prop("KnightStatue", 2.4f, PropCollider.Box);
+            Prop("Well", 1.1f, PropCollider.Capsule);
+            Prop("DragonSkull", 5.5f, PropCollider.Mesh, withLight: true, lightHeight: 3f, lightColor: new Color(1f, 0.45f, 0.15f), lightRange: 16f, lightIntensity: 4f);
+            Prop("DragonRibcage", 0f, PropCollider.Mesh);
+            Prop("DragonClaw", 2.2f, PropCollider.Mesh);
+            Prop("DwarfForge", 3f, PropCollider.Box, withLight: true, lightHeight: 1.4f, lightColor: new Color(1f, 0.55f, 0.2f), lightRange: 12f, lightIntensity: 5f);
+            Prop("GiantHammer", 2.2f, PropCollider.Mesh, withLight: true, lightHeight: 1.5f, lightColor: new Color(1f, 0.45f, 0.15f), lightRange: 9f, lightIntensity: 3f);
+            Prop("CrystalCluster", 1.1f, PropCollider.Capsule, withLight: true, lightHeight: 1.6f, lightColor: new Color(1f, 0.35f, 0.85f), lightRange: 7f, lightIntensity: 2.2f);
+            Prop("LavaFall", 0f, PropCollider.None, withLight: true, lightHeight: 2f, lightColor: new Color(1f, 0.5f, 0.15f), lightRange: 18f, lightIntensity: 5f);
+            Prop("SnowPineA", 0.5f, PropCollider.Capsule);
+            Prop("SnowPineB", 0.5f, PropCollider.Capsule);
+            Prop("IceSpireA", 0.9f, PropCollider.Capsule);
+            Prop("IceSpireB", 0.9f, PropCollider.Capsule);
+            Prop("SnowRockA", 1.0f, PropCollider.Box);
+            Prop("SnowRockB", 1.5f, PropCollider.Box);
+            Prop("FrozenTitan", 3.6f, PropCollider.Mesh);
+            Prop("RuneMonolithA", 0.7f, PropCollider.Box);
+            Prop("RuneMonolithB", 0.7f, PropCollider.Box);
+            Prop("Longhouse", 3.2f, PropCollider.Box);
+            Prop("Tent", 1.3f, PropCollider.Box);
+            Prop("Campfire", 0.8f, PropCollider.None);
+            Prop("Igloo", 2.2f, PropCollider.Mesh);
+            Prop("FrozenWaterfall", 0f, PropCollider.None);
+            Prop("FrostMountainA", 0f, PropCollider.None);
+            Prop("FrostMountainB", 0f, PropCollider.None);
+            // the windmill's blades turn
+            var mill = Load<GameObject>($"{Prefabs}/Environment/Windmill.prefab");
+            if (mill != null && mill.GetComponent<Spinner>() == null)
+            {
+                var root = PrefabUtility.LoadPrefabContents(AssetDatabase.GetAssetPath(mill));
+                root.AddComponent<Spinner>().degreesPerSecond = 35f;
+                foreach (var t in root.GetComponentsInChildren<Transform>())
+                    if (t.name == "Blades") t.gameObject.isStatic = false;
+                PrefabUtility.SaveAsPrefabAsset(root, AssetDatabase.GetAssetPath(mill));
+                PrefabUtility.UnloadPrefabContents(root);
+            }
 
             // ---------------------------------------------------------------- persistent services
             string gs = Prefabs + "/Systems/Resources/GameServices.prefab";

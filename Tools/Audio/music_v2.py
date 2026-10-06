@@ -452,10 +452,75 @@ def menu_theme():
     return S.render(2.4, 0.4)
 
 
+def frost_theme():
+    """Frostfall Peaks: E dorian, 124 bpm, ~93 s. Sparkling celesta arps, choir, taiko-ish toms, flute + bell hook."""
+    S = Song(124, 48)
+    b = S.beat
+    I = {"Em": [52, 55, 59], "A": [57, 61, 64], "C": [48, 52, 55], "D": [50, 54, 57], "G": [55, 59, 62],
+         "Bm": [47, 50, 54], "B": [47, 51, 54], "Am": [57, 60, 64]}
+    verse = ["Em", "A", "C", "D"]
+    plan = ([("intro", c) for c in ["Em", "C", "Em", "C"]] + [("verse", c) for c in verse * 2] + [("chorus", c) for c in ["Em", "D", "C", "B"] * 2]
+            + [("break", c) for c in ["Am", "Em", "C", "D"]] + [("bridge", c) for c in ["G", "D", "Em", "C", "Am", "Bm", "C", "B"]]
+            + [("chorus2", c) for c in ["Em", "D", "C", "B"] * 2] + [("verse", c) for c in verse] + [("turn", c) for c in ["Am", "C", "D", "B"]])
+    hook = [(0, 1.5, 71), (1.5, 0.5, 74), (2, 1, 76), (3, 1, 74),
+            (0, 1, 73), (1, 1, 74), (2, 2, 69),
+            (0, 1.5, 67), (1.5, 0.5, 69), (2, 1, 71), (3, 1, 72),
+            (0, 3, 71), (3, 1, 66)]
+    bars = [hook[0:4], hook[4:7], hook[7:11], hook[11:13]]
+    for bi, (sec, ch) in enumerate(plan):
+        t0 = bi * 4 * b
+        tones = I[ch]
+        root = tones[0] if tones[0] < 54 else tones[0] - 12
+        new_sec = bi == 0 or plan[bi - 1][0] != sec
+        if new_sec and sec in ("chorus", "chorus2", "verse"):
+            S.put(crash(), t0, 0.55, send=0.4)
+        last = bi + 1 >= len(plan) or plan[bi + 1][0] != sec
+        style = {"intro": "none", "verse": "full", "chorus": "four", "chorus2": "four", "break": "none", "bridge": "half", "turn": "full"}[sec]
+        drums(S, t0, style, bi, fill=last and sec not in ("break", "intro"), open_hats=sec in ("chorus2",))
+        if sec in ("chorus", "chorus2", "turn"):
+            for i in (0, 1.5, 2.5):
+                S.put(tom(95), t0 + i * b, 0.45, pan=-0.2, send=0.3)
+        if sec == "break" and bi % 4 == 3:
+            S.put(riser(4 * b), t0, 0.45)
+        # bass: pulsing eighths, sub in the quiet parts
+        if sec in ("intro", "break"):
+            S.put(bass_v(midi(root - 12), 4 * b, "sub"), t0, 0.32)
+        else:
+            for e in range(8):
+                S.put(bass_v(midi(root - 12 + (7 if e == 6 else 0)), b / 2, "saw", 700), t0 + e * b / 2, 0.32)
+        # pads + choir
+        for n in tones:
+            S.put(pad_v(midi(n), 4 * b + 0.3, 1100 if sec in ("intro", "break") else 1700), t0, 0.1, pan=0.2, send=0.6, haas=0.016)
+        if sec in ("intro", "break", "bridge", "chorus2"):
+            for n in tones:
+                S.put(choir(midi(n + 12), 4 * b + 0.3), t0, 0.07, send=0.7)
+        # icy celesta arpeggio (16ths), echoing across the stereo field
+        pat = [0, 1, 2, 1, 2, 0, 1, 2]
+        for e in range(16):
+            if sec == "intro" and e % 2:
+                continue
+            n = tones[pat[e % 8]] + 24 + (12 if e % 8 == 4 else 0)
+            g = 0.075 if sec != "break" else 0.05
+            S.put(bell(midi(n), 0.6), t0 + e * b / 4, g, pan=0.5 if e % 2 else -0.5, send=0.45)
+        # hook: flute lead, bells doubling an octave up on the second chorus
+        if sec in ("chorus", "chorus2"):
+            for off, ln, n in bars[bi % 4]:
+                S.put(lead_v(midi(n), ln * b, "flute"), t0 + off * b, 0.25, send=0.45, haas=0.008)
+                if sec == "chorus2":
+                    S.put(bell(midi(n + 12), ln * b + 0.4), t0 + off * b, 0.09, pan=0.3, send=0.5)
+        if sec == "bridge":
+            for off, ln, n in motif_melody(tones, [(0, 1), (1, 1), (2, 1.5), (3.5, 0.5)], seed=bi + 7, octave=12):
+                S.put(lead_v(midi(n), ln * b, "flute"), t0 + off * b, 0.2, pan=-0.2, send=0.55)
+        if sec == "verse":
+            for off, ln, n in motif_melody(tones, [(0, 0.5), (1, 0.5), (1.5, 1), (3, 1)], seed=bi + 300, octave=12, rest_p=0.3):
+                S.put(pluck_v(midi(n), ln * b + 0.1, 2400), t0 + off * b, 0.16, pan=0.25, send=0.3)
+    return S.render(2.4, 0.36)
+
+
 if __name__ == "__main__":
     what = sys.argv[1] if len(sys.argv) > 1 else "all"
     jobs = {"battle": ("MUS_Battle", battle_theme), "volcano": ("MUS_Volcano", volcano_theme),
-            "boss": ("MUS_Boss", boss_theme), "menu": ("MUS_Menu", menu_theme)}
+            "boss": ("MUS_Boss", boss_theme), "menu": ("MUS_Menu", menu_theme), "frost": ("MUS_Frost", frost_theme)}
     for k, (name, fn) in jobs.items():
         if what in ("all", k):
             l, r = fn()

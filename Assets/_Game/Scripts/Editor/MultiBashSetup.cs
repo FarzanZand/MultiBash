@@ -200,7 +200,8 @@ namespace MultiBash.EditorTools
                     t.alphaIsTransparency = false;
                 });
             foreach (var n in new[] { "T_TerrainGrass", "T_TerrainDirt", "T_TerrainCliff", "T_TerrainMoss",
-                         "T_TerrainBasalt", "T_TerrainAsh", "T_TerrainMagma", "T_TerrainVolcCliff", "T_Lava" })
+                         "T_TerrainBasalt", "T_TerrainAsh", "T_TerrainMagma", "T_TerrainVolcCliff", "T_Lava",
+                         "T_TerrainSnow", "T_TerrainFrostCliff", "T_TerrainSnowPath", "T_TerrainIce", "T_TerrainRoad", "T_Water" })
                 Texture($"{Tex}/{n}.png", t =>
                 {
                     t.filterMode = FilterMode.Point;
@@ -269,6 +270,19 @@ namespace MultiBash.EditorTools
                     ai.SaveAndReimport();
                 }
             }
+            foreach (var p in Find("t:AudioClip", AudioDir + "/Ambience"))
+            {
+                var ai = (AudioImporter)AssetImporter.GetAtPath(p);
+                var s = ai.defaultSampleSettings;
+                if (s.loadType != AudioClipLoadType.CompressedInMemory)
+                {
+                    s.loadType = AudioClipLoadType.CompressedInMemory;
+                    s.compressionFormat = AudioCompressionFormat.Vorbis;
+                    s.quality = 0.6f;
+                    ai.defaultSampleSettings = s;
+                    ai.SaveAndReimport();
+                }
+            }
             foreach (var p in Find("t:AudioClip", AudioDir + "/Music"))
             {
                 var ai = (AudioImporter)AssetImporter.GetAtPath(p);
@@ -309,8 +323,8 @@ namespace MultiBash.EditorTools
 
         // ================================================================== materials
 
-        public static Material PaletteMat, GroundMat, FxAdd, FxAlpha, StoneMat, SkyMat, GrassMat, TerrainMat, VolcanoSkyMat, LavaMat;
-        public static TerrainLayer[] TerrainLayers, VolcanoLayers;
+        public static Material PaletteMat, GroundMat, FxAdd, FxAlpha, StoneMat, SkyMat, GrassMat, TerrainMat, VolcanoSkyMat, LavaMat, KeepSkyMat, FrostSkyMat, WaterMat;
+        public static TerrainLayer[] TerrainLayers, VolcanoLayers, KeepLayers, FrostLayers;
 
         static TerrainLayer Layer(string name, string tex, float tile)
         {
@@ -389,6 +403,56 @@ namespace MultiBash.EditorTools
                 m.SetFloat("_CloudScale", 2.4f);
                 m.SetFloat("_Speed", 0.007f);
             });
+            KeepLayers = new[]
+            {
+                Layer("TL_Grass", "T_TerrainGrass", 4.5f),
+                Layer("TL_Cliff", "T_TerrainCliff", 5f),
+                Layer("TL_Road", "T_TerrainRoad", 3f),
+                Layer("TL_Moss", "T_TerrainMoss", 4.5f),
+                Layer("TL_Dirt", "T_TerrainDirt", 4f),
+            };
+            FrostLayers = new[]
+            {
+                Layer("TL_Snow", "T_TerrainSnow", 4.5f),
+                Layer("TL_FrostCliff", "T_TerrainFrostCliff", 5f),
+                Layer("TL_SnowPath", "T_TerrainSnowPath", 4f),
+                Layer("TL_Ice", "T_TerrainIce", 6f),
+            };
+            // sky / water materials are always refreshed (cheap) so look tweaks land without a full rebuild
+            KeepSkyMat = Mat(Mats + "/M_SkyKeep.mat", Shader.Find("MultiBash/PixelSky"), m => { });
+            KeepSkyMat.SetColor("_TopColor", new Color(0.13f, 0.17f, 0.42f));
+            KeepSkyMat.SetColor("_HorizonColor", new Color(0.9f, 0.62f, 0.55f));
+            KeepSkyMat.SetColor("_BottomColor", new Color(0.36f, 0.34f, 0.46f));
+            KeepSkyMat.SetColor("_CloudColor", new Color(0.62f, 0.5f, 0.68f));
+            KeepSkyMat.SetFloat("_CloudCover", 0.42f);
+            KeepSkyMat.SetFloat("_CloudScale", 2.8f);
+            KeepSkyMat.SetFloat("_StarDensity", 0.45f);
+            KeepSkyMat.SetFloat("_MoonSize", 0.07f);
+            KeepSkyMat.SetVector("_MoonDir", new Vector4(-0.3f, 0.62f, 0.72f, 0));
+            KeepSkyMat.SetColor("_MoonColor", new Color(1f, 0.96f, 0.86f));
+            EditorUtility.SetDirty(KeepSkyMat);
+            FrostSkyMat = Mat(Mats + "/M_SkyFrost.mat", Shader.Find("MultiBash/PixelSky"), m => { });
+            FrostSkyMat.SetColor("_TopColor", new Color(0.04f, 0.07f, 0.2f));
+            FrostSkyMat.SetColor("_HorizonColor", new Color(0.36f, 0.5f, 0.7f));
+            FrostSkyMat.SetColor("_BottomColor", new Color(0.4f, 0.48f, 0.62f));
+            FrostSkyMat.SetColor("_CloudColor", new Color(0.42f, 0.5f, 0.68f));
+            FrostSkyMat.SetFloat("_CloudCover", 0.3f);
+            FrostSkyMat.SetFloat("_CloudScale", 2.6f);
+            FrostSkyMat.SetFloat("_StarDensity", 0.85f);
+            FrostSkyMat.SetFloat("_Aurora", 1.15f);
+            FrostSkyMat.SetColor("_AuroraA", new Color(0.3f, 1f, 0.6f));
+            FrostSkyMat.SetColor("_AuroraB", new Color(0.65f, 0.4f, 1f));
+            FrostSkyMat.SetFloat("_MoonSize", 0.05f);
+            FrostSkyMat.SetVector("_MoonDir", new Vector4(0.4f, 0.7f, 0.6f, 0));
+            FrostSkyMat.SetColor("_MoonColor", new Color(0.9f, 0.95f, 1f));
+            EditorUtility.SetDirty(FrostSkyMat);
+            WaterMat = Mat(Mats + "/M_Water.mat", Shader.Find("MultiBash/PixelLava"), m => { });
+            WaterMat.SetTexture("_MainTex", Load<Texture2D>(Tex + "/T_Water.png"));
+            WaterMat.SetColor("_Tint", new Color(0.85f, 0.95f, 1f));
+            WaterMat.SetFloat("_Glow", 1.0f);
+            WaterMat.SetFloat("_Tile", 5f);
+            WaterMat.SetVector("_Flow", new Vector4(0.035f, 0.01f, 0, 0));
+            EditorUtility.SetDirty(WaterMat);
             LavaMat = Mat(Mats + "/M_Lava.mat", Shader.Find("MultiBash/PixelLava"), m =>
             {
                 m.SetTexture("_MainTex", Load<Texture2D>(Tex + "/T_Lava.png"));

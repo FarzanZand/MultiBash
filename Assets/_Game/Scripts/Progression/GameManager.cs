@@ -62,17 +62,19 @@ namespace MultiBash
                 TeamXP = 0;
                 XPToNext = ProgressionManager.Settings.XPForLevel(1, Mathf.Max(1, PlayerData.All.Count));
                 foreach (var p in PlayerData.All) p.ResetRunStats();
-                Announce("Survive the night!");
+                Announce(map != null && !string.IsNullOrEmpty(map.intro) ? map.intro : "Survive the night!");
             }
             _lastLevel = TeamLevel;
             _lastState = State;
             _lastAnnouncement = AnnouncementTick;
             AudioManager.PlayMusic(map != null && map.music != null ? map.music : AudioManager.Lib != null ? AudioManager.Lib.battleMusic : null);
+            AudioManager.PlayAmbience(map != null ? map.ambience : null, map != null ? map.ambienceVolume : 0f);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
             if (Instance == this) Instance = null;
+            AudioManager.PlayAmbience(null);
             CombatWorld.Clear();
         }
 

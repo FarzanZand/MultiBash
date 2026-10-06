@@ -64,6 +64,8 @@ namespace MultiBash
         [Networked] public int ReviveTick { get; set; }
         [Networked] int AirJumps { get; set; }
         [Networked] public int AirJumpTick { get; set; }
+        /// <summary>Tick of the last jump-pad launch (mushroom / vent / geyser).</summary>
+        [Networked] public int PadTick { get; set; }
 
         [SerializeField] Transform visualRoot;
 
@@ -93,6 +95,9 @@ namespace MultiBash
         float _heartTimer;
         bool _lastDowned;
         float _stepTimer;
+        int _lastPad;
+        bool _wasAirborne;
+        float _airTime;
         int _visualLoadout = -1;
         OrbitVisual _orbit;
         AuraVisual _aura;
@@ -368,6 +373,21 @@ namespace MultiBash
                     }
                 }
 
+                // bounce pads: launch high with a speed boost (scene data, so the client predicts it exactly)
+                if (canAct && Runner.Tick - PadTick > 15)
+                {
+                    var pad = JumpPad.Find(transform.position);
+                    if (pad != null && _cc.Velocity.y <= 2f)
+                    {
+                        var v = _cc.Velocity;
+                        _cc.Velocity = new Vector3(v.x, 0f, v.z);
+                        _cc.Jump(true, pad.launch);
+                        PadTick = Runner.Tick;
+                        Momentum = true;
+                        AirJumps = 0;
+                    }
+                }
+
                 float max = speed;
                 if (sliding)
                 {
@@ -379,12 +399,15 @@ namespace MultiBash
                     max = speed * CombatManager.Settings.momentumSpeed;
                 }
 
+                // frozen lakes: barely any grip, long fast glides
+                bool ice = _cc.Grounded && IceZone.On(transform.position);
+                if (ice && !sliding) max *= 1.25f;
                 _cc.maxSpeed = max;
-                _cc.acceleration = sliding ? 400f : 70f;
-                _cc.braking = 16f;
+                _cc.acceleration = sliding ? 400f : ice ? 10f : 70f;
+                _cc.braking = ice ? 1.1f : 16f;
                 _cc.Move(dir);
 
-                if (_cc.Grounded && !sliding && Momentum && Runner.Tick - JumpTick > 4) Momentum = false;
+                if (_cc.Grounded && !sliding && Momentum && Runner.Tick - Mathf.Max(JumpTick, PadTick) > 4) Momentum = false;
 
                 if (transform.position.y < Ground.Height(transform.position) - 6f) _cc.Teleport(Ground.Snap(transform.position, 1f));
             }
@@ -750,6 +773,19 @@ namespace MultiBash
                 if (air) FxManager.Instance?.Burst(transform.position + Vector3.up * 0.3f, new Color(0.85f, 0.95f, 1f), 12, 4f, 0.3f, 0.35f, 0f, true); // feather puff
                 else FxManager.Instance?.Dust(transform.position, 3);
             }
+            if (PadTick != _lastPad)
+            {
+                _lastPad = PadTick;
+                JumpPad best = null;
+                float bd = float.MaxValue;
+                foreach (var p in JumpPad.All)
+                {
+                    float d = (p.transform.position - transform.position).sqrMagnitude;
+                    if (d < bd) { bd = d; best = p; }
+                }
+                if (best != null && bd < 25f) best.Bounced(IsLocal);
+                if (IsLocal) CameraRig.Instance?.Shake(0.2f);
+            }
             if (SlideTick != _lastSlide)
             {
                 _lastSlide = SlideTick;
@@ -819,11 +855,27 @@ namespace MultiBash
                 v.y = 0;
                 // footstep dust puffs while running
                 _stepTimer -= Time.deltaTime;
-                if (_stepTimer <= 0f && v.magnitude > 3f && _cc != null && _cc.Grounded && !down)
+                bool grounded = _cc != null && _cc.Grounded;
+                if (_stepTimer <= 0f && v.magnitude > 3f && grounded && !down)
                 {
-                    _stepTimer = IsSliding ? 0.05f : 0.28f;
+                    _stepTimer = IsSliding ? 0.05f : 0.3f;
                     FxManager.Instance?.Dust(transform.position, IsSliding ? 2 : 1);
+                    if (!IsSliding && lib != null && lib.footstep != null)
+                        AudioManager.Play(lib.footstep, transform.position, IsLocal ? 0.22f : 0.1f, Random.Range(0.85f, 1.15f), 0f);
                 }
+                // landing thump after a real fall (pads, ledges, double jumps)
+                if (!grounded) _airTime += Time.deltaTime;
+                else
+                {
+                    if (_wasAirborne && _airTime > 0.45f && !down)
+                    {
+                        FxManager.Instance?.Dust(transform.position, Mathf.Clamp(Mathf.RoundToInt(_airTime * 6f), 3, 10));
+                        if (lib != null && lib.land != null) AudioManager.Play(lib.land, transform.position, IsLocal ? 0.55f : 0.3f, Random.Range(0.9f, 1.05f));
+                        if (IsLocal && _airTime > 1.1f) CameraRig.Instance?.Shake(0.15f);
+                    }
+                    _airTime = 0f;
+                }
+                _wasAirborne = !grounded;
                 _rig.SetMotion(v.magnitude, _cc != null && !_cc.Grounded, Velocity.y);
                 _rig.SetSliding(IsSliding);
                 _rig.SetDowned(down);

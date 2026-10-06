@@ -185,6 +185,7 @@ namespace MultiBash
         {
             float radius = lvl.area * stats.Area;
             var pos = _owner.transform.position;
+            Breakables.HitSphere(pos, radius);
             EnemyRegistry.Query(pos, radius, Hits);
             if (Hits.Count == 0) return false;
             float slow = lvl.duration * stats.Duration;
@@ -299,6 +300,7 @@ namespace MultiBash
         void ArcDamage(Slot s, WeaponLevel lvl, PlayerStats stats, Vector3 dir, float radius, float arc)
         {
             var pos = _owner.transform.position;
+            Breakables.HitSphere(pos + dir * radius * 0.55f, radius * 0.55f);
             EnemyRegistry.Query(pos, radius, Hits);
             float cos = Mathf.Cos(arc * 0.5f * Mathf.Deg2Rad);
             bool any = false;
@@ -450,6 +452,7 @@ namespace MultiBash
         {
             float radius = lvl.area * stats.Area;
             var pos = _owner.transform.position;
+            Breakables.HitSphere(pos, radius);
             EnemyRegistry.Query(pos, radius, Hits);
             foreach (var e in Hits) e.TakeDamage(Dmg(lvl, stats), pos, lvl.knockback, _owner);
             // extra rings (levels + Multishot): wider halos that burn the outer crowd
@@ -519,6 +522,7 @@ namespace MultiBash
             {
                 float a = (angle0 + i * 360f / blades) * Mathf.Deg2Rad;
                 var p = center + new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * radius;
+                Breakables.HitSphere(p, hitRadius);
                 EnemyRegistry.Query(p, hitRadius, Hits);
                 foreach (var e in Hits)
                 {

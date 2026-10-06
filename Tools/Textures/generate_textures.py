@@ -167,14 +167,14 @@ def terrain_textures():
 def volcano_textures():
     """Volcano level: basalt ground, ash, magma crust, dark cliff and the animated lava surface."""
     rng = np.random.default_rng(21)
-    basalt = pixel_tex(64, (46, 43, 46), [((38, 35, 38), 0.28), ((56, 52, 54), 0.18), ((30, 28, 31), 0.08), ((70, 64, 62), 0.04)], 21)
+    basalt = pixel_tex(64, (70, 64, 76), [((60, 54, 66), 0.28), ((84, 76, 88), 0.18), ((50, 44, 56), 0.08), ((104, 92, 100), 0.04)], 21)
     d = ImageDraw.Draw(basalt)
     for _ in range(10):   # hex-ish crack lines
         x, y = rng.integers(0, 60, 2)
-        d.line([(x, y), (x + rng.integers(2, 6), y + rng.integers(-2, 3))], fill=(30, 26, 28))
+        d.line([(x, y), (x + rng.integers(2, 6), y + rng.integers(-2, 3))], fill=(54, 44, 50))
     save(basalt, "Art", "Textures", "T_TerrainBasalt.png")
 
-    ash = pixel_tex(64, (96, 90, 86), [((84, 78, 76), 0.28), ((110, 104, 98), 0.18), ((70, 64, 62), 0.08), ((124, 116, 106), 0.04)], 22)
+    ash = pixel_tex(64, (118, 110, 116), [((104, 96, 104), 0.28), ((134, 124, 128), 0.18), ((88, 80, 90), 0.08), ((150, 140, 140), 0.04)], 22)
     save(ash, "Art", "Textures", "T_TerrainAsh.png")
 
     crust = pixel_tex(64, (52, 36, 32), [((40, 28, 26), 0.3), ((66, 42, 34), 0.15)], 23)
@@ -189,7 +189,7 @@ def volcano_textures():
         d.line(pts, fill=(236, 104, 34))
     save(crust, "Art", "Textures", "T_TerrainMagma.png")
 
-    cliff = pixel_tex(64, (52, 44, 44), [((42, 36, 36), 0.3), ((64, 54, 52), 0.15), ((34, 28, 30), 0.1)], 24)
+    cliff = pixel_tex(64, (66, 56, 64), [((54, 46, 54), 0.3), ((80, 68, 74), 0.15), ((44, 36, 44), 0.1)], 24)
     d = ImageDraw.Draw(cliff)
     for x in (8, 21, 33, 47, 58):   # vertical basalt columns
         d.line([(x, 0), (x, 63)], fill=(30, 26, 28))
@@ -205,6 +205,68 @@ def volcano_textures():
     lava = colorize(n, [(0.0, (90, 16, 6)), (0.3, (190, 44, 10)), (0.55, (255, 104, 20)), (0.8, (255, 180, 50)), (1.0, (255, 236, 140))])
     img = Image.fromarray(np.clip(lava, 0, 255).astype(np.uint8), "RGB")
     save(img, "Art", "Textures", "T_Lava.png")
+
+
+def frost_textures():
+    """Frostfall Peaks: snow, blue rock cliff, packed-snow path and lake ice."""
+    rng = np.random.default_rng(41)
+    snow = pixel_tex(64, (224, 234, 244), [((206, 220, 236), 0.28), ((238, 244, 250), 0.18), ((190, 206, 226), 0.06), ((250, 252, 255), 0.04)], 41)
+    d = ImageDraw.Draw(snow)
+    for _ in range(26):   # sparkles
+        x, y = rng.integers(0, 64, 2)
+        d.point((x, y), fill=(255, 255, 255))
+    save(snow, "Art", "Textures", "T_TerrainSnow.png")
+
+    cliff = pixel_tex(64, (96, 118, 146), [((82, 102, 130), 0.3), ((112, 134, 160), 0.16), ((70, 88, 114), 0.1)], 42)
+    d = ImageDraw.Draw(cliff)
+    for _ in range(16):   # chunky rock facets
+        x, y = rng.integers(0, 58, 2)
+        w, h = rng.integers(3, 7, 2)
+        d.rectangle([x, y, x + w, y + h], fill=(70, 88, 114))
+        d.line([(x, y), (x + w, y)], fill=(136, 156, 182))
+    for _ in range(10):   # snow caught on ledges
+        x, y = rng.integers(0, 58, 2)
+        d.rectangle([x, y, x + rng.integers(3, 7), y + 1], fill=(226, 236, 246))
+    save(cliff, "Art", "Textures", "T_TerrainFrostCliff.png")
+
+    path = pixel_tex(64, (178, 190, 206), [((160, 172, 190), 0.3), ((196, 206, 220), 0.18), ((140, 150, 166), 0.08), ((120, 104, 90), 0.03)], 43)
+    save(path, "Art", "Textures", "T_TerrainSnowPath.png")
+
+    ice = pixel_tex(64, (120, 196, 232), [((100, 178, 222), 0.3), ((150, 214, 242), 0.16), ((86, 160, 210), 0.08)], 44)
+    d = ImageDraw.Draw(ice)
+    for _ in range(9):   # cracks
+        x, y = rng.integers(0, 60, 2)
+        pts = [(x, y)]
+        for _ in range(4):
+            x = (x + rng.integers(-4, 5)) % 64
+            y = (y + rng.integers(-4, 5)) % 64
+            pts.append((x, y))
+        d.line(pts, fill=(216, 244, 255))
+    for _ in range(20):
+        x, y = rng.integers(0, 64, 2)
+        d.point((x, y), fill=(240, 252, 255))
+    save(ice, "Art", "Textures", "T_TerrainIce.png")
+
+
+def keep_textures():
+    """Haunted Keep extras: cobbled road and a darker forest floor."""
+    rng = np.random.default_rng(51)
+    road = pixel_tex(64, (124, 116, 102), [((108, 100, 88), 0.3), ((140, 132, 116), 0.16), ((92, 86, 76), 0.08)], 51)
+    d = ImageDraw.Draw(road)
+    for y in range(0, 64, 8):   # cobbles
+        off = 4 if (y // 8) % 2 else 0
+        for x in range(-8, 64, 8):
+            x0 = x + off
+            d.rectangle([x0 + 1, y + 1, x0 + 6, y + 6], outline=(84, 78, 70))
+            d.point((x0 + 2, y + 2), fill=(156, 148, 132))
+    save(road, "Art", "Textures", "T_TerrainRoad.png")
+
+    # brook water (animated by the PixelLava shader: two scrolling layers)
+    n = tile_noise(64, 4, 52)
+    n = (n - n.min()) / (n.max() - n.min())
+    n = np.floor(n * 6) / 6
+    water = colorize(n, [(0.0, (22, 64, 96)), (0.4, (34, 98, 140)), (0.7, (60, 140, 180)), (0.9, (120, 196, 220)), (1.0, (210, 240, 250))])
+    save(Image.fromarray(np.clip(water, 0, 255).astype(np.uint8), "RGB"), "Art", "Textures", "T_Water.png")
 
 
 # ----------------------------------------------------------------------------- tileable noise
@@ -813,7 +875,7 @@ def pixelate_portraits():
 
 if __name__ == "__main__":
     import sys
-    only = sys.argv[1:] or ["palette", "detail", "terrain", "vfx", "ui", "icons", "portraits", "volcano"]
+    only = sys.argv[1:] or ["palette", "detail", "terrain", "vfx", "ui", "icons", "portraits", "volcano", "frost", "keep"]
     if "palette" in only: palette()
     if "detail" in only: detail_atlas()
     if "terrain" in only: terrain_textures()
@@ -822,3 +884,5 @@ if __name__ == "__main__":
     if "icons" in only: icons()
     if "portraits" in only: pixelate_portraits()
     if "volcano" in only: volcano_textures()
+    if "frost" in only: frost_textures()
+    if "keep" in only: keep_textures()

@@ -34,6 +34,10 @@ namespace MultiBash
         public AudioClip lavaSizzle;
         public AudioClip heartbeat;
         public AudioClip crit;
+        public AudioClip footstep;
+        public AudioClip land;
+        public AudioClip bounce;
+        public AudioClip smash;
 
         [Header("Pickups")]
         public AudioClip gem;

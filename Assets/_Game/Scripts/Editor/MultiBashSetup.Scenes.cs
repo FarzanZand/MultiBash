@@ -22,12 +22,15 @@ namespace MultiBash.EditorTools
             if (Force || !System.IO.File.Exists(game)) BuildGameScene(game);
             string volcano = Scenes + "/Volcano.unity";
             if (Force || !System.IO.File.Exists(volcano)) BuildVolcanoScene(volcano);
+            string frost = Scenes + "/Frost.unity";
+            if (Force || !System.IO.File.Exists(frost)) BuildFrostScene(frost);
             EditorBuildSettings.scenes = new[]
             {
                 new EditorBuildSettingsScene(menu, true),
                 new EditorBuildSettingsScene(lobby, true),
                 new EditorBuildSettingsScene(game, true),
                 new EditorBuildSettingsScene(volcano, true),
+                new EditorBuildSettingsScene(frost, true),
             };
         }
 
@@ -368,6 +371,8 @@ namespace MultiBash.EditorTools
             const int res = 257;
             data = new TerrainData { heightmapResolution = res, alphamapResolution = 256, baseMapResolution = 256 };
             data.size = new Vector3(size, maxH, size);
+            // save the asset first: alphamaps written before CreateAsset are lost (splat textures become sub-assets)
+            AssetDatabase.CreateAsset(data, assetPath);
             var heights = new float[res, res];
             for (int iz = 0; iz < res; iz++)
             for (int ix = 0; ix < res; ix++)
@@ -380,8 +385,9 @@ namespace MultiBash.EditorTools
             data.terrainLayers = layers;
 
             int ar = data.alphamapResolution;
-            var maps = new float[ar, ar, 4];
-            var w = new float[4];
+            int nl = layers.Length;
+            var maps = new float[ar, ar, nl];
+            var w = new float[nl];
             for (int iz = 0; iz < ar; iz++)
             for (int ix = 0; ix < ar; ix++)
             {
@@ -389,10 +395,11 @@ namespace MultiBash.EditorTools
                 float steep = data.GetSteepness(nx, nz);
                 float x = nx * size - size / 2f, z = nz * size - size / 2f;
                 splat(data, x, z, steep, data.GetInterpolatedHeight(nx, nz) - HeightBase, w);
-                for (int k = 0; k < 4; k++) maps[iz, ix, k] = w[k];
+                for (int k = 0; k < nl; k++) maps[iz, ix, k] = w[k];
             }
             data.SetAlphamaps(0, 0, maps);
-            AssetDatabase.CreateAsset(data, assetPath);
+            EditorUtility.SetDirty(data);
+            AssetDatabase.SaveAssets();
 
             var go = Terrain.CreateTerrainGameObject(data);
             go.name = "Terrain";
@@ -405,179 +412,6 @@ namespace MultiBash.EditorTools
             t.heightmapPixelError = 4f;
             t.drawInstanced = true;
             return t;
-        }
-
-        static void BuildGameScene(string path)
-        {
-            if (AssetDatabase.LoadAssetAtPath<TerrainData>(Scenes + "/GameTerrain.asset") != null)
-                AssetDatabase.DeleteAsset(Scenes + "/GameTerrain.asset");
-            var scene = NewScene();
-            HeightBase = 0f;
-            var cfg = Load<GameConfig>(Content + "/GameConfig.asset");
-            float half = cfg != null ? cfg.arenaHalfSize : 58f;
-            Atmosphere(22f, 190f);
-            Sun(new Vector3(38, -35, 0), new Color(1f, 0.93f, 0.82f), 1.2f);
-            PostVolume();
-            var terrain = BuildTerrain(half, out var data);
-            float H(Vector3 p) => terrain.SampleHeight(p);
-
-            // invisible arena walls (the terrain also rises outside)
-            var walls = new GameObject("ArenaWalls").transform;
-            int env = LayerMask.NameToLayer("Environment");
-            for (int i = 0; i < 4; i++)
-            {
-                var w = new GameObject("Wall" + i) { layer = env };
-                w.transform.SetParent(walls);
-                var bc = w.AddComponent<BoxCollider>();
-                bool xAxis = i < 2;
-                float s = i % 2 == 0 ? 1 : -1;
-                w.transform.position = xAxis ? new Vector3(s * (half + 0.5f), 20, 0) : new Vector3(0, 20, s * (half + 0.5f));
-                bc.size = xAxis ? new Vector3(1, 60, half * 2 + 2) : new Vector3(half * 2 + 2, 60, 1);
-            }
-
-            var deco = new GameObject("Props").transform;
-            var rng = new System.Random(1234);
-            float R() => (float)rng.NextDouble();
-            var placed = new List<(Vector3 p, float r)>();
-            bool Free(Vector3 p, float r, float minCenter = 10f)
-            {
-                if (new Vector2(p.x, p.z).magnitude < minCenter) return false;
-                foreach (var o in placed) if ((new Vector2(o.p.x - p.x, o.p.z - p.z)).magnitude < o.r + r) return false;
-                return true;
-            }
-            float Steep(Vector3 p) => data.GetSteepness((p.x + 160f) / 320f, (p.z + 160f) / 320f);
-            void Scatter(string prop, int count, float r, float minScale, float maxScale, float maxSteep, float extent, bool block = true, float sink = 0.05f)
-            {
-                int made = 0, tries = 0;
-                while (made < count && tries++ < count * 40)
-                {
-                    var p = new Vector3((R() * 2 - 1) * extent, 0, (R() * 2 - 1) * extent);
-                    float s = Mathf.Lerp(minScale, maxScale, R());
-                    if (block && !Free(p, r * s)) continue;
-                    if (Steep(p) > maxSteep) continue;
-                    p.y = H(p) - sink;
-                    if (block) placed.Add((p, r * s));
-                    Place(prop, p, R() * 360f, s, deco);
-                    made++;
-                }
-            }
-            foreach (var p in Plateaus) placed.Add((new Vector3(p.c.x, 0, p.c.y), p.r * 0.8f));
-            var shrineSpots = new[] { new Vector3(16, 0, 14), new Vector3(-18, 0, -12), new Vector3(-10, 0, 40), new Vector3(42, 0, -8), new Vector3(8, 0, -36) };
-            foreach (var s in shrineSpots) placed.Add((s, 4.5f));
-
-            // castle wall ring just outside the arena (with gaps and towers) frames the battlefield like the reference
-            float wallD = half + 3.5f;
-            for (int side = 0; side < 4; side++)
-            {
-                for (float t = -wallD + 4f; t < wallD - 2f; t += 8f)
-                {
-                    if (R() < 0.18f) continue; // collapsed sections
-                    var local = new Vector3(t, 0, wallD);
-                    var p = Quaternion.Euler(0, side * 90f, 0) * local;
-                    p.y = H(p) - 0.8f;
-                    var w = Place("CastleWall", p, side * 90f + 180f + R() * 4f - 2f, 1f, deco);
-                    if (w != null && R() < 0.3f) w.transform.localScale = new Vector3(1f, 0.6f + R() * 0.3f, 1f); // broken height
-                }
-                var corner = Quaternion.Euler(0, side * 90f, 0) * new Vector3(wallD, 0, wallD);
-                corner.y = H(corner) - 0.8f;
-                Place("CastleTower", corner, R() * 360f, 1.1f, deco);
-                var mid = Quaternion.Euler(0, side * 90f, 0) * new Vector3(R() * 30f - 15f, 0, wallD + 1f);
-                mid.y = H(mid) - 0.8f;
-                Place("CastleTower", mid, R() * 360f, 0.9f, deco);
-            }
-
-            // landmarks inside: ruined towers on plateaus and edges
-            foreach (var t in new[] { new Vector3(-30, 0, 20), new Vector3(26, 0, -24), new Vector3(46, 0, 8), new Vector3(-46, 0, -30), new Vector3(8, 0, -48) })
-            {
-                var p = t;
-                p.y = H(p) - 0.3f;
-                Place("TowerRuin", p, R() * 360f, 0.8f + R() * 0.4f, deco);
-                placed.Add((p, 4f));
-            }
-            Scatter("WallRuin", 12, 3.5f, 0.9f, 1.2f, 14f, half - 6);
-            Scatter("Arch", 5, 3f, 0.9f, 1.2f, 10f, half - 8);
-            Scatter("RuneStone", 7, 1.5f, 0.9f, 1.3f, 14f, half - 6);
-            Scatter("Brazier", 12, 1.5f, 1f, 1f, 10f, half - 6);
-            Scatter("Banner", 12, 1.2f, 0.9f, 1.2f, 12f, half - 6);
-            Scatter("Crates", 12, 1.6f, 0.9f, 1.2f, 10f, half - 6);
-            Scatter("SkullPile", 16, 1.0f, 0.8f, 1.3f, 20f, half - 4, false);
-            Scatter("Mushrooms", 50, 0.5f, 0.8f, 1.6f, 25f, half - 2, false);
-            Scatter("FlowersA", 90, 0f, 0.8f, 1.4f, 25f, half, false, 0.02f);
-            Scatter("FlowersB", 90, 0f, 0.8f, 1.4f, 25f, half, false, 0.02f);
-            Scatter("TreeA", 16, 2.5f, 0.9f, 1.3f, 18f, half - 3);
-            Scatter("TreeB", 16, 2.5f, 0.9f, 1.3f, 18f, half - 3);
-            Scatter("TreePine", 14, 2f, 1.0f, 1.5f, 20f, half - 3);
-            Scatter("RockA", 18, 1.8f, 0.8f, 1.4f, 30f, half - 3);
-            Scatter("RockB", 10, 2.6f, 0.8f, 1.3f, 30f, half - 3);
-            Scatter("Log", 10, 1.8f, 0.9f, 1.1f, 10f, half - 4);
-            Scatter("PillarBroken", 8, 2f, 0.9f, 1.2f, 12f, half - 4);
-            Scatter("LanternPost", 10, 1.5f, 1f, 1f, 10f, half - 4);
-            // a small graveyard corner
-            for (int i = 0; i < 18; i++)
-            {
-                var p = new Vector3(-38 + (i % 6) * 3.2f + R(), 0, 34 + (i / 6) * 3.4f + R());
-                if (Steep(p) > 15f) continue;
-                p.y = H(p);
-                Place(i % 3 == 0 ? "TombstoneB" : "TombstoneA", p, 180 + R() * 20 - 10, 1f, deco);
-            }
-            Scatter("Bush", 60, 1.2f, 0.8f, 1.3f, 25f, half - 2, false);
-            Scatter("GrassTuft", 1100, 0f, 0.7f, 1.5f, 35f, half, false, 0.02f);
-            // trees on the hills outside the arena frame the view
-            for (int i = 0; i < 70; i++)
-            {
-                float a = R() * Mathf.PI * 2f, d = half + 6f + R() * 50f;
-                var p = new Vector3(Mathf.Cos(a) * d, 0, Mathf.Sin(a) * d);
-                p.x = Mathf.Clamp(p.x, -150, 150);
-                p.z = Mathf.Clamp(p.z, -150, 150);
-                p.y = H(p) - 0.3f;
-                Place(i % 3 == 0 ? "TreePine" : (i % 2 == 0 ? "TreeA" : "TreeB"), p, R() * 360f, 1.2f + R() * 0.8f, deco);
-            }
-            Backdrop(deco, 230f, 18, 3);
-
-            // Fusion needs the scene saved (so it has a GUID) before it can bake scene NetworkObjects
-            EditorSceneManager.SaveScene(scene, path);
-
-            var gmGo = new GameObject("GameManager");
-            gmGo.AddComponent<NetworkObject>();
-            gmGo.AddComponent<GameManager>().map = Load<MapDefinition>(Content + "/Maps/Graveyard.asset");
-
-            // charge shrines (scene network objects)
-            int si = 0;
-            foreach (var s in shrineSpots)
-            {
-                var go = new GameObject("Shrine" + si++);
-                var p = s;
-                p.y = H(p) - 0.15f;
-                go.transform.position = p;
-                go.AddComponent<NetworkObject>();
-                var shrine = go.AddComponent<Shrine>();
-                var baseM = InstantiateModel(Model("Environment", "ShrineBase"), go.transform);
-                baseM.name = "Base";
-                var crystalHolder = new GameObject("Crystal").transform;
-                crystalHolder.SetParent(go.transform, false);
-                InstantiateModel(Model("Environment", "ShrineCrystal"), crystalHolder);
-                shrine.crystal = crystalHolder;
-                var l = new GameObject("Light").AddComponent<Light>();
-                l.transform.SetParent(go.transform, false);
-                l.transform.localPosition = new Vector3(0, 2.6f, 0);
-                l.type = LightType.Point;
-                l.color = new Color(0.4f, 0.8f, 1f);
-                l.range = 9f;
-                l.intensity = 2f;
-                l.shadows = LightShadows.None;
-            }
-
-            MakeFx();
-
-            var rigGo = new GameObject("CameraRig");
-            var rig = rigGo.AddComponent<CameraRig>();
-            rig.cam = MakeCamera("Camera", rigGo.transform);
-            rigGo.transform.position = new Vector3(0, 10, -10);
-
-            new GameObject("HUD").AddComponent<HUD>();
-
-            OrganizeScene(scene);
-            EditorSceneManager.SaveScene(scene, path);
         }
     }
 }

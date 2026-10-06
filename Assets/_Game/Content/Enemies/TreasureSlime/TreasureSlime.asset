@@ -27,6 +27,7 @@ MonoBehaviour:
   hopHeight: 1.1
   fodder: 0
   scale: 1
+  tint: {r: 1, g: 1, b: 1, a: 1}
   gearSize: 1.4
   xpChance: 1
   flees: 1
