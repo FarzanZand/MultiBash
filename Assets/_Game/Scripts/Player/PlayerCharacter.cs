@@ -154,9 +154,13 @@ namespace MultiBash
                 var arm = fore != null ? fore : _rig.FindPart("ArmR");
                 if (arm != null)
                 {
+                    // placed in character space (works for axis-aligned parts and for skinned bones with their own axes)
+                    var root = _rig.transform;
+                    var offset = fore != null ? new Vector3(0f, -0.34f, -0.02f) : new Vector3(0f, -0.64f, -0.02f);
                     _hand = new GameObject("Hand_R").transform;
                     _hand.SetParent(arm, false);
-                    _hand.localPosition = fore != null ? new Vector3(0f, -0.34f, -0.02f) : new Vector3(0f, -0.64f, -0.02f);
+                    _hand.SetPositionAndRotation(arm.position + root.TransformVector(offset), root.rotation);
+                    _hand.localScale = Vector3.one * (root.lossyScale.x / Mathf.Max(1e-4f, arm.lossyScale.x));
                 }
             }
             _orbit = gameObject.AddComponent<OrbitVisual>();

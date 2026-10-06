@@ -176,7 +176,7 @@ namespace MultiBash.EditorTools
             lr.receiveShadows = false;
             var zone = lava.AddComponent<LavaZone>();
             zone.level = LavaLevel;
-            zone.damagePerSecond = 24f;
+            zone.damagePerSecond = 15f;
 
             // glow lights over the lava (no shadows, cheap)
             var glow = new GameObject("LavaGlow").transform;

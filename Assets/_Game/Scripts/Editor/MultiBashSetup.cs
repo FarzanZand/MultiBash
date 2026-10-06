@@ -152,7 +152,12 @@ namespace MultiBash.EditorTools
             {
                 var mi = (ModelImporter)AssetImporter.GetAtPath(path);
                 bool dirty = false;
-                if (mi.animationType != ModelImporterAnimationType.None) { mi.animationType = ModelImporterAnimationType.None; dirty = true; }
+                // heroes are skinned meshes with an armature (Tools/Blender/characters.py): generic rig, no avatar, axis baked
+                bool skinned = path.Contains("/Characters/");
+                var anim = skinned ? ModelImporterAnimationType.Generic : ModelImporterAnimationType.None;
+                if (mi.animationType != anim) { mi.animationType = anim; dirty = true; }
+                if (skinned && mi.avatarSetup != ModelImporterAvatarSetup.NoAvatar) { mi.avatarSetup = ModelImporterAvatarSetup.NoAvatar; dirty = true; }
+                if (mi.bakeAxisConversion != skinned) { mi.bakeAxisConversion = skinned; dirty = true; }
                 if (mi.importAnimation) { mi.importAnimation = false; dirty = true; }
                 if (mi.importCameras || mi.importLights) { mi.importCameras = false; mi.importLights = false; dirty = true; }
                 if (mi.materialImportMode != ModelImporterMaterialImportMode.ImportStandard) { mi.materialImportMode = ModelImporterMaterialImportMode.ImportStandard; dirty = true; }
@@ -178,6 +183,16 @@ namespace MultiBash.EditorTools
                 t.wrapMode = TextureWrapMode.Repeat;
                 t.sRGBTexture = false;
             });
+            foreach (var p in Find("t:Texture2D", Tex + "/Characters"))
+                Texture(p, t =>
+                {
+                    t.filterMode = FilterMode.Point;
+                    t.mipmapEnabled = true;
+                    t.textureCompression = TextureImporterCompression.Uncompressed;
+                    t.wrapMode = TextureWrapMode.Clamp;
+                    t.sRGBTexture = true;
+                    t.alphaIsTransparency = false;
+                });
             foreach (var n in new[] { "T_TerrainGrass", "T_TerrainDirt", "T_TerrainCliff", "T_TerrainMoss",
                          "T_TerrainBasalt", "T_TerrainAsh", "T_TerrainMagma", "T_TerrainVolcCliff", "T_Lava" })
                 Texture($"{Tex}/{n}.png", t =>
@@ -397,6 +412,24 @@ namespace MultiBash.EditorTools
                 m.SetTexture("_MainTex", Load<Texture2D>(Vfx + "/T_SoftParticle.png"));
                 m.enableInstancing = true;
             });
+
+            // per-hero materials with their baked painted textures (names match the FBX materials "M_Char_<Name>")
+            foreach (var texPath in Find("t:Texture2D", Tex + "/Characters"))
+            {
+                string hero = Path.GetFileNameWithoutExtension(texPath).Replace("T_Char_", "");
+                Mat($"{Mats}/M_Char_{hero}.mat", pixelLit, m =>
+                {
+                    m.SetTexture("_BaseMap", Load<Texture2D>(texPath));
+                    m.SetTexture("_DetailAtlas", Load<Texture2D>(Tex + "/T_DetailAtlas.png"));
+                    m.SetColor("_BaseColor", Color.white);
+                    m.SetFloat("_DetailTile", 1.6f);
+                    m.SetFloat("_DetailStrength", 0.4f);
+                    m.SetColor("_EmissionColor", Color.black);
+                    m.SetFloat("_Wrap", 0.35f);
+                    m.SetColor("_ShadowTint", new Color(0.45f, 0.58f, 0.8f));
+                    m.enableInstancing = true;
+                });
+            }
 
             // make every model use the shared palette material (remap by name "M_Palette")
             foreach (var path in Find("t:Model", Models))

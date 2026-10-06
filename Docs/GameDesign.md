@@ -178,7 +178,7 @@ The host picks the map in the lobby (`<` `>` under **Map**); everyone sees the c
 
 ### Molten Caldera (`Volcano` scene, danger x1.15)
 - Dark basalt plains cut by two **lava rivers** with rock bridges, three lava lakes, and basalt mesas with ramps.
-- **Lava burns players** (about 24 HP/s, ignores armor) but enemies walk right over it, so a river is
+- **Lava burns players** (about 15 HP/s, ignores armor) but enemies walk right over it, so a river is
   a shortcut for them and a hazard for you. Jump (or double jump) across.
 - Charred trees, obsidian spires, fire totems, sulfur vents, glowing lava rocks; a ring of basalt columns
   frames the arena; smoking volcanoes and ash mountains on a red horizon; rising embers.

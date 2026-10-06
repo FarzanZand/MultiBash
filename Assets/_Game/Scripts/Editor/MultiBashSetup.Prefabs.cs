@@ -22,7 +22,8 @@ namespace MultiBash.EditorTools
             var go = (GameObject)PrefabUtility.InstantiatePrefab(model);
             go.transform.SetParent(parent, false);
             go.name = "Model";
-            foreach (var r in go.GetComponentsInChildren<Renderer>()) r.sharedMaterial = PaletteMat;
+            foreach (var r in go.GetComponentsInChildren<Renderer>())
+                if (r.sharedMaterial == null || !r.sharedMaterial.name.StartsWith("M_Char_")) r.sharedMaterial = PaletteMat;
             return go;
         }
 

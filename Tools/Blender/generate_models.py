@@ -139,6 +139,8 @@ def build(category, name, fn):
     JOINTS.clear()
     reset()
     fn()
+    if name in SMOOTH_ENEMIES:
+        _smooth_all()
     export(category, name)
 
 
@@ -1210,6 +1212,984 @@ VOLCANO_MODELS = [
 ]
 
 
+
+# ----------------------------------------------------------------------------- heroes v2 (Megabonk-like: chunky faceted low-poly, tapered limbs, big round heads)
+
+HEAD_Z = 1.84
+
+
+def hero(c, body_extra=(), arm_extra_l=(), arm_extra_r=(), head_extra=(), skirt=None, face=True, hair=None, shoulder=None):
+    """Same joints/pivots as humanoid() (ProceduralRig compatible) but sculpted from tapered, faceted shapes."""
+    body = [
+        part("cyl", (0, 0, 0.99), (0.40, 0.28, 0.20), c["legs"], verts=8),                       # hips
+        part("cone", (0, 0, 1.20), (0.36, 0.26, 0.30), c["torso"], verts=8, r2=0.62),            # waist, flares up
+        part("ico", (0, 0.0, 1.42), (0.54, 0.36, 0.36), c.get("chest", c["torso"]), sub=1),       # chest
+        part("cyl", (0, 0, 1.08), (0.43, 0.31, 0.07), c["belt"], verts=8),                        # belt
+        part("cube", (0, -0.155, 1.08), (0.08, 0.02, 0.07), "gold"),                               # buckle
+        part("cyl", (0, 0, 1.61), (0.14, 0.14, 0.12), c["skin"], verts=6),                       # neck
+    ]
+    if skirt:
+        body.append(part("cone", (0, 0, 0.62), (0.66, 0.52, 0.80), skirt, r2=0.36, verts=9))
+    if shoulder:
+        for s in (-1, 1):
+            body.append(part("ico", (0.32 * s, 0, 1.55), (0.26, 0.26, 0.2), shoulder, sub=1))
+    body += [f() for f in body_extra]
+    Body = group("Body", body, (0, 0, HIP_Z))
+
+    hd = []
+    if face:
+        skin, dark = c["skin"], c.get("skin_dark", c["skin"])
+        hd += [
+            part("ico", (0, 0, HEAD_Z), (0.40, 0.38, 0.40), skin, sub=2),                         # round head
+            part("cube", (0, -0.08, 1.72), (0.26, 0.2, 0.08), skin),                               # jaw
+            part("cube", (-0.075, -0.188, 1.85), (0.05, 0.02, 0.085), "black"),                    # eyes (tall pills)
+            part("cube", (0.075, -0.188, 1.85), (0.05, 0.02, 0.085), "black"),
+            part("cube", (-0.065, -0.196, 1.875), (0.018, 0.01, 0.025), "white"),                 # eye glints
+            part("cube", (0.085, -0.196, 1.875), (0.018, 0.01, 0.025), "white"),
+            part("cone", (0, -0.2, 1.8), (0.06, 0.07, 0.07), dark, verts=4, rot=(-80, 0, 0)),      # nose
+            part("cube", (-0.075, -0.19, 1.91), (0.07, 0.015, 0.018), dark),                       # brows
+            part("cube", (0.075, -0.19, 1.91), (0.07, 0.015, 0.018), dark),
+            part("ico", (-0.2, 0, 1.83), (0.06, 0.08, 0.1), skin, sub=1),                          # ears
+            part("ico", (0.2, 0, 1.83), (0.06, 0.08, 0.1), skin, sub=1),
+        ]
+    if hair:
+        hd += [
+            part("ico", (0, 0.04, 1.93), (0.43, 0.42, 0.3), hair, sub=1),                          # hair cap
+            part("cube", (0, 0.12, 1.8), (0.38, 0.18, 0.26), hair),                                 # back of the head
+            part("cone", (-0.1, -0.15, 1.97), (0.14, 0.1, 0.14), hair, verts=4, rot=(-120, 0, 20)),  # fringe tufts
+            part("cone", (0.06, -0.16, 1.98), (0.14, 0.1, 0.12), hair, verts=4, rot=(-120, 0, -15)),
+        ]
+    hd += [f() for f in head_extra]
+    if hd:
+        JOINTS.append(group("Head", hd, (0, 0, NECK_Z)))
+
+    def arm(side, extra):
+        x = 0.32 * side
+        upper = group("ArmR" if side < 0 else "ArmL", [
+            part("ico", (x, 0, 1.52), (0.17, 0.17, 0.17), c["arms"], sub=1),                      # shoulder ball
+            part("cone", (x, 0, 1.39), (0.15, 0.16, 0.30), c["arms"], verts=6, r2=0.38, rot=(180, 0, 0)),  # tapered upper arm
+        ], (x, 0, SHOULDER_Z))
+        fore = [
+            part("cone", (x, -0.01, 1.12), (0.15, 0.15, 0.28), c.get("forearm", c["arms"]), verts=6, r2=0.36, rot=(180, 0, 0)),
+            part("cyl", (x, -0.01, 1.0), (0.15, 0.15, 0.06), c.get("cuff", c.get("forearm", c["arms"])), verts=6),  # cuff
+            part("ico", (x, -0.01, 0.91), (0.13, 0.14, 0.13), c.get("hands", c["skin"]), sub=1),  # fist
+            part("ico", (x - 0.04 * side, -0.06, 0.94), (0.05, 0.05, 0.06), c.get("hands", c["skin"]), sub=1),  # thumb
+        ]
+        fore += [f() for f in extra]
+        JOINTS.append(group("ForeArmR" if side < 0 else "ForeArmL", fore, (x, 0, ELBOW_Z)))
+        return upper
+
+    def leg(side):
+        x = 0.11 * side
+        thigh = group("LegR" if side < 0 else "LegL", [
+            part("cone", (x, 0, 0.73), (0.19, 0.21, 0.42), c["legs"], verts=6, r2=0.62),           # thigh, wide at hip
+        ], (x, 0, HIP_Z))
+        shin = group("ShinR" if side < 0 else "ShinL", [
+            part("cone", (x, 0, 0.33), (0.15, 0.17, 0.40), c.get("shins", c["legs"]), verts=6, r2=0.62),
+            part("cyl", (x, 0, 0.17), (0.18, 0.19, 0.12), c["boots"], verts=6),                    # boot cuff
+            part("ico", (x, -0.05, 0.07), (0.17, 0.28, 0.14), c["boots"], sub=1),                  # rounded boot
+            part("cube", (x, -0.03, 0.015), (0.17, 0.28, 0.03), "black"),                          # sole
+        ], (x, 0, KNEE_Z))
+        JOINTS.append(shin)
+        return thigh
+
+    parts = [Body, arm(1, arm_extra_l), arm(-1, arm_extra_r), leg(-1), leg(1)]
+    return root_with(parts + JOINTS)
+
+
+def knight():
+    c = dict(torso="steel_dark", chest="steel", arms="steel", forearm="steel_dark", cuff="gold_dark", legs="steel_dark",
+             shins="steel", boots="dark_iron", belt="leather", skin="steel", hands="steel_dark")
+    hero(
+        c, face=False, shoulder="steel",
+        body_extra=[
+            lambda: part("cone", (0, -0.1, 1.33), (0.4, 0.12, 0.5), "cloth_white", verts=4, r2=0.62, rot=(0, 0, 45)),   # surcoat
+            lambda: part("cube", (0, -0.17, 1.37), (0.06, 0.02, 0.28), "cloth_red"),                # cross
+            lambda: part("cube", (0, -0.17, 1.42), (0.2, 0.02, 0.06), "cloth_red"),
+            lambda: part("cone", (0, -0.13, 0.92), (0.3, 0.06, 0.3), "cloth_white", verts=4, rot=(180, 0, 45)),  # tabard tail
+            lambda: part("ico", (-0.36, 0, 1.6), (0.3, 0.3, 0.2), "steel", sub=1),                 # big pauldrons
+            lambda: part("ico", (0.36, 0, 1.6), (0.3, 0.3, 0.2), "steel", sub=1),
+            lambda: part("cube", (-0.36, 0, 1.6), (0.32, 0.06, 0.04), "gold_dark"),
+            lambda: part("cube", (0.36, 0, 1.6), (0.32, 0.06, 0.04), "gold_dark"),
+            lambda: part("cone", (0, 0.2, 1.15), (0.5, 0.08, 0.85), "cloth_red", verts=4, r2=0.3, rot=(8, 0, 45)),   # cape
+        ],
+        head_extra=[
+            lambda: part("ico", (0, 0, HEAD_Z), (0.42, 0.4, 0.44), "steel", sub=2),                 # rounded great helm
+            lambda: part("cyl", (0, 0, 1.73), (0.36, 0.34, 0.08), "steel_dark", verts=8),          # gorget
+            lambda: part("cube", (0, -0.2, 1.86), (0.24, 0.03, 0.035), "black"),                   # visor slit
+            lambda: part("cube", (0, -0.2, 1.8), (0.035, 0.03, 0.09), "black"),
+            lambda: part("cube", (0, -0.17, 1.95), (0.05, 0.08, 0.15), "gold"),                    # brow ridge
+            lambda: part("cone", (0, 0.05, 2.12), (0.1, 0.22, 0.3), "cloth_red", verts=4, rot=(-30, 0, 0)),   # plume
+            lambda: part("cone", (0, 0.16, 2.02), (0.08, 0.2, 0.26), "cloth_red", verts=4, rot=(-75, 0, 0)),
+        ],
+        arm_extra_l=[lambda: part("cube", (0.42, -0.02, 1.06), (0.06, 0.44, 0.52), "knight_blue"),             # shield
+                     lambda: part("cube", (0.455, -0.02, 1.06), (0.02, 0.1, 0.34), "gold"),
+                     lambda: part("cube", (0.455, -0.02, 1.1), (0.02, 0.3, 0.08), "gold")],
+    )
+
+
+def ranger():
+    c = dict(torso="leather", chest="ranger_green", arms="ranger_green", forearm="leather_dark", cuff="leather",
+             legs="leather_dark", shins="leather_dark", boots="leather_dark", belt="leather_dark", skin="skin",
+             skin_dark="skin_dark", hands="leather")
+    hero(
+        c, hair="wood",
+        body_extra=[
+            lambda: part("cone", (0, 0.18, 1.1), (0.52, 0.08, 0.95), "ranger_dark", verts=4, r2=0.3, rot=(8, 0, 45)),   # cloak
+            lambda: part("cyl", (0.12, 0.22, 1.42), (0.14, 0.14, 0.52), "leather", rot=(-12, 0, -18), verts=6),  # quiver
+            lambda: part("cone", (0.04, 0.27, 1.73), (0.05, 0.03, 0.14), "white", rot=(-12, 0, -18), verts=3),   # fletchings
+            lambda: part("cone", (0.13, 0.27, 1.75), (0.05, 0.03, 0.14), "cloth_red", rot=(-12, 0, -18), verts=3),
+            lambda: part("cube", (0, -0.17, 1.33), (0.06, 0.03, 0.52), "leather_dark", rot=(0, 32, 0)),        # strap
+            lambda: part("cone", (0, 0.03, 1.58), (0.56, 0.42, 0.16), "ranger_green", verts=8, r2=0.3),      # mantle
+        ],
+        head_extra=[
+            lambda: part("cone", (0, 0.08, 1.96), (0.48, 0.48, 0.42), "ranger_green", verts=7, r2=0.06, rot=(-25, 0, 0)),  # hood
+            lambda: part("cone", (0, 0.28, 1.95), (0.16, 0.16, 0.3), "ranger_green", verts=4, rot=(-110, 0, 0)),  # hood tip
+        ],
+    )
+
+
+def mage():
+    c = dict(torso="mage_red", chest="mage_red", arms="mage_red", forearm="mage_red_dark", cuff="gold", legs="mage_red_dark",
+             boots="black", belt="gold", skin="skin", skin_dark="skin_dark", hands="skin")
+    hero(
+        c, skirt="mage_red",
+        body_extra=[
+            lambda: part("cube", (0, -0.17, 1.3), (0.08, 0.02, 0.5), "gold"),
+            lambda: part("cone", (0, -0.17, 1.55), (0.3, 0.12, 0.42), "cloth_white", rot=(180, 0, 0), verts=6),  # big beard
+            lambda: part("cone", (0, 0.04, 1.58), (0.6, 0.44, 0.14), "mage_red_dark", verts=8, r2=0.32),      # collar
+            lambda: part("cone", (0, 0.2, 1.1), (0.5, 0.08, 0.9), "mage_red_dark", verts=4, r2=0.3, rot=(6, 0, 45)),  # cape
+        ],
+        head_extra=[
+            lambda: part("cone", (0, -0.17, 1.71), (0.24, 0.1, 0.16), "cloth_white", rot=(180, 0, 0), verts=6),   # moustache
+            lambda: part("cyl", (0, 0, 1.97), (0.7, 0.7, 0.05), "mage_red_dark", verts=10),       # brim
+            lambda: part("cone", (0, 0.06, 2.28), (0.42, 0.42, 0.66), "mage_red", verts=8, rot=(-16, 0, 0)),
+            lambda: part("cone", (0, 0.2, 2.56), (0.16, 0.16, 0.24), "mage_red", verts=6, rot=(-55, 0, 0)),    # bent tip
+            lambda: part("cyl", (0, 0, 2.02), (0.44, 0.44, 0.06), "gold", verts=8),                 # band
+            lambda: part("ico", (0, -0.2, 2.03), (0.07, 0.04, 0.07), "lightning", sub=1),           # gem
+        ],
+    )
+
+
+def alchemist():
+    c = dict(torso="cloth_white", chest="cloth_white", arms="alch_orange", forearm="cloth_white", cuff="leather",
+             legs="leather_dark", boots="black", belt="leather", skin="skin", skin_dark="skin_dark", hands="leather")
+    hero(
+        c, hair="leather_dark",
+        body_extra=[
+            lambda: part("cone", (0, -0.13, 1.12), (0.42, 0.1, 0.72), "alch_orange", verts=4, r2=0.35, rot=(0, 0, 45)),  # apron
+            lambda: part("cube", (0, 0.22, 1.33), (0.38, 0.18, 0.42), "leather"),                   # backpack
+            lambda: part("cube", (0, 0.32, 1.2), (0.3, 0.04, 0.12), "leather_dark"),
+            lambda: part("cyl", (-0.1, 0.25, 1.62), (0.09, 0.09, 0.18), "poison", verts=6),
+            lambda: part("cyl", (0.1, 0.25, 1.62), (0.09, 0.09, 0.18), "gem_blue", verts=6),
+            lambda: part("cyl", (-0.22, -0.08, 1.04), (0.1, 0.1, 0.14), "gem_red", verts=6),         # belt vials
+            lambda: part("cyl", (0.22, -0.08, 1.04), (0.1, 0.1, 0.14), "poison", verts=6),
+        ],
+        head_extra=[
+            lambda: part("cyl", (0, 0, 1.9), (0.43, 0.42, 0.04), "leather_dark", verts=10),          # goggle strap
+            lambda: part("cyl", (-0.08, -0.19, 1.9), (0.12, 0.12, 0.05), "gold", rot=(90, 0, 0), verts=8),  # goggles on forehead
+            lambda: part("cyl", (0.08, -0.19, 1.9), (0.12, 0.12, 0.05), "gold", rot=(90, 0, 0), verts=8),
+            lambda: part("cyl", (-0.08, -0.215, 1.9), (0.08, 0.08, 0.01), "glass", rot=(90, 0, 0), verts=8),
+            lambda: part("cyl", (0.08, -0.215, 1.9), (0.08, 0.08, 0.01), "glass", rot=(90, 0, 0), verts=8),
+        ],
+    )
+
+
+
+# ----------------------------------------------------------------------------- heroes v3: PS2-era low-poly anatomy
+# Continuous, smooth-shaded limbs grown from joint chains with Blender's Skin modifier (+1 subdivision), heroic
+# proportions (~6 heads tall, broad shoulders, narrow waist, tapered muscles). Same joint names/pivots as humanoid().
+
+def skin(points, color, subdiv=1, smooth=True, edges=None):
+    """points: [((x,y,z), (rx,ry)), ...] -> organic tube through them (chain unless edges given)."""
+    me = bpy.data.meshes.new("skin")
+    verts = [p for p, _ in points]
+    if edges is None:
+        edges = [(i, i + 1) for i in range(len(points) - 1)]
+    me.from_pydata(verts, edges, [])
+    o = bpy.data.objects.new("skin", me)
+    bpy.context.scene.collection.objects.link(o)
+    bpy.ops.object.select_all(action="DESELECT")
+    o.select_set(True)
+    bpy.context.view_layer.objects.active = o
+    m = o.modifiers.new("Skin", "SKIN")
+    m.use_smooth_shade = smooth
+    for i, (_, r) in enumerate(points):
+        sv = me.skin_vertices[0].data[i]
+        sv.radius = r if isinstance(r, tuple) else (r, r)
+        sv.use_root = i == 0
+    if subdiv:
+        s = o.modifiers.new("Sub", "SUBSURF")
+        s.levels = subdiv
+        s.render_levels = subdiv
+    for mod in list(o.modifiers):
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    _finish(o, (1, 1, 1), color)
+    for p in o.data.polygons:
+        p.use_smooth = smooth
+    return o
+
+
+def soft(kind, loc, size, color, **kw):
+    """A primitive part, smooth shaded (rounded, painted-look instead of faceted)."""
+    o = part(kind, loc, size, color, **kw)
+    for p in o.data.polygons:
+        p.use_smooth = True
+    return o
+
+
+HEAD_C = 1.77
+
+
+def extras(fns, side):
+    out = []
+    for f in fns:
+        r = f(side)
+        out += r if isinstance(r, list) else [r]
+    return out
+
+
+def plate(kind, loc, size, color, edge="steel_edge", grow=1.12, **kw):
+    """Armor plate with a dark rim: a slightly larger dark copy behind the main piece reads as a painted outline."""
+    big = tuple(v * grow for v in size)
+    return [soft(kind, loc, big, edge, **kw), soft(kind, loc, size, color, **kw)]
+
+
+def body3(c, body_extra=(), arm_extra_l=(), arm_extra_r=(), head_extra=(), head=True, face="human", bare_arms=False,
+          upper_extra=(), leg_extra=(), shin_extra=()):
+    """upper_extra / leg_extra / shin_extra: functions f(side) -> part or list, attached to that limb (they animate with it)."""
+    """c: palette names: torso, chest, arms, forearm, hands, legs, shins, boots, belt, skin, skin_dark."""
+    body = [
+        skin([((0, 0, 0.94), (0.17, 0.11)), ((0, 0, 1.12), (0.135, 0.095)), ((0, -0.01, 1.34), (0.215, 0.135)),
+              ((0, 0, 1.47), (0.245, 0.13)), ((0, 0, 1.55), (0.1, 0.08))], c.get("chest", c["torso"])),
+        skin([((0, 0, 1.52), (0.06, 0.06)), ((0, 0.005, 1.66), (0.055, 0.055))], c["skin"]),          # neck
+        skin([((0, 0, 0.9), (0.165, 0.115)), ((0, 0, 1.1), (0.14, 0.1))], c["torso"]),               # hips / waist cloth
+        soft("cyl", (0, 0, 1.06), (0.3, 0.22, 0.07), c["belt"], verts=10),                            # belt
+        part("cube", (0, -0.112, 1.06), (0.07, 0.02, 0.06), "gold"),                                   # buckle
+    ]
+    for s in (-1, 1):   # shoulder caps (deltoids) live on the body so the silhouette stays broad
+        body.append(soft("ico", (0.235 * s, 0, 1.49), (0.15, 0.15, 0.13), c.get("shoulder", c["arms"]), sub=2))
+    for f in body_extra:
+        r = f()
+        body += r if isinstance(r, list) else [r]
+    Body = group("Body", body, (0, 0, HIP_Z))
+
+    hd = []
+    if head:
+        skin_c, dark = c["skin"], c.get("skin_dark", c["skin"])
+        hd += [
+            soft("ico", (0, 0, HEAD_C), (0.24, 0.265, 0.29), skin_c, sub=2),                            # skull
+            soft("ico", (0, -0.055, 1.69), (0.17, 0.16, 0.13), skin_c, sub=2),                         # jaw / chin
+        ]
+        if face == "human":
+            hd += [
+                soft("ico", (-0.05, -0.122, 1.792), (0.03, 0.02, 0.036), "black", sub=1),            # eyes
+                soft("ico", (0.05, -0.122, 1.792), (0.03, 0.02, 0.036), "black", sub=1),
+                part("cube", (-0.055, -0.13, 1.818), (0.06, 0.02, 0.014), dark),                       # brows
+                part("cube", (0.055, -0.13, 1.818), (0.06, 0.02, 0.014), dark),
+                soft("cone", (0, -0.14, 1.755), (0.035, 0.05, 0.06), dark, verts=4, rot=(-75, 0, 0)), # nose
+                part("cube", (0, -0.132, 1.705), (0.06, 0.012, 0.012), dark),                          # mouth
+                soft("ico", (-0.122, 0, 1.775), (0.035, 0.05, 0.07), skin_c, sub=1),                   # ears
+                soft("ico", (0.122, 0, 1.775), (0.035, 0.05, 0.07), skin_c, sub=1),
+            ]
+    for f in head_extra:
+        r = f()
+        hd += r if isinstance(r, list) else [r]
+    if hd:
+        JOINTS.append(group("Head", hd, (0, 0, NECK_Z)))
+
+    def arm(side, extra):
+        x = side
+        upper = skin([((0.24 * x, 0, 1.53), (0.08, 0.08)), ((0.275 * x, 0, 1.38), (0.085, 0.08)),
+                      ((0.3 * x, 0.005, 1.25), (0.062, 0.062)), ((0.302 * x, 0.0, 1.19), (0.055, 0.055))],
+                     c["skin"] if bare_arms else c["arms"])
+        ups = [upper]
+        for f in upper_extra:
+            r = f(side)
+            ups += r if isinstance(r, list) else [r]
+        Upper = group("ArmR" if side < 0 else "ArmL", ups, (0.26 * x, 0, SHOULDER_Z))
+        fore = [
+            skin([((0.298 * x, 0, 1.31), (0.06, 0.06)), ((0.3 * x, 0, 1.25), (0.064, 0.064)), ((0.312 * x, -0.01, 1.14), (0.072, 0.066)),
+                  ((0.32 * x, -0.012, 0.99), (0.045, 0.045)), ((0.32 * x, -0.013, 0.95), (0.042, 0.045))], c.get("forearm", c["arms"])),
+            skin([((0.32 * x, -0.014, 1.0), (0.04, 0.05)), ((0.322 * x, -0.02, 0.91), (0.042, 0.062)),
+                  ((0.322 * x, -0.025, 0.84), (0.036, 0.05))], c.get("hands", c["skin"])),             # hand
+            soft("ico", (0.3 * x, -0.055, 0.92), (0.035, 0.035, 0.06), c.get("hands", c["skin"]), sub=1),  # thumb
+        ]
+        for f in extra:
+            r = f()
+            fore += r if isinstance(r, list) else [r]
+        JOINTS.append(group("ForeArmR" if side < 0 else "ForeArmL", fore, (0.3 * x, 0, ELBOW_Z)))
+        return Upper
+
+    def leg(side):
+        x = 0.105 * side
+        thigh = group("LegR" if side < 0 else "LegL", [
+            skin([((x, 0, 1.0), (0.11, 0.11)), ((x, 0, 0.96), (0.118, 0.118)), ((x * 1.05, -0.01, 0.75), (0.1, 0.1)),
+                  ((x, -0.01, 0.53), (0.072, 0.075)), ((x, -0.01, 0.47), (0.066, 0.07))], c["legs"]),
+        ] + extras(leg_extra, side), (x, 0, HIP_Z))
+        shin = group("ShinR" if side < 0 else "ShinL", [
+            skin([((x, -0.01, 0.6), (0.066, 0.07)), ((x, -0.01, 0.53), (0.072, 0.075)), ((x, 0.014, 0.38), (0.082, 0.082)),
+                  ((x, 0, 0.14), (0.052, 0.056)), ((x, 0, 0.09), (0.05, 0.054))], c.get("shins", c["legs"])),
+            skin([((x, 0.01, 0.16), (0.06, 0.064)), ((x, -0.03, 0.06), (0.066, 0.05)), ((x, -0.15, 0.04), (0.056, 0.034))],
+                 c["boots"]),                                                                          # foot / boot
+        ] + extras(shin_extra, side), (x, 0, KNEE_Z))
+        JOINTS.append(shin)
+        return thigh
+
+    parts = [Body, arm(1, arm_extra_l), arm(-1, arm_extra_r), leg(-1), leg(1)]
+    return root_with(parts + JOINTS)
+
+
+def jagged_hem(z_top, z_bottom, r_top, r_bottom, color, points=9, depth=0.16, y_scale=0.8):
+    """Long coat skirt flaring out, with zig-zag points along the hem (Megabonk mage coat)."""
+    ps = [soft("cone", (0, 0.01, (z_top + z_bottom) / 2 + depth / 2), (r_bottom * 2, r_bottom * 2 * y_scale, z_top - z_bottom - depth),
+               color, verts=points * 2, r2=0.5 * r_top / r_bottom)]
+    zc = z_bottom + depth / 2
+    for i in range(points):
+        a = math.radians(i / points * 360 + 180 / points)
+        ps.append(soft("cone", (math.cos(a) * r_bottom * 0.93, math.sin(a) * r_bottom * 0.93 * y_scale + 0.01, zc),
+                       (0.2 * r_bottom * 3.2 / points * 2.2, 0.06, depth), color, verts=3, rot=(180, 0, math.degrees(a) + 90)))
+    return ps
+
+
+def knight():
+    c = dict(torso="steel_dark", chest="steel", arms="steel", shoulder="steel", forearm="steel_dark", hands="dark_iron",
+             legs="steel_dark", shins="steel", boots="dark_iron", belt="leather", skin="steel", skin_dark="steel_dark")
+    body3(
+        c, face="none",
+        body_extra=[
+            lambda: soft("cone", (0, -0.03, 1.27), (0.42, 0.28, 0.5), "cloth_white", verts=10, r2=0.62),   # surcoat
+            lambda: part("cube", (0, -0.14, 1.32), (0.05, 0.02, 0.26), "cloth_red"),
+            lambda: part("cube", (0, -0.14, 1.37), (0.18, 0.02, 0.05), "cloth_red"),
+            lambda: soft("cone", (0, -0.0, 0.88), (0.4, 0.3, 0.3), "steel_dark", verts=10, r2=0.4),       # tassets
+            lambda: soft("ico", (-0.27, 0, 1.53), (0.24, 0.24, 0.17), "steel", sub=2),                     # pauldrons
+            lambda: soft("ico", (0.27, 0, 1.53), (0.24, 0.24, 0.17), "steel", sub=2),
+            lambda: soft("cyl", (-0.27, 0, 1.5), (0.25, 0.25, 0.03), "gold_dark", verts=10),
+            lambda: soft("cyl", (0.27, 0, 1.5), (0.25, 0.25, 0.03), "gold_dark", verts=10),
+            lambda: soft("cone", (0, 0.16, 1.05), (0.46, 0.06, 0.95), "cloth_red", verts=4, r2=0.36, rot=(6, 0, 45)),  # cape
+        ],
+        head_extra=[
+            lambda: soft("ico", (0, 0, 1.78), (0.27, 0.29, 0.31), "steel", sub=2),                       # helm
+            lambda: soft("cyl", (0, 0.0, 1.66), (0.2, 0.2, 0.06), "steel_dark", verts=10),               # gorget
+            lambda: part("cube", (0, -0.14, 1.79), (0.17, 0.03, 0.025), "black"),                        # visor slit
+            lambda: part("cube", (0, -0.14, 1.74), (0.025, 0.03, 0.07), "black"),
+            lambda: soft("cube", (0, -0.12, 1.86), (0.04, 0.06, 0.12), "gold"),                          # crest ridge
+            lambda: soft("cone", (0, 0.06, 2.0), (0.06, 0.2, 0.22), "cloth_red", verts=6, rot=(-35, 0, 0)),   # plume
+        ],
+        arm_extra_l=[lambda: soft("cube", (0.37, -0.03, 1.05), (0.05, 0.36, 0.44), "knight_blue"),        # shield
+                     lambda: part("cube", (0.397, -0.03, 1.05), (0.02, 0.07, 0.3), "gold"),
+                     lambda: part("cube", (0.397, -0.03, 1.1), (0.02, 0.24, 0.06), "gold")],
+    )
+
+
+def ranger():
+    c = dict(torso="ranger_green", chest="ranger_green", arms="cloth_white", forearm="leather", hands="skin",
+             legs="cloth_white", shins="cloth_white", boots="leather_dark", belt="leather_dark", skin="skin", skin_dark="skin_dark")
+    body3(
+        c,
+        body_extra=[
+            lambda: soft("cone", (0, 0, 0.86), (0.42, 0.32, 0.28), "ranger_green", verts=10, r2=0.36),     # tunic skirt
+            lambda: soft("ico", (-0.24, 0, 1.49), (0.17, 0.17, 0.15), "ranger_green", sub=2),              # short sleeves
+            lambda: soft("ico", (0.24, 0, 1.49), (0.17, 0.17, 0.15), "ranger_green", sub=2),
+            lambda: soft("cyl", (0.1, 0.15, 1.38), (0.11, 0.11, 0.48), "leather", rot=(-12, 0, -22), verts=8),  # quiver
+            lambda: soft("cone", (0.04, 0.19, 1.67), (0.05, 0.03, 0.14), "cloth_red", rot=(-12, 0, -22), verts=3),
+            lambda: soft("cone", (0.12, 0.2, 1.68), (0.05, 0.03, 0.14), "cloth_red", rot=(-12, 0, -22), verts=3),
+            lambda: part("cube", (0, -0.125, 1.32), (0.04, 0.02, 0.44), "leather_dark", rot=(0, 35, 0)),   # strap
+        ],
+        head_extra=[
+            lambda: soft("ico", (0, 0.03, 1.81), (0.26, 0.27, 0.27), "flower_yellow", sub=2),             # blonde hair
+            lambda: soft("cube", (0, 0.07, 1.7), (0.22, 0.14, 0.16), "flower_yellow"),
+            lambda: soft("cone", (0, 0.02, 1.9), (0.27, 0.3, 0.2), "ranger_green", verts=10, r2=0.18, rot=(-10, 0, 0)),  # cap
+            lambda: soft("cone", (0, 0.14, 1.98), (0.1, 0.1, 0.22), "ranger_green", verts=6, rot=(-75, 0, 0)),          # cap tip
+            lambda: soft("cone", (0.1, 0.06, 1.98), (0.03, 0.02, 0.2), "cloth_red", verts=3, rot=(-40, 25, 0)),         # feather
+        ],
+    )
+
+
+def mage():
+    """Red mage after the Megabonk reference: shadowed face with glowing eyes, wide-brim hat, high collar,
+    long red coat with a jagged hem, black belt with gold buckle, dark gloves, glowing hands."""
+    c = dict(torso="mage_red", chest="mage_red", arms="mage_red", shoulder="mage_red", forearm="dark_iron", hands="dark_iron",
+             legs="mage_red_dark", shins="mage_red_dark", boots="black", belt="black", skin="black", skin_dark="black")
+    body3(
+        c, face="none",
+        body_extra=[
+            lambda: jagged_hem(1.12, 0.1, 0.16, 0.25, "mage_red", points=7, depth=0.24, y_scale=0.75),  # long coat
+            lambda: soft("cone", (0, 0.13, 0.95), (0.48, 0.07, 1.05), "mage_red_dark", verts=4, r2=0.3, rot=(4, 0, 45)),  # back cape
+            lambda: soft("cone", (0, 0.0, 1.6), (0.36, 0.32, 0.24), "mage_red", verts=10, r2=0.62),     # high collar
+            lambda: soft("cone", (-0.23, 0, 1.49), (0.24, 0.24, 0.16), "mage_red", verts=8, r2=0.2),    # shoulder capes
+            lambda: soft("cone", (0.23, 0, 1.49), (0.24, 0.24, 0.16), "mage_red", verts=8, r2=0.2),
+            lambda: part("cube", (0, -0.125, 1.06), (0.09, 0.02, 0.07), "gold"),
+        ],
+        head_extra=[
+            lambda: part("cube", (-0.05, -0.128, 1.79), (0.045, 0.02, 0.022), "lantern_glow"),         # glowing eyes in shadow
+            lambda: part("cube", (0.05, -0.128, 1.79), (0.045, 0.02, 0.022), "lantern_glow"),
+            lambda: soft("cone", (0, 0, 1.915), (0.62, 0.62, 0.05), "mage_red", verts=14, r2=0.42),   # wide brim
+            lambda: soft("cone", (0, 0.03, 2.13), (0.36, 0.36, 0.4), "mage_red", verts=12, r2=0.17, rot=(-8, 0, 0)),   # hat crown
+            lambda: soft("cone", (0, 0.1, 2.38), (0.13, 0.13, 0.22), "mage_red", verts=8, rot=(-32, 0, 0)),          # bent tip
+            lambda: soft("cyl", (0, 0, 1.96), (0.33, 0.33, 0.06), "dark_iron", verts=12),               # hat band
+        ],
+        arm_extra_l=[lambda: soft("ico", (0.33, -0.06, 0.86), (0.12, 0.12, 0.12), "lantern_glow", sub=2)],   # magic orb
+        arm_extra_r=[lambda: soft("ico", (-0.33, -0.06, 0.86), (0.12, 0.12, 0.12), "lantern_glow", sub=2)],
+    )
+
+
+def alchemist():
+    c = dict(torso="leather_dark", chest="cloth_white", arms="cloth_white", forearm="leather", hands="leather",
+             legs="leather_dark", shins="leather_dark", boots="black", belt="leather", skin="skin", skin_dark="skin_dark")
+    body3(
+        c,
+        body_extra=[
+            lambda: soft("cone", (0, 0.0, 1.43), (0.56, 0.46, 0.32), "alch_orange", verts=10, r2=0.3),  # poncho / mantle
+            lambda: soft("cone", (0, -0.1, 1.0), (0.3, 0.06, 0.52), "alch_orange", verts=4, r2=0.36, rot=(0, 0, 45)),  # apron
+            lambda: soft("cube", (0, 0.16, 1.28), (0.3, 0.14, 0.34), "leather"),                        # backpack
+            lambda: soft("cyl", (-0.08, 0.17, 1.52), (0.07, 0.07, 0.15), "poison", verts=8),
+            lambda: soft("cyl", (0.08, 0.17, 1.52), (0.07, 0.07, 0.15), "gem_blue", verts=8),
+            lambda: soft("cyl", (-0.17, -0.07, 1.0), (0.08, 0.08, 0.12), "gem_red", verts=8),            # belt vials
+            lambda: soft("cyl", (0.17, -0.07, 1.0), (0.08, 0.08, 0.12), "poison", verts=8),
+            lambda: soft("cube", (0.19, 0.0, 0.98), (0.08, 0.14, 0.12), "leather"),                      # pouch
+        ],
+        head_extra=[
+            lambda: soft("ico", (0, 0.03, 1.82), (0.27, 0.28, 0.26), "leather_dark", sub=2),             # hair
+            lambda: soft("cone", (-0.05, -0.1, 1.9), (0.1, 0.06, 0.1), "leather_dark", verts=4, rot=(-120, 0, 20)),
+            lambda: soft("cyl", (0, 0, 1.86), (0.27, 0.29, 0.03), "leather", verts=12),                  # goggle strap
+            lambda: soft("cyl", (-0.055, -0.13, 1.86), (0.085, 0.085, 0.04), "gold", rot=(90, 0, 0), verts=10),
+            lambda: soft("cyl", (0.055, -0.13, 1.86), (0.085, 0.085, 0.04), "gold", rot=(90, 0, 0), verts=10),
+            lambda: soft("cyl", (-0.055, -0.152, 1.86), (0.06, 0.06, 0.01), "glass", rot=(90, 0, 0), verts=10),
+            lambda: soft("cyl", (0.055, -0.152, 1.86), (0.06, 0.06, 0.01), "glass", rot=(90, 0, 0), verts=10),
+        ],
+    )
+
+
+
+def plate(kind, loc, size, color, edge="steel_edge", grow=(1.14, 0.6, 1.14), back=(0, 0.012, 0), flat=True, **kw):
+    """Front-facing armor plate with a dark painted-style rim (a dark copy, bigger in the plate plane, just behind it)."""
+    mk = part if flat else soft
+    big = tuple(size[i] * grow[i] for i in range(3))
+    bl = tuple(loc[i] + back[i] for i in range(3))
+    return [mk(kind, bl, big, edge, **kw), mk(kind, loc, size, color, **kw)]
+
+
+def knight():
+    """Megabonk-style knight: flat-top bucket helm with eye holes, layered angular plates (flat-shaded = metal sheen),
+    dark plate rims, gold straps crossing the chest, tabard with a black cross, faulds, couters, knee cops."""
+    c = dict(torso="steel_edge", chest="steel", arms="steel_edge", shoulder="steel", forearm="steel", hands="steel_edge",
+             legs="steel", shins="steel", boots="steel_edge", belt="gold_trim", skin="steel", skin_dark="steel_edge")
+
+    def pauldron(s):
+        ps = [part("ico", (0.26 * s, 0, 1.55), (0.25, 0.25, 0.2), "steel", sub=1)]                  # dome
+        for k in range(3):                                                                           # lames
+            z = 1.5 - k * 0.065
+            ps.append(part("cone", (0.285 * s, 0, z), (0.27 - k * 0.02, 0.25 - k * 0.02, 0.07), "steel_edge", verts=8, r2=0.42))
+            ps.append(part("cone", (0.285 * s, 0, z + 0.012), (0.255 - k * 0.02, 0.235 - k * 0.02, 0.06),
+                           "steel_light" if k == 0 else "steel", verts=8, r2=0.42))
+        ps.append(part("cyl", (0.285 * s, 0, 1.385), (0.2, 0.19, 0.02), "gold_trim", verts=8))
+        return ps
+
+    def couter(s):
+        return [part("ico", (0.3 * s, 0.035, 1.25), (0.12, 0.1, 0.12), "steel_light", sub=1),
+                part("cone", (0.3 * s, 0.075, 1.25), (0.09, 0.04, 0.09), "steel", verts=4, rot=(-90, 0, 0)),
+                part("cone", (0.32 * s, -0.012, 1.0), (0.14, 0.14, 0.13), "steel", verts=8, r2=0.33, rot=(180, 0, 0)),   # gauntlet cuff
+                part("cyl", (0.32 * s, -0.012, 1.065), (0.145, 0.145, 0.02), "gold_trim", verts=8)]
+
+    body3(
+        c, head=False,
+        upper_extra=[pauldron],
+        leg_extra=[lambda s: plate("cube", (0.105 * s, -0.08, 0.76), (0.16, 0.05, 0.28), "steel_light")],       # cuisses
+        shin_extra=[
+            lambda s: [part("ico", (0.105 * s, -0.07, 0.53), (0.13, 0.09, 0.13), "steel_light", sub=1),        # knee cops
+                       part("cone", (0.105 * s, -0.1, 0.53), (0.1, 0.05, 0.1), "steel", verts=4, rot=(90, 0, 0))],
+            lambda s: plate("cube", (0.105 * s, -0.065, 0.32), (0.12, 0.04, 0.3), "steel_light"),                # greaves
+            lambda s: part("cone", (0.105 * s, -0.12, 0.06), (0.12, 0.16, 0.08), "steel", verts=4, rot=(-90, 0, 45)),  # sabaton
+        ],
+        body_extra=[
+            lambda: plate("ico", (0, -0.055, 1.37), (0.44, 0.24, 0.38), "steel_light", sub=1, grow=(1.08, 0.9, 1.08)),  # breastplate
+            lambda: part("cube", (0, -0.17, 1.37), (0.025, 0.03, 0.3), "steel"),                     # center ridge
+            lambda: part("cube", (0.0, -0.165, 1.37), (0.026, 0.03, 0.4), "gold_trim", rot=(0, 34, 0)),   # crossed straps
+            lambda: part("cube", (0.0, -0.165, 1.37), (0.026, 0.03, 0.4), "gold_trim", rot=(0, -34, 0)),
+            lambda: part("cyl", (0, 0, 1.6), (0.26, 0.22, 0.07), "steel_edge", verts=8),             # gorget
+            lambda: part("cyl", (0, 0, 1.63), (0.22, 0.19, 0.04), "steel", verts=8),
+            lambda: part("cone", (0, 0, 0.97), (0.42, 0.31, 0.09), "steel_edge", verts=10, r2=0.44),  # fauld tiers
+            lambda: part("cone", (0, 0, 0.98), (0.4, 0.29, 0.08), "steel", verts=10, r2=0.44),
+            lambda: part("cone", (0, 0, 0.9), (0.45, 0.33, 0.09), "steel_edge", verts=10, r2=0.44),
+            lambda: part("cone", (0, 0, 0.91), (0.43, 0.31, 0.08), "steel_light", verts=10, r2=0.44),
+            lambda: plate("cube", (0, -0.15, 0.8), (0.2, 0.02, 0.32), "cloth_white", edge="steel_edge", grow=(1.12, 1, 1.05)),  # tabard
+            lambda: part("cube", (0, -0.163, 0.83), (0.035, 0.012, 0.18), "black"),                  # cross
+            lambda: part("cube", (0, -0.163, 0.86), (0.12, 0.012, 0.035), "black"),
+        ],
+        head_extra=[
+            lambda: part("cyl", (0, 0, 1.8), (0.29, 0.31, 0.36), "steel", verts=8),                 # bucket helm
+            lambda: part("cyl", (0, 0, 1.99), (0.27, 0.29, 0.03), "steel_light", verts=8),          # flat top
+            lambda: part("cyl", (0, 0, 1.64), (0.31, 0.33, 0.04), "steel_edge", verts=8),           # rim
+            lambda: part("cyl", (0, 0, 1.9), (0.3, 0.32, 0.02), "steel_edge", verts=8),
+            lambda: part("cube", (0, -0.155, 1.79), (0.03, 0.03, 0.32), "steel_light"),              # face ridge
+            lambda: part("cube", (-0.058, -0.152, 1.84), (0.07, 0.02, 0.04), "black"),               # eye holes
+            lambda: part("cube", (0.058, -0.152, 1.84), (0.07, 0.02, 0.04), "black"),
+            lambda: part("cube", (-0.05, -0.152, 1.72), (0.015, 0.02, 0.015), "black"),              # breaths
+            lambda: part("cube", (0.05, -0.152, 1.72), (0.015, 0.02, 0.015), "black"),
+            lambda: part("cube", (-0.05, -0.152, 1.69), (0.015, 0.02, 0.015), "black"),
+            lambda: part("cube", (0.05, -0.152, 1.69), (0.015, 0.02, 0.015), "black"),
+        ],
+        arm_extra_l=[lambda: couter(1)],
+        arm_extra_r=[lambda: couter(-1)],
+    )
+
+
+def ranger():
+    """Green archer after the reference: green tunic with dark trim and split skirt, short sleeves, leather bracers,
+    white leggings, tall folded boots, gold-buckled belt, pointed cap with a feather, blonde hair, quiver."""
+    c = dict(torso="ranger_green", chest="ranger_green", arms="skin", shoulder="ranger_green", forearm="leather", hands="skin",
+             legs="cloth_white", shins="cloth_white", boots="leather", belt="leather_dark", skin="skin", skin_dark="skin_dark")
+    body3(
+        c,
+        upper_extra=[lambda s: [soft("cone", (0.262 * s, 0, 1.43), (0.2, 0.19, 0.18), "ranger_green", verts=10, r2=0.34),   # sleeve
+                                soft("cyl", (0.268 * s, 0, 1.345), (0.19, 0.18, 0.02), "green_dark", verts=10)]],
+        arm_extra_l=[lambda: [soft("cyl", (0.31, -0.01, 1.08), (0.15, 0.14, 0.18), "leather", verts=8),       # bracer
+                              soft("cyl", (0.31, -0.01, 1.13), (0.155, 0.145, 0.015), "leather_dark", verts=8),
+                              soft("cyl", (0.31, -0.01, 1.03), (0.155, 0.145, 0.015), "leather_dark", verts=8)]],
+        arm_extra_r=[lambda: [soft("cyl", (-0.31, -0.01, 1.08), (0.15, 0.14, 0.18), "leather", verts=8),
+                              soft("cyl", (-0.31, -0.01, 1.13), (0.155, 0.145, 0.015), "leather_dark", verts=8),
+                              soft("cyl", (-0.31, -0.01, 1.03), (0.155, 0.145, 0.015), "leather_dark", verts=8)]],
+        shin_extra=[lambda s: [soft("cone", (0.105 * s, 0, 0.37), (0.17, 0.18, 0.06), "leather_light", verts=10, r2=0.42),  # boot fold
+                               soft("cyl", (0.105 * s, 0.005, 0.23), (0.15, 0.16, 0.26), "leather", verts=10)]],          # tall boot
+        body_extra=[
+            lambda: soft("cone", (0, -0.01, 0.86), (0.42, 0.32, 0.3), "ranger_green", verts=12, r2=0.36),   # tunic skirt
+            lambda: soft("cone", (0, -0.01, 0.725), (0.44, 0.34, 0.03), "green_dark", verts=12, r2=0.48),   # hem trim
+            lambda: part("cube", (0, -0.16, 0.82), (0.03, 0.03, 0.22), "green_dark"),                       # skirt split
+            lambda: soft("cone", (0, -0.1, 1.5), (0.16, 0.06, 0.12), "green_dark", verts=3, rot=(180, 0, 0)),   # V collar
+            lambda: part("cube", (0, -0.12, 1.06), (0.08, 0.02, 0.07), "gold_trim"),
+            lambda: soft("cyl", (0.1, 0.15, 1.38), (0.11, 0.11, 0.5), "leather", rot=(-12, 0, -22), verts=8),   # quiver
+            lambda: soft("cyl", (0.03, 0.2, 1.62), (0.12, 0.12, 0.02), "leather_dark", rot=(-12, 0, -22), verts=8),
+            lambda: soft("cone", (0.04, 0.19, 1.69), (0.05, 0.03, 0.15), "cloth_red", rot=(-12, 0, -22), verts=3),
+            lambda: soft("cone", (0.1, 0.2, 1.7), (0.05, 0.03, 0.15), "cloth_red", rot=(-12, 0, -22), verts=3),
+            lambda: soft("cone", (0.16, 0.21, 1.66), (0.05, 0.03, 0.15), "white", rot=(-12, 0, -22), verts=3),
+            lambda: part("cube", (0, -0.13, 1.32), (0.035, 0.02, 0.46), "leather_dark", rot=(0, 35, 0)),   # strap
+        ],
+        head_extra=[
+            lambda: soft("ico", (0, 0.03, 1.81), (0.265, 0.275, 0.27), "hair_blonde", sub=2),           # blonde hair
+            lambda: soft("cone", (0, 0.07, 1.66), (0.26, 0.16, 0.24), "hair_blonde", verts=8, r2=0.3, rot=(180, 0, 0)),  # hair to shoulders
+            lambda: soft("cone", (-0.07, -0.11, 1.86), (0.1, 0.05, 0.1), "hair_blonde", verts=4, rot=(-120, 0, 25)),   # bangs
+            lambda: soft("cone", (0.05, -0.115, 1.865), (0.1, 0.05, 0.09), "hair_blonde", verts=4, rot=(-120, 0, -20)),
+            lambda: soft("cone", (0, 0.02, 1.9), (0.28, 0.3, 0.2), "ranger_green", verts=10, r2=0.18, rot=(-10, 0, 0)),  # cap
+            lambda: soft("cyl", (0, 0.0, 1.84), (0.285, 0.305, 0.02), "green_dark", verts=10),
+            lambda: soft("cone", (0, 0.15, 1.98), (0.1, 0.1, 0.24), "ranger_green", verts=6, rot=(-75, 0, 0)),          # cap tip
+            lambda: soft("cone", (0.11, 0.06, 1.99), (0.03, 0.02, 0.22), "cloth_red", verts=3, rot=(-40, 25, 0)),       # feather
+        ],
+    )
+
+
+def mage():
+    """Red mage after the Megabonk reference: shadowed face with glowing eyes, wide-brim hat, high collar,
+    long red coat with a jagged hem and dark trim, black belt with gold buckle, dark gloves, glowing hands."""
+    c = dict(torso="mage_red", chest="mage_red", arms="mage_red", shoulder="mage_red", forearm="steel_edge", hands="steel_edge",
+             legs="mage_red_dark", shins="mage_red_dark", boots="black", belt="black", skin="black", skin_dark="black")
+    body3(
+        c, face="none",
+        upper_extra=[lambda s: soft("cone", (0.27 * s, 0, 1.4), (0.2, 0.19, 0.3), "mage_red", verts=10, r2=0.32)],   # sleeves
+        arm_extra_l=[lambda: [soft("cone", (0.31, -0.01, 1.2), (0.17, 0.17, 0.14), "mage_red_dark", verts=10, r2=0.34, rot=(180, 0, 0)),  # cuff
+                              soft("ico", (0.34, -0.07, 0.86), (0.13, 0.13, 0.13), "lantern_glow", sub=2)]],      # magic orb
+        arm_extra_r=[lambda: [soft("cone", (-0.31, -0.01, 1.2), (0.17, 0.17, 0.14), "mage_red_dark", verts=10, r2=0.34, rot=(180, 0, 0)),
+                              soft("ico", (-0.34, -0.07, 0.86), (0.13, 0.13, 0.13), "lantern_glow", sub=2)]],
+        body_extra=[
+            lambda: jagged_hem(1.12, 0.1, 0.16, 0.25, "mage_red", points=7, depth=0.24, y_scale=0.75),  # long coat
+            lambda: part("cube", (0, -0.13, 0.62), (0.02, 0.02, 0.9), "mage_red_dark"),                  # coat opening
+            lambda: soft("cone", (0, 0.13, 0.95), (0.48, 0.07, 1.05), "mage_red_dark", verts=4, r2=0.3, rot=(4, 0, 45)),  # back cape
+            lambda: soft("cone", (0, 0.0, 1.6), (0.36, 0.32, 0.24), "mage_red", verts=10, r2=0.62),     # high collar
+            lambda: soft("cone", (0, 0.0, 1.715), (0.45, 0.4, 0.02), "mage_red_dark", verts=10, r2=0.5),
+            lambda: soft("cone", (-0.23, 0, 1.49), (0.26, 0.26, 0.16), "mage_red", verts=8, r2=0.2),    # shoulder capes
+            lambda: soft("cone", (0.23, 0, 1.49), (0.26, 0.26, 0.16), "mage_red", verts=8, r2=0.2),
+            lambda: soft("cyl", (0, 0, 1.06), (0.31, 0.23, 0.08), "black", verts=10),
+            lambda: plate("cube", (0, -0.125, 1.06), (0.09, 0.02, 0.07), "black", edge="gold_trim", grow=(1.5, 0.5, 1.6)),  # buckle
+        ],
+        head_extra=[
+            lambda: part("cube", (-0.05, -0.128, 1.79), (0.045, 0.02, 0.022), "lantern_glow"),          # glowing eyes in shadow
+            lambda: part("cube", (0.05, -0.128, 1.79), (0.045, 0.02, 0.022), "lantern_glow"),
+            lambda: soft("cone", (0, 0, 1.915), (0.62, 0.62, 0.05), "mage_red", verts=14, r2=0.42),   # wide brim
+            lambda: soft("cone", (0, 0.03, 2.13), (0.36, 0.36, 0.4), "mage_red", verts=12, r2=0.17, rot=(-8, 0, 0)),
+            lambda: soft("cone", (0, 0.1, 2.38), (0.13, 0.13, 0.22), "mage_red", verts=8, rot=(-32, 0, 0)),
+            lambda: soft("cyl", (0, 0, 1.97), (0.34, 0.34, 0.06), "steel_edge", verts=12),             # hat band
+        ],
+    )
+
+
+def alchemist():
+    """Wandering alchemist: layered orange mantle with a dark trim, satchel, pouch belt, gloves, tall boots, goggles."""
+    c = dict(torso="leather_dark", chest="cloth_white", arms="cloth_white", forearm="leather", hands="leather_dark",
+             legs="leather_dark", shins="leather_dark", boots="leather", belt="leather", skin="skin", skin_dark="skin_dark")
+    body3(
+        c,
+        upper_extra=[lambda s: soft("cone", (0.27 * s, 0, 1.4), (0.18, 0.17, 0.26), "cloth_white", verts=10, r2=0.36)],
+        arm_extra_l=[lambda: soft("cone", (0.31, -0.01, 1.05), (0.15, 0.15, 0.16), "leather", verts=8, r2=0.36, rot=(180, 0, 0))],   # gloves
+        arm_extra_r=[lambda: soft("cone", (-0.31, -0.01, 1.05), (0.15, 0.15, 0.16), "leather", verts=8, r2=0.36, rot=(180, 0, 0))],
+        shin_extra=[lambda s: [soft("cyl", (0.105 * s, 0.005, 0.24), (0.16, 0.17, 0.28), "leather", verts=10),
+                               soft("cone", (0.105 * s, 0, 0.39), (0.18, 0.19, 0.05), "leather_light", verts=10, r2=0.44)]],
+        body_extra=[
+            lambda: soft("cone", (0, 0.0, 1.4), (0.62, 0.52, 0.36), "alch_orange", verts=12, r2=0.3),      # poncho
+            lambda: soft("cone", (0, 0.0, 1.225), (0.63, 0.53, 0.03), "alch_dark", verts=12, r2=0.49),     # poncho trim
+            lambda: soft("cone", (0, 0.0, 1.62), (0.3, 0.26, 0.1), "alch_dark", verts=10, r2=0.4),        # hood rolled down
+            lambda: soft("cone", (0, -0.1, 0.92), (0.3, 0.06, 0.36), "alch_orange", verts=4, r2=0.36, rot=(0, 0, 45)),   # apron
+            lambda: soft("cube", (0, 0.18, 1.28), (0.3, 0.14, 0.34), "leather"),                         # backpack
+            lambda: soft("cube", (0, 0.26, 1.18), (0.28, 0.04, 0.1), "leather_dark"),
+            lambda: soft("cyl", (-0.08, 0.19, 1.52), (0.07, 0.07, 0.15), "poison", verts=8),
+            lambda: soft("cyl", (0.08, 0.19, 1.52), (0.07, 0.07, 0.15), "gem_blue", verts=8),
+            lambda: soft("cyl", (-0.17, -0.07, 1.0), (0.08, 0.08, 0.12), "gem_red", verts=8),            # belt vials
+            lambda: soft("cyl", (0.17, -0.07, 1.0), (0.08, 0.08, 0.12), "poison", verts=8),
+            lambda: soft("cube", (0.2, 0.02, 0.97), (0.08, 0.14, 0.12), "leather"),                       # pouches
+            lambda: soft("cube", (-0.2, 0.04, 0.97), (0.07, 0.12, 0.1), "leather_light"),
+            lambda: plate("cube", (0, -0.12, 1.06), (0.07, 0.02, 0.06), "leather_dark", edge="gold_trim", grow=(1.5, 0.5, 1.6)),
+        ],
+        head_extra=[
+            lambda: soft("ico", (0, 0.03, 1.82), (0.27, 0.28, 0.26), "leather_dark", sub=2),             # hair
+            lambda: soft("cone", (-0.06, -0.105, 1.89), (0.11, 0.06, 0.11), "leather_dark", verts=4, rot=(-120, 0, 25)),
+            lambda: soft("cone", (0.06, -0.11, 1.9), (0.1, 0.06, 0.1), "leather_dark", verts=4, rot=(-120, 0, -25)),
+            lambda: soft("cyl", (0, 0, 1.86), (0.27, 0.29, 0.03), "leather", verts=12),                  # goggle strap
+            lambda: soft("cyl", (-0.055, -0.13, 1.87), (0.085, 0.085, 0.04), "gold", rot=(90, 0, 0), verts=10),
+            lambda: soft("cyl", (0.055, -0.13, 1.87), (0.085, 0.085, 0.04), "gold", rot=(90, 0, 0), verts=10),
+            lambda: soft("cyl", (-0.055, -0.152, 1.87), (0.06, 0.06, 0.01), "glass", rot=(90, 0, 0), verts=10),
+            lambda: soft("cyl", (0.055, -0.152, 1.87), (0.06, 0.06, 0.01), "glass", rot=(90, 0, 0), verts=10),
+            lambda: soft("cone", (0, -0.12, 1.66), (0.2, 0.08, 0.06), "alch_dark", verts=8, r2=0.4),      # scarf
+        ],
+    )
+
+
+def bone(a, b, r, color="bone"):
+    """Long bone: thin shaft with knobbed ends (epiphyses)."""
+    mid = tuple((a[i] + b[i]) / 2 for i in range(3))
+    return skin([(a, (r * 1.7, r * 1.5)), (mid, (r, r)), (b, (r * 1.7, r * 1.5))], color)
+
+
+def skeleton():
+    """Megabonk-style skeleton: big cranium with deep sockets and a toothy jaw, curved ribs, vertebrae, winged pelvis,
+    knobbed limb bones. Smooth bone surfaces, dark cavities."""
+    body = [skin([((0, 0.05, 0.98), (0.035, 0.035)), ((0, 0.06, 1.2), (0.03, 0.03)), ((0, 0.04, 1.45), (0.032, 0.032)),
+                  ((0, 0.02, 1.62), (0.028, 0.028))], "bone_shadow")]                                      # spine
+    for i in range(9):                                                                                      # vertebrae
+        z = 1.0 + i * 0.07
+        body.append(soft("ico", (0, 0.07, z), (0.07, 0.06, 0.04), "bone", sub=1))
+    for i, (z, w) in enumerate(((1.47, 0.38), (1.39, 0.4), (1.31, 0.38), (1.23, 0.33))):                    # ribs
+        body.append(soft("torus", (0, 0.0, z), (w, 0.27, 0.22), "bone", verts=14))
+    body += [
+        soft("cube", (0, -0.13, 1.35), (0.05, 0.03, 0.26), "bone"),                                         # sternum
+        bone((-0.22, 0.0, 1.53), (0.22, 0.0, 1.53), 0.028),                                                  # collarbones
+        soft("ico", (-0.13, 0.02, 0.98), (0.2, 0.1, 0.15), "bone", sub=2, rot=(0, 0, 20)),                 # pelvis wings
+        soft("ico", (0.13, 0.02, 0.98), (0.2, 0.1, 0.15), "bone", sub=2, rot=(0, 0, -20)),
+        soft("ico", (0, 0.06, 0.94), (0.1, 0.08, 0.12), "bone_shadow", sub=1),                              # sacrum
+    ]
+    Body = group("Body", body, (0, 0, HIP_Z))
+
+    skull = [
+        soft("ico", (0, 0.02, 1.8), (0.3, 0.32, 0.29), "bone", sub=2),                                      # cranium
+        soft("ico", (0, -0.07, 1.72), (0.24, 0.18, 0.16), "bone", sub=2),                                   # face / cheekbones
+        soft("ico", (-0.06, -0.135, 1.775), (0.085, 0.05, 0.085), "black", sub=2),                          # sockets
+        soft("ico", (0.06, -0.135, 1.775), (0.085, 0.05, 0.085), "black", sub=2),
+        soft("ico", (-0.06, -0.152, 1.775), (0.022, 0.02, 0.022), "eye_red", sub=1),                        # ember pupils
+        soft("ico", (0.06, -0.152, 1.775), (0.022, 0.02, 0.022), "eye_red", sub=1),
+        soft("cone", (0, -0.15, 1.715), (0.045, 0.03, 0.05), "black", verts=3, rot=(-90, 0, 180)),         # nasal cavity
+        soft("ico", (0, -0.06, 1.635), (0.2, 0.16, 0.07), "bone_shadow", sub=2),                            # jaw
+        part("cube", (0, -0.14, 1.67), (0.15, 0.02, 0.012), "black"),                                       # mouth gap
+    ]
+    for i in range(6):                                                                                      # teeth
+        x = -0.055 + i * 0.022
+        skull.append(part("cube", (x, -0.145, 1.682), (0.016, 0.015, 0.022), "bone"))
+        skull.append(part("cube", (x, -0.14, 1.655), (0.016, 0.015, 0.02), "bone"))
+    JOINTS.append(group("Head", skull, (0, 0, NECK_Z)))
+
+    def arm(side):
+        x = side
+        upper = group("ArmR" if side < 0 else "ArmL", [
+            soft("ico", (0.24 * x, 0, 1.52), (0.08, 0.08, 0.08), "bone", sub=1),
+            bone((0.25 * x, 0, 1.5), (0.29 * x, 0, 1.25), 0.026)], (0.25 * x, 0, SHOULDER_Z))
+        ps = [
+            bone((0.29 * x, 0, 1.25), (0.31 * x, -0.02, 0.98), 0.022),
+            bone((0.3 * x, 0.015, 1.24), (0.32 * x, 0.0, 0.99), 0.016, "bone_shadow"),                        # radius + ulna
+            soft("ico", (0.315 * x, -0.02, 0.93), (0.07, 0.04, 0.07), "bone", sub=1),                          # hand
+        ]
+        for k in range(3):                                                                                   # fingers
+            ps.append(bone((0.3 * x + 0.02 * k * x, -0.03, 0.9), (0.3 * x + 0.02 * k * x, -0.04, 0.84), 0.008))
+        if side < 0:  # right hand: rusty blade
+            ps.append(part("cube", (0.315 * x, -0.17, 0.91), (0.03, 0.36, 0.06), "dark_iron"))
+            ps.append(part("cube", (0.315 * x, -0.17, 0.93), (0.012, 0.36, 0.02), "steel"))
+            ps.append(part("cube", (0.315 * x, -0.02, 0.91), (0.03, 0.05, 0.12), "leather_dark"))
+        JOINTS.append(group("ForeArmR" if side < 0 else "ForeArmL", ps, (0.29 * x, 0, ELBOW_Z)))
+        return upper
+
+    def leg(side):
+        x = 0.1 * side
+        thigh = group("LegR" if side < 0 else "LegL", [bone((x, 0, 0.94), (x, -0.01, 0.53), 0.032)], (x, 0, HIP_Z))
+        shin = group("ShinR" if side < 0 else "ShinL", [
+            soft("ico", (x, -0.04, 0.53), (0.07, 0.05, 0.07), "bone", sub=1),                                # kneecap
+            bone((x, -0.01, 0.53), (x, 0, 0.1), 0.026),
+            bone((x + 0.03 * side, 0.01, 0.5), (x + 0.02 * side, 0.01, 0.12), 0.014, "bone_shadow"),          # fibula
+            soft("ico", (x, -0.06, 0.05), (0.1, 0.22, 0.06), "bone", sub=1),                                  # foot
+        ], (x, 0, KNEE_Z))
+        JOINTS.append(shin)
+        return thigh
+
+    parts = [Body, arm(-1), arm(1), leg(-1), leg(1)]
+    root_with(parts + JOINTS)
+
+
+SMOOTH_ENEMIES = {"Slime", "MagmaSlime", "Bat", "FireImp", "BombShroom"}
+
+
+def _smooth_all():
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            for p in o.data.polygons:
+                p.use_smooth = True
+
+
+def eye(x, y, z, r, pupil="black", white="white", look=(0, 0)):
+    """Cartoon eye: white ball, pupil, glint (faces -Y)."""
+    return [soft("ico", (x, y, z), (r * 2.2, r * 1.2, r * 2.5), white, sub=2),
+            soft("ico", (x + look[0] * r * 0.3, y - r * 0.55, z + look[1] * r * 0.3), (r * 0.95, r * 0.6, r * 1.15), pupil, sub=2),
+            soft("ico", (x + r * 0.25, y - r * 0.85, z + r * 0.45), (r * 0.4, r * 0.2, r * 0.4), white, sub=1)]
+
+
+def slime():
+    body = [
+        soft("ico", (0, 0, 0.4), (1.0, 0.95, 0.78), "slime_green", sub=3),                     # jelly dome
+        soft("ico", (0, 0, 0.12), (1.1, 1.05, 0.26), "slime_green", sub=2),                    # squashed base
+        soft("ico", (0.05, 0.12, 0.42), (0.42, 0.42, 0.36), "slime_core", sub=2),              # core
+        soft("ico", (-0.22, -0.2, 0.66), (0.2, 0.12, 0.12), "white", sub=2, rot=(0, -30, 0)),  # shine
+        soft("ico", (-0.33, -0.24, 0.52), (0.07, 0.05, 0.07), "white", sub=1),
+        soft("cone", (0, -0.45, 0.3), (0.2, 0.05, 0.08), "slime_dark", verts=8, rot=(90, 0, 0)),   # smile
+    ]
+    body += eye(-0.17, -0.42, 0.48, 0.07) + eye(0.17, -0.42, 0.48, 0.07)
+    for x, z in ((0.35, 0.78), (-0.1, 0.83)):                                                    # bubbles
+        body.append(soft("ico", (x, -0.05, z), (0.08, 0.08, 0.08), "slime_core", sub=1))
+    root_with([group("Body", body, (0, 0, 0))])
+
+
+def magma_slime():
+    random.seed(31)
+    body = [
+        soft("ico", (0, 0, 0.4), (1.0, 0.95, 0.78), "magma_skin", sub=3),
+        soft("ico", (0, 0, 0.12), (1.1, 1.05, 0.26), "magma_skin", sub=2),
+        soft("ico", (-0.22, -0.2, 0.66), (0.18, 0.1, 0.1), "magma_core", sub=2, rot=(0, -30, 0)),
+    ]
+    for i in range(6):                                                                           # glowing fissures
+        a = math.radians(i * 60 + random.uniform(-15, 15))
+        body.append(soft("cube", (math.cos(a) * 0.43, math.sin(a) * 0.41, 0.42), (0.035, 0.3, 0.05), "magma",
+                         rot=(random.uniform(-40, 40), 0, math.degrees(a))))
+    for i in range(5):                                                                           # cooled crust plates
+        a = math.radians(i * 72 + 20)
+        body.append(soft("ico", (math.cos(a) * 0.3, math.sin(a) * 0.3, 0.7), (0.24, 0.24, 0.1), "basalt_dark", sub=1,
+                         rot=(random.uniform(-25, 25), random.uniform(-25, 25), 0)))
+    body += eye(-0.17, -0.42, 0.46, 0.07, pupil="magma") + eye(0.17, -0.42, 0.46, 0.07, pupil="magma")
+    body += [soft("cone", (0, -0.45, 0.28), (0.24, 0.05, 0.1), "basalt_dark", verts=8, rot=(90, 0, 0)),
+             soft("cone", (0, 0.0, 0.88), (0.12, 0.12, 0.2), "magma", verts=6)]                 # little eruption
+    root_with([group("Body", body, (0, 0, 0))])
+
+
+def bat_wing(side, membrane, bone_c):
+    """Membrane wing: three bone fingers with scalloped skin panels between them."""
+    x0 = 0.15 * side
+    ps = [bone((x0, 0.03, 0.08), (x0 + 0.32 * side, 0.03, 0.2), 0.022, bone_c)]                 # arm
+    tip = (x0 + 0.32 * side, 0.03, 0.2)
+    ends = [(x0 + 0.78 * side, 0.03, 0.18), (x0 + 0.7 * side, 0.03, -0.12), (x0 + 0.42 * side, 0.03, -0.24)]
+    prev = (x0 + 0.05 * side, 0.03, -0.12)
+    for e in ends:
+        ps.append(bone(tip, e, 0.012, bone_c))
+    pts = [tip] + ends
+    # panels between consecutive fingers (and the body)
+    for a, b in zip(pts[1:], pts[2:] + [prev]):
+        cx = (tip[0] + a[0] + b[0]) / 3
+        cz = (tip[2] + a[2] + b[2]) / 3
+        w = math.dist((a[0], a[2]), (b[0], b[2]))
+        h = math.dist((tip[0], tip[2]), ((a[0] + b[0]) / 2, (a[2] + b[2]) / 2))
+        ang = math.degrees(math.atan2((a[0] + b[0]) / 2 - tip[0], (a[2] + b[2]) / 2 - tip[2]))
+        ps.append(soft("cone", (cx, 0.03, cz), (w * 1.05, 0.02, h * 1.1), membrane, verts=3, rot=(0, ang + 180, 0)))
+    return group("WingR" if side < 0 else "WingL", ps, (x0, 0.03, 0.1))
+
+
+def bat():
+    body = [
+        soft("ico", (0, 0, 0.0), (0.4, 0.36, 0.38), "mage_dark", sub=2),                       # furry body
+        soft("ico", (0, -0.04, 0.17), (0.32, 0.3, 0.27), "mage_dark", sub=2),                  # head
+        soft("cone", (-0.1, 0.0, 0.36), (0.13, 0.08, 0.22), "mage_dark", verts=6, rot=(0, -15, 0)),   # big ears
+        soft("cone", (0.1, 0.0, 0.36), (0.13, 0.08, 0.22), "mage_dark", verts=6, rot=(0, 15, 0)),
+        soft("cone", (-0.1, -0.02, 0.35), (0.07, 0.04, 0.15), "heart_red", verts=6, rot=(0, -15, 0)),
+        soft("cone", (0.1, -0.02, 0.35), (0.07, 0.04, 0.15), "heart_red", verts=6, rot=(0, 15, 0)),
+        soft("ico", (0, -0.17, 0.12), (0.08, 0.05, 0.06), "mage_purple", sub=1),               # snout
+        soft("cone", (-0.03, -0.17, 0.06), (0.02, 0.02, 0.06), "white", verts=4, rot=(180, 0, 0)),   # fangs
+        soft("cone", (0.03, -0.17, 0.06), (0.02, 0.02, 0.06), "white", verts=4, rot=(180, 0, 0)),
+        soft("ico", (-0.06, 0, -0.2), (0.06, 0.06, 0.08), "mage_purple", sub=1),               # feet
+        soft("ico", (0.06, 0, -0.2), (0.06, 0.06, 0.08), "mage_purple", sub=1),
+    ]
+    body += eye(-0.065, -0.15, 0.2, 0.04, pupil="eye_red") + eye(0.065, -0.15, 0.2, 0.04, pupil="eye_red")
+    root_with([group("Body", body, (0, 0, 0)), bat_wing(-1, "mage_purple", "mage_dark"), bat_wing(1, "mage_purple", "mage_dark")])
+
+
+def fire_imp():
+    body = [
+        soft("ico", (0, 0, 0.0), (0.4, 0.34, 0.44), "imp_red", sub=2),                         # pot belly
+        soft("ico", (0, -0.08, -0.02), (0.24, 0.12, 0.26), "imp_dark", sub=2),                 # belly
+        soft("ico", (0, -0.03, 0.34), (0.36, 0.33, 0.32), "imp_red", sub=2),                   # head
+        soft("cone", (-0.1, 0.0, 0.53), (0.09, 0.09, 0.24), "basalt_dark", verts=6, rot=(0, -28, 0)),   # horns
+        soft("cone", (0.1, 0.0, 0.53), (0.09, 0.09, 0.24), "basalt_dark", verts=6, rot=(0, 28, 0)),
+        soft("cone", (-0.19, 0.0, 0.37), (0.06, 0.12, 0.14), "imp_red", verts=4, rot=(0, -75, 0)),     # pointed ears
+        soft("cone", (0.19, 0.0, 0.37), (0.06, 0.12, 0.14), "imp_red", verts=4, rot=(0, 75, 0)),
+        soft("cone", (0, -0.16, 0.25), (0.14, 0.04, 0.05), "black", verts=8, rot=(90, 0, 0)),          # grin
+        soft("cone", (-0.04, -0.17, 0.235), (0.02, 0.015, 0.035), "white", verts=4, rot=(180, 0, 0)),
+        soft("cone", (0.04, -0.17, 0.235), (0.02, 0.015, 0.035), "white", verts=4, rot=(180, 0, 0)),
+        bone((-0.15, 0, 0.08), (-0.22, -0.08, -0.1), 0.03, "imp_red"),                                   # arms
+        bone((0.15, 0, 0.08), (0.24, -0.1, -0.02), 0.03, "imp_red"),
+        bone((-0.1, 0, -0.18), (-0.12, -0.03, -0.36), 0.035, "imp_dark"),                               # legs
+        bone((0.1, 0, -0.18), (0.12, -0.03, -0.36), 0.035, "imp_dark"),
+        skin([((0, 0.18, -0.12), (0.035, 0.035)), ((0, 0.32, -0.22), (0.025, 0.025)), ((0, 0.38, -0.08), (0.015, 0.015))], "imp_dark"),  # tail
+        soft("cone", (0, 0.4, -0.02), (0.1, 0.03, 0.12), "imp_dark", verts=3),
+        soft("ico", (0.27, -0.13, 0.0), (0.2, 0.2, 0.2), "magma", sub=2),                       # fireball in claw
+        soft("ico", (0.27, -0.13, 0.0), (0.11, 0.11, 0.11), "magma_core", sub=2),
+    ]
+    body += eye(-0.075, -0.15, 0.37, 0.042, pupil="black", white="magma_core") + eye(0.075, -0.15, 0.37, 0.042, pupil="black", white="magma_core")
+    root_with([group("Body", body, (0, 0, 0)), bat_wing(-1, "imp_dark", "basalt_dark"), bat_wing(1, "imp_dark", "basalt_dark")])
+
+
+def bomb_shroom():
+    body = [
+        soft("cyl", (0, 0, 0.3), (0.44, 0.42, 0.58), "mushroom_stem", verts=12),                # stem
+        soft("ico", (0, 0, 0.08), (0.52, 0.5, 0.18), "mushroom_stem", sub=2),
+        soft("ico", (0, 0, 0.78), (1.05, 1.05, 0.62), "mushroom_red", sub=3),                   # dome cap
+        soft("cone", (0, 0, 0.6), (1.0, 1.0, 0.1), "mushroom_stem", verts=16, r2=0.3),          # gills
+    ]
+    for (x, y, z, r) in ((0.25, -0.32, 0.9, 0.12), (-0.28, -0.25, 0.95, 0.1), (0.05, 0.36, 1.0, 0.11),
+                         (-0.05, -0.1, 1.08, 0.09), (0.38, 0.12, 0.92, 0.08), (-0.36, 0.2, 0.88, 0.09)):
+        body.append(soft("ico", (x, y, z), (r * 2, r * 2, r), "white", sub=1))                # spots
+    body += eye(-0.09, -0.2, 0.42, 0.045) + eye(0.09, -0.2, 0.42, 0.045)
+    body += [
+        soft("cube", (-0.09, -0.235, 0.5), (0.09, 0.02, 0.02), "black", rot=(0, -20, 0)),       # angry brows
+        soft("cube", (0.09, -0.235, 0.5), (0.09, 0.02, 0.02), "black", rot=(0, 20, 0)),
+        soft("cone", (0, -0.22, 0.3), (0.12, 0.04, 0.05), "black", verts=8, rot=(-90, 0, 0)),   # frown
+        skin([((0, 0, 1.05), (0.03, 0.03)), ((0.04, 0, 1.2), (0.025, 0.025)), ((0.0, 0, 1.3), (0.02, 0.02))], "dark_iron"),  # fuse
+        soft("ico", (0, 0, 1.33), (0.1, 0.1, 0.1), "ember", sub=2),
+    ]
+    root_with([group("Body", body, (0, 0, 0))])
+
+
+def rock_chunk(loc, size, color, seed, sub=1):
+    """Faceted boulder (flat shaded so it reads as cut stone)."""
+    random.seed(seed)
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=sub, radius=0.5, location=loc)
+    o = bpy.context.active_object
+    for v in o.data.vertices:
+        v.co *= random.uniform(0.82, 1.12)
+    return _finish(o, size, color)
+
+
+def golem():
+    """Stone golem: boulder torso and limbs, mossy shoulders, glowing rune core and eyes, huge fists."""
+    body = [
+        rock_chunk((0, 0, 1.38), (0.86, 0.58, 0.62), "stone", 1),                                   # chest boulder
+        rock_chunk((0, 0.02, 1.02), (0.56, 0.42, 0.36), "stone_dark", 2),                          # belly
+        rock_chunk((0, 0, 0.88), (0.5, 0.38, 0.26), "stone", 3),                                   # hips
+        soft("ico", (-0.4, 0.02, 1.62), (0.42, 0.42, 0.24), "moss", sub=2),                        # mossy shoulders
+        soft("ico", (0.36, 0.05, 1.6), (0.3, 0.3, 0.16), "moss", sub=2),
+        rock_chunk((0, -0.28, 1.4), (0.22, 0.06, 0.22), "rune_blue", 4),                           # rune core
+        part("cube", (0, -0.31, 1.4), (0.06, 0.02, 0.16), "crystal_light"),
+        rock_chunk((0.12, 0.25, 1.25), (0.3, 0.12, 0.26), "moss", 5),
+    ]
+    Body = group("Body", body, (0, 0, HIP_Z))
+    head = [rock_chunk((0, -0.04, 1.8), (0.36, 0.34, 0.3), "stone", 6),
+            part("cube", (0, -0.2, 1.88), (0.3, 0.06, 0.06), "stone_dark"),                         # brow ridge
+            soft("ico", (-0.075, -0.2, 1.81), (0.07, 0.03, 0.05), "rune_blue", sub=1),               # glowing eyes
+            soft("ico", (0.075, -0.2, 1.81), (0.07, 0.03, 0.05), "rune_blue", sub=1)]
+    JOINTS.append(group("Head", head, (0, 0, NECK_Z)))
+
+    def arm(side):
+        x = 0.46 * side
+        upper = group("ArmR" if side < 0 else "ArmL", [rock_chunk((x, 0, 1.4), (0.3, 0.3, 0.38), "stone_dark", 10 + side)],
+                      (x, 0, SHOULDER_Z))
+        fore = [rock_chunk((x * 1.04, -0.01, 1.08), (0.3, 0.3, 0.36), "stone", 20 + side),
+                rock_chunk((x * 1.06, -0.03, 0.82), (0.36, 0.34, 0.3), "stone_dark", 30 + side),        # huge fist
+                soft("ico", (x * 1.04, 0.1, 1.12), (0.16, 0.12, 0.1), "moss", sub=1)]
+        JOINTS.append(group("ForeArmR" if side < 0 else "ForeArmL", fore, (x, 0, ELBOW_Z)))
+        return upper
+
+    def leg(side):
+        x = 0.17 * side
+        thigh = group("LegR" if side < 0 else "LegL", [rock_chunk((x, 0, 0.72), (0.28, 0.3, 0.42), "stone_dark", 40 + side)], (x, 0, HIP_Z))
+        shin = group("ShinR" if side < 0 else "ShinL", [
+            rock_chunk((x, 0, 0.32), (0.26, 0.28, 0.42), "stone", 50 + side),
+            rock_chunk((x, -0.06, 0.07), (0.32, 0.4, 0.16), "stone_dark", 60 + side)], (x, 0, KNEE_Z))
+        JOINTS.append(shin)
+        return thigh
+
+    parts = [Body, arm(-1), arm(1), leg(-1), leg(1)]
+    root_with(parts + JOINTS)
+
+
+def skeleton_archer():
+    skeleton()
+    head = bpy.data.objects.get("Head")
+    hood = [soft("ico", (0, 0.03, 1.82), (0.36, 0.38, 0.36), "cloth_red", sub=2),                   # cloth hood over the skull
+            soft("cone", (0, 0.14, 1.66), (0.34, 0.24, 0.3), "cloth_red", verts=8, r2=0.3, rot=(180, 0, 0)),
+            soft("cone", (0, 0.06, 2.0), (0.1, 0.1, 0.16), "cloth_red", verts=6, rot=(-60, 0, 0))]
+    bpy.ops.object.select_all(action="DESELECT")
+    for h in hood:
+        h.select_set(True)
+    head.select_set(True)
+    bpy.context.view_layer.objects.active = head
+    bpy.ops.object.join()
+    # the hood swallows the front of the skull: cut the face back in front of it
+    bow = []
+    for i in range(6):
+        t0 = -1 + 2 * i / 6
+        t1 = -1 + 2 * (i + 1) / 6
+        z0, z1 = 0.95 + t0 * 0.5, 0.95 + t1 * 0.5
+        y0, y1 = -0.08 - 0.16 * (1 - t0 * t0), -0.08 - 0.16 * (1 - t1 * t1)
+        ang = math.degrees(math.atan2(y1 - y0, z1 - z0))
+        bow.append(soft("cube", (0.31, (y0 + y1) / 2, (z0 + z1) / 2), (0.035, 0.045, abs(z1 - z0) * 1.15), "wood", rot=(-ang, 0, 0)))
+    bow.append(part("cube", (0.31, -0.08, 0.95), (0.01, 0.01, 1.0), "rope"))
+    fore = bpy.data.objects.get("ForeArmL")
+    bpy.ops.object.select_all(action="DESELECT")
+    for b in bow:
+        b.select_set(True)
+    fore.select_set(True)
+    bpy.context.view_layer.objects.active = fore
+    bpy.ops.object.join()
+
+
+def mage():
+    """Red-robed sage: deep hood up over a visible old face with a long white beard, gold-trimmed robe with a
+    straight hem, layered bell sleeves, a sash and a stole with rune patches, glowing rune pendant."""
+    c = dict(torso="mage_red", chest="mage_red", arms="mage_red", shoulder="mage_red", forearm="mage_red", hands="skin",
+             legs="mage_red_dark", shins="mage_red_dark", boots="leather_dark", belt="gold_trim", skin="skin", skin_dark="skin_dark")
+    body3(
+        c,
+        upper_extra=[lambda s: soft("cone", (0.27 * s, 0, 1.4), (0.19, 0.18, 0.3), "mage_red", verts=10, r2=0.34)],
+        arm_extra_l=[lambda: [soft("cone", (0.315, -0.01, 1.1), (0.2, 0.2, 0.24), "mage_red", verts=12, r2=0.26, rot=(180, 0, 0)),  # bell sleeve
+                              soft("cone", (0.315, -0.01, 0.98), (0.21, 0.21, 0.03), "gold_trim", verts=12, r2=0.48)]],
+        arm_extra_r=[lambda: [soft("cone", (-0.315, -0.01, 1.1), (0.2, 0.2, 0.24), "mage_red", verts=12, r2=0.26, rot=(180, 0, 0)),
+                              soft("cone", (-0.315, -0.01, 0.98), (0.21, 0.21, 0.03), "gold_trim", verts=12, r2=0.48)]],
+        body_extra=[
+            lambda: soft("cone", (0, 0.0, 0.6), (0.56, 0.46, 1.04), "mage_red", verts=14, r2=0.27),         # robe, straight hem
+            lambda: soft("cone", (0, 0.0, 0.095), (0.57, 0.47, 0.05), "gold_trim", verts=14, r2=0.49),     # hem trim
+            lambda: part("cube", (0, -0.2, 0.55), (0.12, 0.02, 0.9), "mage_red_dark"),                    # front panel
+            lambda: part("cube", (-0.065, -0.205, 0.55), (0.012, 0.012, 0.9), "gold_trim"),
+            lambda: part("cube", (0.065, -0.205, 0.55), (0.012, 0.012, 0.9), "gold_trim"),
+            lambda: soft("cyl", (0, 0, 1.07), (0.32, 0.24, 0.09), "gold_trim", verts=12),                 # sash
+            lambda: soft("cone", (0.1, -0.12, 0.92), (0.07, 0.03, 0.28), "gold_trim", verts=4, rot=(0, 10, 0)),   # sash tail
+            lambda: soft("cone", (0, 0.0, 1.5), (0.52, 0.4, 0.16), "mage_red_dark", verts=12, r2=0.38),    # shoulder mantle
+            lambda: soft("cone", (0, 0.0, 1.43), (0.53, 0.41, 0.02), "gold_trim", verts=12, r2=0.49),
+            lambda: part("cube", (-0.09, -0.13, 1.25), (0.07, 0.02, 0.4), "cloth_white"),                  # stole
+            lambda: part("cube", (0.09, -0.13, 1.25), (0.07, 0.02, 0.4), "cloth_white"),
+            lambda: part("cube", (-0.09, -0.142, 1.15), (0.04, 0.01, 0.04), "rune_blue"),
+            lambda: part("cube", (0.09, -0.142, 1.15), (0.04, 0.01, 0.04), "rune_blue"),
+            lambda: soft("ico", (0, -0.14, 1.38), (0.06, 0.03, 0.08), "lightning", sub=1),                 # rune pendant
+            lambda: soft("cone", (0, -0.235, 1.36), (0.2, 0.1, 0.46), "cloth_white", verts=8, rot=(170, 0, 0)),   # long beard
+        ],
+        head_extra=[
+            lambda: soft("cone", (0, -0.1, 1.67), (0.2, 0.09, 0.14), "cloth_white", verts=8, rot=(180, 0, 0)),   # moustache / beard top
+            lambda: soft("cube", (-0.055, -0.128, 1.822), (0.065, 0.02, 0.02), "cloth_white"),            # bushy brows
+            lambda: soft("cube", (0.055, -0.128, 1.822), (0.065, 0.02, 0.02), "cloth_white"),
+            lambda: soft("ico", (0, 0.075, 1.83), (0.34, 0.32, 0.36), "mage_red", sub=2),                  # hood (face stays visible)
+            lambda: soft("torus", (0, -0.075, 1.8), (0.3, 0.32, 0.4), "mage_red_dark", verts=14, rot=(90, 0, 0)),   # hood opening rim
+            lambda: soft("cone", (0, 0.17, 1.88), (0.14, 0.14, 0.3), "mage_red", verts=6, rot=(-100, 0, 0)),   # hood point down the back
+            lambda: soft("cyl", (0, -0.12, 1.96), (0.2, 0.03, 0.02), "gold_trim", verts=8),
+        ],
+    )
+
 ROUND2_MODELS = [
     ("Enemies", "Bat", bat),
     ("Enemies", "Golem", golem),
@@ -1278,6 +2258,9 @@ MODELS = [
     ("Environment", "MountainA", mountain(1, 80, 45)),
     ("Environment", "MountainB", mountain(2, 110, 60)),
 ] + EXTRA_MODELS + ROUND2_MODELS + VOLCANO_MODELS
+
+# lists above were built while older builders were still bound: use the latest definition of every builder
+MODELS = [(c, n, globals().get(f.__name__, f) if f.__name__ != "fn" else f) for c, n, f in MODELS]
 
 if __name__ == "__main__":
     import sys

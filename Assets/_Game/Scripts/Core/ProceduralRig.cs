@@ -29,6 +29,9 @@ namespace MultiBash
         Quaternion _wingLRot, _wingRRot;
         Quaternion _bodyRot, _headRot, _armLRot, _armRRot, _foreLRot, _foreRRot, _legLRot, _legRRot, _shinLRot, _shinRRot;
         Vector3 _bodyPos, _scale;
+        // rest rotation of each joint relative to this rig: lets character-space rotations drive joints whose local axes
+        // differ (skinned bones from an armature) exactly like the old axis-aligned parts
+        readonly System.Collections.Generic.Dictionary<Transform, Quaternion> _rel = new();
 
         float _phase, _speed, _vy, _run;
         bool _air, _wasAir, _sliding;
@@ -78,6 +81,9 @@ namespace MultiBash
             if (_legR) _legRRot = _legR.localRotation;
             if (_shinL) _shinLRot = _shinL.localRotation;
             if (_shinR) _shinRRot = _shinR.localRotation;
+            _rel.Clear();
+            foreach (var t in new[] { _body, _head, _armL, _armR, _foreL, _foreR, _legL, _legR, _shinL, _shinR, _wingL, _wingR })
+                if (t != null) _rel[t] = Quaternion.Inverse(transform.rotation) * t.rotation;
             blob = blob || (_armL == null && _legL == null);
             if (_armL != null || _legL != null) blob = false;
             _phase = Random.value * 10f;
@@ -110,6 +116,21 @@ namespace MultiBash
 
         static float Ease(float t) => t * t * (3f - 2f * t);
 
+        /// <summary>The rig's up axis in the body's parent space (bones can have rotated parents).</summary>
+        Vector3 BodyUp()
+        {
+            var p = _body.parent;
+            return p == null ? Vector3.up : p.InverseTransformVector(transform.TransformVector(Vector3.up));
+        }
+
+        /// <summary>rest * rotation (euler, in character space) expressed in the joint's own frame.</summary>
+        Quaternion Pose(Transform t, Quaternion rest, float x, float y, float z)
+        {
+            var e = Quaternion.Euler(x, y, z);
+            if (!_rel.TryGetValue(t, out var rel)) return rest * e;
+            return rest * (Quaternion.Inverse(rel) * e * rel);
+        }
+
         void LateUpdate()
         {
             float dt = Time.deltaTime;
@@ -125,9 +146,9 @@ namespace MultiBash
             {
                 // flyers: fast wing flaps + body bob
                 float flap = Mathf.Sin(Time.time * 22f + _phase) * 55f;
-                if (_wingL) _wingL.localRotation = _wingLRot * Quaternion.Euler(0, 0, flap);
-                if (_wingR) _wingR.localRotation = _wingRRot * Quaternion.Euler(0, 0, -flap);
-                if (_body) _body.localPosition = _bodyPos + Vector3.up * Mathf.Sin(Time.time * 22f + _phase) * 0.05f;
+                if (_wingL) _wingL.localRotation = Pose(_wingL, _wingLRot, 0, 0, flap);
+                if (_wingR) _wingR.localRotation = Pose(_wingR, _wingRRot, 0, 0, -flap);
+                if (_body) _body.localPosition = _bodyPos + BodyUp() * Mathf.Sin(Time.time * 22f + _phase) * 0.05f;
                 float sqh = 1f - (1f - Mathf.Clamp01(_hitT)) * 0.2f;
                 transform.localScale = _scale * sqh;
                 return;
@@ -170,10 +191,10 @@ namespace MultiBash
             float land = (1f - Mathf.Clamp01(_landT)) * (1f - _slide);
             legL += -20f * land; legR += -20f * land;
             kneeL += 40f * land; kneeR += 40f * land;
-            if (_legL) _legL.localRotation = _legLRot * Quaternion.Euler(legL, 0, 0);
-            if (_legR) _legR.localRotation = _legRRot * Quaternion.Euler(legR, 0, 0);
-            if (_shinL) _shinL.localRotation = _shinLRot * Quaternion.Euler(kneeL, 0, 0);
-            if (_shinR) _shinR.localRotation = _shinRRot * Quaternion.Euler(kneeR, 0, 0);
+            if (_legL) _legL.localRotation = Pose(_legL, _legLRot, legL, 0, 0);
+            if (_legR) _legR.localRotation = Pose(_legR, _legRRot, legR, 0, 0);
+            if (_shinL) _shinL.localRotation = Pose(_shinL, _shinLRot, kneeL, 0, 0);
+            if (_shinR) _shinR.localRotation = Pose(_shinR, _shinRRot, kneeR, 0, 0);
 
             // ---- arms: counter-swing with bent elbows; raised in the air; back while sliding
             float armL = -s * armSwing * run + breathe * 2f * idle - 55f * _airBlend + 35f * _slide;
@@ -203,10 +224,10 @@ namespace MultiBash
                 bodyTwistExtra = -10f * k;
             }
 
-            if (_armL) _armL.localRotation = _armLRot * Quaternion.Euler(armL, 0, 0);
-            if (_armR) _armR.localRotation = _armRRot * Quaternion.Euler(armR, 0, armRSide);
-            if (_foreL) _foreL.localRotation = _foreLRot * Quaternion.Euler(elbowL, 0, 0);
-            if (_foreR) _foreR.localRotation = _foreRRot * Quaternion.Euler(elbowR, 0, 0);
+            if (_armL) _armL.localRotation = Pose(_armL, _armLRot, armL, 0, 0);
+            if (_armR) _armR.localRotation = Pose(_armR, _armRRot, armR, 0, armRSide);
+            if (_foreL) _foreL.localRotation = Pose(_foreL, _foreLRot, elbowL, 0, 0);
+            if (_foreR) _foreR.localRotation = Pose(_foreR, _foreRRot, elbowR, 0, 0);
 
             // ---- body: bob, forward lean, twist with the stride, recoil, breathing
             if (_body)
@@ -216,14 +237,14 @@ namespace MultiBash
                 float recoil = (1f - Mathf.Clamp01(_hitT)) * 14f;
                 float lean = 10f * run - 8f * _slide;
                 float twist = s * 9f * run + bodyTwistExtra;
-                _body.localPosition = _bodyPos + Vector3.up * (bob + crouch + breathe * 0.006f * idle);
-                _body.localRotation = _bodyRot * Quaternion.Euler(lean - recoil + 6f * _airBlend, twist, 0);
+                _body.localPosition = _bodyPos + BodyUp() * (bob + crouch + breathe * 0.006f * idle);
+                _body.localRotation = Pose(_body, _bodyRot, lean - recoil + 6f * _airBlend, twist, 0);
             }
             if (_head)
             {
                 float nod = Mathf.Sin(_phase * 2f) * 3f * run + breathe * 1.5f * idle;
                 float look = -Mathf.Sin(_phase) * 6f * run - bodyTwistExtra * 0.4f;
-                _head.localRotation = _headRot * Quaternion.Euler(nod - 4f * run, look, 0);
+                _head.localRotation = Pose(_head, _headRot, nod - 4f * run, look, 0);
             }
 
             // ---- whole model: lie down when downed, lean back while sliding, squash on landing

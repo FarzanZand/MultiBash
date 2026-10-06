@@ -333,7 +333,7 @@ namespace MultiBash.EditorTools
                 new StatModifier(StatType.MaxHealth, 30), new StatModifier(StatType.Armor, 2));
             Hero("Ranger", "Fast and precise. Keep moving and let the arrows do the work.", "#5fc04a", bow,
                 new StatModifier(StatType.MoveSpeed, 1.2f), new StatModifier(StatType.PickupRadius, 1f));
-            Hero("Mage", "Calls lightning that leaps through packs of enemies.", "#a46cf0", staff,
+            Hero("Mage", "Calls lightning that leaps through packs of enemies.", "#e0473b", staff,
                 new StatModifier(StatType.Cooldown, -0.1f), new StatModifier(StatType.XPGain, 0.1f));
             Hero("Alchemist", "Hurls toxic flasks that turn the ground into a death zone.", "#f0973a", flask,
                 new StatModifier(StatType.Area, 0.2f), new StatModifier(StatType.Duration, 0.2f));

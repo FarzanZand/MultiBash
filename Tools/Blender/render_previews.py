@@ -68,6 +68,7 @@ def portraits():
     os.makedirs(out_dir, exist_ok=True)
     for name, fn in (("Knight", gm.knight), ("Ranger", gm.ranger), ("Mage", gm.mage), ("Alchemist", gm.alchemist)):
         gm.reset()
+        gm.JOINTS.clear()
         fn()
         setup_material()
         setup_render(256, 256)
@@ -95,9 +96,57 @@ def sheet():
     bpy.ops.render.render(write_still=True)
 
 
+def heroes():
+    """Full-body lineup of the four heroes (Tools/Blender/heroes.png), handy for art review."""
+    gm.reset()
+    for i, fn in enumerate((gm.knight, gm.ranger, gm.mage, gm.alchemist)):
+        gm.JOINTS.clear()
+        before = set(bpy.data.objects)
+        fn()
+        for o in bpy.data.objects:
+            if o not in before and o.parent is None:
+                o.location.x += i * 1.3
+    setup_material()
+    setup_render(1600, 900, transparent=False)
+    camera((1.95 + 1.2, -6.5, 2.4), (1.95, 0, 1.15), lens=50)
+    bpy.context.scene.render.filepath = os.path.join(ROOT, "Tools", "Blender", "heroes.png")
+    bpy.ops.render.render(write_still=True)
+
+
+def enemies():
+    """Lineup of the enemies (Tools/Blender/enemies.png)."""
+    gm.reset()
+    names = ["Skeleton", "SkeletonArcher", "Slime", "MagmaSlime", "Bat", "FireImp", "BombShroom", "Golem"]
+    lookup = {n: (c, f) for c, n, f in gm.MODELS}
+    for i, n in enumerate(names):
+        gm.JOINTS.clear()
+        before = set(bpy.data.objects)
+        lookup[n][1]()
+        new = [o for o in bpy.data.objects if o not in before]
+        if n in gm.SMOOTH_ENEMIES:
+            for o in new:
+                if o.type == "MESH":
+                    for p in o.data.polygons:
+                        p.use_smooth = True
+        for o in new:
+            if o.parent is None:
+                o.location.x += i * 1.4
+                if n in ("Bat", "FireImp"):
+                    o.location.z += 1.3
+    setup_material()
+    setup_render(1800, 700, transparent=False)
+    camera((4.9 + 1.0, -14.5, 2.6), (4.9, 0, 1.0), lens=50)
+    bpy.context.scene.render.filepath = os.path.join(ROOT, "Tools", "Blender", "enemies.png")
+    bpy.ops.render.render(write_still=True)
+
+
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    if "--sheet" in args:
+    if "--heroes" in args:
+        heroes()
+    elif "--enemies" in args:
+        enemies()
+    elif "--sheet" in args:
         sheet()
     else:
         portraits()

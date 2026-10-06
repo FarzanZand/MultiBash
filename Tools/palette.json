@@ -95,6 +95,17 @@
     "imp_dark": "#6e1a14|noise",
     "sulfur": "#d8c23a|noise",
     "volcano_rock": "#3c3332|noise",
-    "magma_skin": "#d9541c|noise"
+    "magma_skin": "#d9541c|noise",
+    "mage_red": "#c8372e|noise",
+    "mage_red_dark": "#7a1f22|noise",
+    "steel_light": "#eef2f5|noise",
+    "steel_edge": "#3c4350|noise",
+    "gold_trim": "#e8b13a|noise",
+    "leather_light": "#a8784a|noise",
+    "green_light": "#5fbf45|noise",
+    "green_dark": "#2d6a2a|noise",
+    "red_light": "#e0473b|noise",
+    "hair_blonde": "#e3bf55|noise",
+    "hair_brown": "#5a3a24|noise"
   }
 }
