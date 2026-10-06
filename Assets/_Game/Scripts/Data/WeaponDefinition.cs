@@ -18,7 +18,7 @@ namespace MultiBash
         Homing,       // projectiles that seek enemies (Spirit Daggers)
     }
 
-    public enum Rarity { Common, Rare, Epic }
+    public enum Rarity { Common, Rare, Epic, Legendary }
 
     [Serializable]
     public class WeaponLevel
@@ -63,6 +63,13 @@ namespace MultiBash
         public Color fxColor = Color.white;
         public AudioClip fireSound;
         public AudioClip hitSound;
+
+        [Header("Evolution")]
+        [Tooltip("At max level, owning this tome lets the weapon evolve (offered on the next level-up).")]
+        public PowerupDefinition evolveWith;
+        public WeaponDefinition evolvesInto;
+        [Tooltip("Evolved weapons are never offered as normal picks.")]
+        public bool isEvolution;
 
         public int MaxLevel => levels.Length;
         public WeaponLevel GetLevel(int level) => levels[Mathf.Clamp(level - 1, 0, levels.Length - 1)];

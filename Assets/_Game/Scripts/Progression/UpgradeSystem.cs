@@ -8,15 +8,40 @@ namespace MultiBash
     ///   1..999      weapon index + 1
     ///   1000..1999  powerup index + 1000
     ///   2000        heal (fallback when everything is maxed)
+    ///   3000..3999  evolve into weapon index + 3000 (a max-level weapon + its tome)
     /// </summary>
     public static class UpgradeSystem
     {
         public const short Heal = 2000;
+        const short EvolveBase = 3000;
 
         public static bool IsWeapon(short code) => code > 0 && code < 1000;
         public static bool IsPowerup(short code) => code >= 1000 && code < 2000;
-        public static int WeaponIndex(short code) => code - 1;
+        public static bool IsEvolution(short code) => code >= EvolveBase && code < EvolveBase + 1000;
+        public static int WeaponIndex(short code) => IsEvolution(code) ? code - EvolveBase : code - 1;
         public static int PowerupIndex(short code) => code - 1000;
+
+        /// <summary>The weapon (index into db.weapons) this player evolves into evoIndex, or -1.</summary>
+        public static int EvolutionSource(PlayerCharacter pc, int evoIndex)
+        {
+            var db = GameDatabase.Instance;
+            var evo = db.GetWeapon(evoIndex);
+            if (evo == null) return -1;
+            for (int i = 0; i < db.weapons.Count; i++)
+                if (db.weapons[i].evolvesInto == evo && CanEvolve(pc, i)) return i;
+            return -1;
+        }
+
+        /// <summary>True when this weapon is maxed and its evolution tome is owned.</summary>
+        public static bool CanEvolve(PlayerCharacter pc, int weaponIndex)
+        {
+            var db = GameDatabase.Instance;
+            var w = db.GetWeapon(weaponIndex);
+            if (w == null || w.evolvesInto == null || w.evolveWith == null) return false;
+            if (pc.WeaponLevelOf(weaponIndex) < w.MaxLevel) return false;
+            int tome = db.powerups.IndexOf(w.evolveWith);
+            return tome >= 0 && pc.PowerupLevels.Get(tome) > 0 && db.IndexOf(w.evolvesInto) >= 0;
+        }
 
         struct Candidate
         {
@@ -39,16 +64,28 @@ namespace MultiBash
         {
             var db = GameDatabase.Instance;
             var cfg = db.config;
-            float luck = pc.Stats.Luck;
+            bool treasure = pc.TreasurePicks > 0;
+            pc.OfferIsTreasure = treasure;
+            float luck = pc.Stats.Luck + (treasure ? 2.5f : 0f);
             Candidates.Clear();
+
+            // an available evolution is always offered first
+            int firstSlot = 0;
+            for (int i = 0; i < db.weapons.Count && firstSlot == 0; i++)
+            {
+                if (!CanEvolve(pc, i)) continue;
+                pc.Choices.Set(0, (short)(EvolveBase + db.IndexOf(db.weapons[i].evolvesInto)));
+                firstSlot = 1;
+            }
 
             int weaponCount = pc.WeaponCount;
             for (int i = 0; i < db.weapons.Count; i++)
             {
                 var w = db.weapons[i];
+                if (w.isEvolution) continue;
                 int lvl = pc.WeaponLevelOf(i);
                 if (lvl > 0 && lvl < w.MaxLevel)
-                    Candidates.Add(new Candidate { code = (short)(i + 1), weight = RarityWeight(w.rarity, luck) * 1.6f });
+                    Candidates.Add(new Candidate { code = (short)(i + 1), weight = RarityWeight(w.rarity, luck) * (treasure ? 3f : 1.6f) });
                 else if (lvl == 0 && weaponCount < cfg.maxWeapons)
                     Candidates.Add(new Candidate { code = (short)(i + 1), weight = RarityWeight(w.rarity, luck) });
             }
@@ -65,7 +102,7 @@ namespace MultiBash
             }
 
             int n = Mathf.Min(cfg.choicesPerLevel, pc.Choices.Length);
-            for (int slot = 0; slot < n; slot++)
+            for (int slot = firstSlot; slot < n; slot++)
             {
                 if (Candidates.Count == 0)
                 {
@@ -89,7 +126,13 @@ namespace MultiBash
         /// <summary>Host only.</summary>
         public static void Apply(PlayerCharacter pc, short code)
         {
-            if (IsWeapon(code)) pc.AddOrLevelWeapon(WeaponIndex(code));
+            if (IsEvolution(code))
+            {
+                int evo = WeaponIndex(code);
+                int src = EvolutionSource(pc, evo);
+                if (src >= 0) pc.EvolveWeapon(src, evo);
+            }
+            else if (IsWeapon(code)) pc.AddOrLevelWeapon(WeaponIndex(code));
             else if (IsPowerup(code)) pc.AddPowerup(PowerupIndex(code));
             else if (code == Heal) pc.Heal(pc.Stats.MaxHealth * GameDatabase.Config.healChoicePercent);
         }
@@ -99,7 +142,7 @@ namespace MultiBash
         public static string NameOf(short code)
         {
             var db = GameDatabase.Instance;
-            if (IsWeapon(code)) return db.GetWeapon(WeaponIndex(code))?.displayName ?? "?";
+            if (IsWeapon(code) || IsEvolution(code)) return db.GetWeapon(WeaponIndex(code))?.displayName ?? "?";
             if (IsPowerup(code)) return db.GetPowerup(PowerupIndex(code))?.displayName ?? "?";
             return "Second Wind";
         }
@@ -107,7 +150,7 @@ namespace MultiBash
         public static Sprite IconOf(short code)
         {
             var db = GameDatabase.Instance;
-            if (IsWeapon(code)) return db.GetWeapon(WeaponIndex(code))?.icon;
+            if (IsWeapon(code) || IsEvolution(code)) return db.GetWeapon(WeaponIndex(code))?.icon;
             if (IsPowerup(code)) return db.GetPowerup(PowerupIndex(code))?.icon;
             return db.healIcon;
         }
@@ -115,6 +158,7 @@ namespace MultiBash
         public static Rarity RarityOf(short code)
         {
             var db = GameDatabase.Instance;
+            if (IsEvolution(code)) return Rarity.Legendary;
             if (IsWeapon(code)) return db.GetWeapon(WeaponIndex(code))?.rarity ?? Rarity.Common;
             if (IsPowerup(code)) return db.GetPowerup(PowerupIndex(code))?.rarity ?? Rarity.Common;
             return Rarity.Common;
@@ -122,6 +166,7 @@ namespace MultiBash
 
         public static Color ColorOf(short code) => RarityOf(code) switch
         {
+            Rarity.Legendary => new Color(1f, 0.6f, 0.15f),
             Rarity.Rare => new Color(0.35f, 0.65f, 1f),
             Rarity.Epic => new Color(0.8f, 0.45f, 1f),
             _ => new Color(1f, 0.85f, 0.4f),
@@ -142,12 +187,20 @@ namespace MultiBash
             int lines = 0;
             void Add(string s)
             {
-                if (lines >= 2) return;
+                if (lines >= 3) return;
                 if (lines > 0) sb.Append('\n');
                 sb.Append(s);
                 lines++;
             }
 
+            if (IsEvolution(code))
+            {
+                var evo = db.GetWeapon(WeaponIndex(code));
+                var from = db.GetWeapon(EvolutionSource(pc, WeaponIndex(code)));
+                Add($"<color=#ffb347>{from?.displayName} evolves!</color>");
+                Add($"<color={Gold}>{evo.description}</color>");
+                return sb.ToString();
+            }
             if (IsWeapon(code))
             {
                 var w = db.GetWeapon(WeaponIndex(code));
@@ -155,6 +208,7 @@ namespace MultiBash
                 if (lvl == 0)
                 {
                     Add($"<color={Gold}>{w.description}</color>");
+                    if (w.evolveWith != null && w.evolvesInto != null) Add($"<color=#e2c8ff>Evolves with {w.evolveWith.displayName}</color>");
                     return sb.ToString();
                 }
                 var a = w.GetLevel(lvl);
@@ -166,6 +220,11 @@ namespace MultiBash
                 if (!Mathf.Approximately(a.cooldown, b.cooldown)) Add(Delta("Cooldown", $"{a.cooldown:0.##}s", $"{b.cooldown:0.##}s"));
                 if (!Mathf.Approximately(a.duration, b.duration)) Add(Delta("Duration", $"{a.duration:0.#}s", $"{b.duration:0.#}s"));
                 if (!Mathf.Approximately(a.speed, b.speed)) Add(Delta("Speed", $"{a.speed:0}", $"{b.speed:0}"));
+                if (lvl + 1 >= w.MaxLevel && w.evolveWith != null && w.evolvesInto != null)
+                {
+                    lines = Mathf.Min(lines, 2);
+                    Add($"<color=#e2c8ff>MAX + {w.evolveWith.displayName} = {w.evolvesInto.displayName}</color>");
+                }
                 return sb.ToString();
             }
             if (IsPowerup(code))
@@ -187,12 +246,22 @@ namespace MultiBash
                         StatType.CritChance => "Crit Chance",
                         StatType.CritDamage => "Crit Damage",
                         StatType.ExtraJumps => "Air Jumps",
+                        StatType.Thorns => "Thorns",
+                        StatType.Execute => "Execute",
+                        StatType.Revives => "Self-Revives",
                         _ => m.stat.ToString(),
                     };
                     if (m.stat == StatType.Cooldown) Add(Delta(name, Pct(1f / Mathf.Max(0.25f, cur)), Pct(1f / Mathf.Max(0.25f, next))));
                     else if (StatInfo.IsMultiplier(m.stat)) Add(Delta(name, Pct(cur), Pct(next)));
                     else Add(Delta(name, $"{cur:0.#}", $"{next:0.#}"));
                 }
+                // tell players which of their weapons this tome evolves
+                foreach (var w in db.weapons)
+                    if (w.evolveWith == p && w.evolvesInto != null && pc.WeaponLevelOf(db.IndexOf(w)) > 0)
+                    {
+                        Add($"<color=#e2c8ff>Evolves your {w.displayName}</color>");
+                        break;
+                    }
                 return sb.ToString();
             }
             return Delta("Health", $"{pc.Health:0}", $"{Mathf.Min(pc.MaxHealth, pc.Health + pc.MaxHealth * GameDatabase.Config.healChoicePercent):0}");
@@ -202,6 +271,11 @@ namespace MultiBash
         public static string Describe(PlayerCharacter pc, short code, out string levelText)
         {
             var db = GameDatabase.Instance;
+            if (IsEvolution(code))
+            {
+                levelText = "EVOLUTION";
+                return db.GetWeapon(WeaponIndex(code))?.description ?? "";
+            }
             if (IsWeapon(code))
             {
                 int i = WeaponIndex(code);

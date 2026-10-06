@@ -34,6 +34,20 @@ namespace MultiBash
         [Networked] public int PendingLevelUps { get; set; }
         /// <summary>Upgrade codes (see UpgradeSystem). 0 = empty.</summary>
         [Networked, Capacity(3)] public NetworkArray<short> Choices => default;
+        /// <summary>Upgrade-offer rerolls left this run.</summary>
+        [Networked] public byte Rerolls { get; set; }
+        /// <summary>Level-ups that came from chests (rolled with extra luck).</summary>
+        [Networked] public int TreasurePicks { get; set; }
+        [Networked] public NetworkBool OfferIsTreasure { get; set; }
+        [Networked] public byte RevivesUsed { get; set; }
+        [Networked] public int PhoenixTick { get; set; }
+        [Networked] public int EvolveTick { get; set; }
+        [Networked] public short LastEvolution { get; set; }
+        /// <summary>Kills chained within a few seconds of each other (every 50 = FRENZY reward).</summary>
+        [Networked] public int Combo { get; set; }
+        [Networked] public int FrenzyTick { get; set; }
+        float _comboTimer;
+        int _lastFrenzy, _nextFrenzy = 50, _frenzyGap = 50;
 
         [Networked] TickTimer SlideTimer { get; set; }
         [Networked] TickTimer SlideCooldown { get; set; }
@@ -71,7 +85,8 @@ namespace MultiBash
         float _lastHealth, _sizzleTimer;
         /// <summary>Telemetry (host): damage taken by source.</summary>
         public static float DamageFromHits, DamageFromLava;
-        int _lastJump, _lastSlide, _lastRevive;
+        int _lastJump, _lastSlide, _lastRevive, _lastPhoenix, _lastEvolve;
+        float _heartTimer;
         bool _lastDowned;
         float _stepTimer;
         int _visualLoadout = -1;
@@ -101,6 +116,7 @@ namespace MultiBash
             LoadoutVersion++;
             RecalcStats();
             Health = _stats.MaxHealth;
+            Rerolls = (byte)Mathf.Clamp(db.config.rerollsPerRun, 0, 255);
         }
 
         public override void Spawned()
@@ -119,6 +135,9 @@ namespace MultiBash
             _lastJump = JumpTick;
             _lastSlide = SlideTick;
             _lastRevive = ReviveTick;
+            _lastPhoenix = PhoenixTick;
+            _lastEvolve = EvolveTick;
+            _lastFrenzy = FrenzyTick;
 
             if (HasInputAuthority && CameraRig.Instance != null) CameraRig.Instance.SetTarget(this);
         }
@@ -234,6 +253,24 @@ namespace MultiBash
                     LoadoutVersion++;
                     return;
                 }
+            }
+        }
+
+        /// <summary>Host only: replace a max-level weapon with its evolved form.</summary>
+        public void EvolveWeapon(int fromIndex, int toIndex)
+        {
+            for (int i = 0; i < MaxWeaponSlots; i++)
+            {
+                if (WeaponIds.Get(i) != fromIndex + 1) continue;
+                WeaponIds.Set(i, (byte)(toIndex + 1));
+                WeaponLevels.Set(i, 1);
+                LoadoutVersion++;
+                LastEvolution = (short)toIndex;
+                EvolveTick = Runner.Tick;
+                var from = GameDatabase.Instance.GetWeapon(fromIndex);
+                var to = GameDatabase.Instance.GetWeapon(toIndex);
+                GameManager.Instance?.Announce($"{DisplayName}: {from?.displayName} > {to?.displayName}!");
+                return;
             }
         }
 
@@ -369,15 +406,16 @@ namespace MultiBash
                 DamageFromLava += LavaZone.DamagePerSecond * dt;
                 if (Health <= 0f)
                 {
-                    Health = 0f;
-                    Downed = true;
-                    ReviveProgress = 0f;
-                    DownedTimer = TickTimer.CreateFromSeconds(Runner, GameDatabase.Config.downedSeconds);
-                    gm.CheckDefeat();
-                    return;
+                    GoDown();
+                    if (Downed) return;
                 }
             }
 
+            if (Combo > 0)
+            {
+                _comboTimer -= dt;
+                if (_comboTimer <= 0f) { Combo = 0; _nextFrenzy = 50; _frenzyGap = 50; }
+            }
             if (Stats.HealthRegen > 0f) Health = Mathf.Min(Stats.MaxHealth, Health + Stats.HealthRegen * dt);
             if (Health > Stats.MaxHealth) Health = Stats.MaxHealth;
 
@@ -398,14 +436,55 @@ namespace MultiBash
             Health -= dmg;
             DamageFromHits += dmg;
             HurtInvuln = TickTimer.CreateFromSeconds(Runner, 0.33f);
-            if (Health <= 0f)
+            if (Health <= 0f) GoDown();
+        }
+
+        /// <summary>Host: health hit zero. A Phoenix Feather charge brings you straight back instead.</summary>
+        void GoDown()
+        {
+            if (Stats.Revives > RevivesUsed)
             {
-                Health = 0f;
-                Downed = true;
-                ReviveProgress = 0f;
-                DownedTimer = TickTimer.CreateFromSeconds(Runner, GameDatabase.Config.downedSeconds);
-                GameManager.Instance?.CheckDefeat();
+                RevivesUsed++;
+                Health = Stats.MaxHealth * 0.6f;
+                HurtInvuln = TickTimer.CreateFromSeconds(Runner, 3f);
+                PhoenixTick = Runner.Tick;
+                // the rebirth blasts nearby enemies away
+                EnemyRegistry.EnsureGrid(Runner.Tick);
+                var near = new List<Enemy>();
+                EnemyRegistry.Query(transform.position, 6f, near);
+                foreach (var e in near) if (e != null && e.IsAlive) e.TakeDamage(40f + Stats.MaxHealth * 0.4f, transform.position, 14f, this);
+                GameManager.Instance?.Announce($"{DisplayName} rises from the ashes!");
+                return;
             }
+            Health = 0f;
+            Downed = true;
+            ReviveProgress = 0f;
+            DownedTimer = TickTimer.CreateFromSeconds(Runner, GameDatabase.Config.downedSeconds);
+            GameManager.Instance?.CheckDefeat();
+        }
+
+        /// <summary>Host: a kill by this player feeds the combo; every 50 chained kills = FRENZY (heal + vacuum).</summary>
+        public void AddKill()
+        {
+            Combo++;
+            _comboTimer = 2.5f;
+            if (Data != null && Combo > Data.BestCombo) Data.BestCombo = Combo;
+            if (Combo < _nextFrenzy || !IsAlive) return;
+            _frenzyGap += 50;               // 50, 150, 300, 500 ... each FRENZY is harder to reach
+            _nextFrenzy += _frenzyGap;
+            Heal(Stats.MaxHealth * 0.1f);
+            foreach (var g in Pickup.All)
+                if (g != null && g.Kind == PickupKind.XP && !g.Target.IsValid && (g.transform.position - transform.position).sqrMagnitude < 30f * 30f)
+                    g.Target = Object.Id;
+            FrenzyTick = Runner.Tick;
+        }
+
+        /// <summary>Host: thorns. Called when an enemy lands a contact hit on this player.</summary>
+        public void Reflect(Enemy attacker, float hit)
+        {
+            float t = Stats.Thorns;
+            if (t <= 0f || attacker == null || !attacker.IsAlive) return;
+            attacker.TakeDamage(hit * t + 4f, transform.position, 3f, this);
         }
 
         /// <summary>Host: instantly bring back (used when a run ends in victory).</summary>
@@ -448,14 +527,41 @@ namespace MultiBash
             short code = Choices.Get(slot);
             if (code == 0) return;
             UpgradeSystem.Apply(this, code);
-            PendingLevelUps--;
-            for (int i = 0; i < Choices.Length; i++) Choices.Set(i, 0);
+            ConsumeOffer();
             Rpc_UpgradeChosen(code);
+        }
+
+        void ConsumeOffer()
+        {
+            PendingLevelUps--;
+            if (OfferIsTreasure && TreasurePicks > 0) TreasurePicks--;
+            OfferIsTreasure = false;
+            for (int i = 0; i < Choices.Length; i++) Choices.Set(i, 0);
+        }
+
+        /// <summary>Spend a reroll: new offers for the same level-up.</summary>
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        public void Rpc_Reroll()
+        {
+            if (PendingLevelUps <= 0 || Rerolls == 0 || Choices.Get(0) == 0) return;
+            Rerolls--;
+            for (int i = 0; i < Choices.Length; i++) Choices.Set(i, 0);
+            UpgradeSystem.Roll(this);
+        }
+
+        /// <summary>Skip this level-up for a small heal.</summary>
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        public void Rpc_Skip()
+        {
+            if (PendingLevelUps <= 0 || Choices.Get(0) == 0) return;
+            Heal(Stats.MaxHealth * GameDatabase.Config.skipHealPercent);
+            ConsumeOffer();
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         void Rpc_UpgradeChosen(short code)
         {
+            if (UpgradeSystem.IsEvolution(code)) return; // the evolution has its own big moment (EvolveTick)
             FxManager.Instance?.UpgradeBurst(transform.position, UpgradeSystem.ColorOf(code));
         }
 
@@ -606,6 +712,49 @@ namespace MultiBash
                 if (lib != null) AudioManager.Play(lib.revive, transform.position, 0.9f);
                 FxManager.Instance?.UpgradeBurst(transform.position, new Color(0.4f, 1f, 0.6f));
             }
+            if (PhoenixTick != _lastPhoenix)
+            {
+                _lastPhoenix = PhoenixTick;
+                var fire = new Color(1f, 0.55f, 0.15f);
+                FxManager.Instance?.LightPillar(transform.position, fire, 14f, 1.2f);
+                FxManager.Instance?.Shockwave(transform.position, 6f, fire, true);
+                FxManager.Instance?.Burst(transform.position + Vector3.up, fire, 50, 10f, 0.4f, 1f, 3f, true);
+                if (lib != null) AudioManager.Play(lib.revive, transform.position, 1f, 0.8f);
+                if (lib != null) AudioManager.Play(lib.evolution, transform.position, 0.6f, 1.2f);
+                if (IsLocal) CameraRig.Instance?.Shake(0.6f);
+            }
+            if (FrenzyTick != _lastFrenzy)
+            {
+                _lastFrenzy = FrenzyTick;
+                FxManager.Instance?.UpgradeBurst(transform.position, new Color(1f, 0.45f, 0.2f));
+                if (lib != null) AudioManager.Play(lib.levelUp, transform.position, IsLocal ? 0.9f : 0.5f, 1.35f);
+                if (IsLocal) HUD.Instance?.Frenzy(Combo);
+            }
+            if (EvolveTick != _lastEvolve)
+            {
+                _lastEvolve = EvolveTick;
+                var def = GameDatabase.Instance.GetWeapon(LastEvolution);
+                var c = def != null ? def.fxColor : new Color(1f, 0.7f, 0.2f);
+                FxManager.Instance?.LightPillar(transform.position, new Color(1f, 0.75f, 0.25f), 22f, 1.8f);
+                FxManager.Instance?.UpgradeBurst(transform.position, c);
+                FxManager.Instance?.Burst(transform.position + Vector3.up * 1.5f, new Color(1f, 0.85f, 0.4f), 70, 12f, 0.5f, 1.3f, 4f, true);
+                if (lib != null)
+                {
+                    if (IsLocal) AudioManager.PlayUI(lib.evolution, 1f);
+                    else AudioManager.Play(lib.evolution, transform.position, 0.8f);
+                }
+                if (IsLocal) CameraRig.Instance?.Shake(0.5f);
+            }
+            // low health: heartbeat for the local player
+            if (IsLocal && !Downed && !Dead && lib != null && Health < MaxHealth * 0.3f && gameStatePlaying())
+            {
+                _heartTimer -= Time.deltaTime;
+                if (_heartTimer <= 0f)
+                {
+                    _heartTimer = Mathf.Lerp(0.55f, 1.0f, Health / Mathf.Max(1f, MaxHealth * 0.3f));
+                    AudioManager.PlayUI(lib.heartbeat, 0.75f);
+                }
+            }
             bool down = Downed || Dead;
             if (down != _lastDowned)
             {
@@ -637,10 +786,19 @@ namespace MultiBash
             }
         }
 
+        static bool gameStatePlaying() => GameManager.Instance != null && GameManager.Instance.State == RunState.Playing;
+
         void UpdateHeldWeapon()
         {
             int first = WeaponIds.Get(0) - 1;
             if (first == _heldWeapon || _hand == null) return;
+            var newDef = GameDatabase.Instance.GetWeapon(first);
+            var oldDef = GameDatabase.Instance.GetWeapon(_heldWeapon);
+            if (newDef != null && oldDef != null && newDef.heldModel == oldDef.heldModel && _heldModel != null)
+            {
+                _heldWeapon = first; // evolved form uses the same held model
+                return;
+            }
             _heldWeapon = first;
             if (_heldModel != null) Destroy(_heldModel);
             var def = GameDatabase.Instance.GetWeapon(first);

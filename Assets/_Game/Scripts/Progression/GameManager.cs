@@ -238,8 +238,9 @@ namespace MultiBash
             if (e.Boss)
             {
                 // boss loot: a chest for everyone, a magnet, a heal and a big pile of XP
-                Announce($"{e.DisplayName} has fallen!");
+                Announce($"{e.DisplayName} has fallen!  +1 reroll");
                 Rpc_BossDefeated(pos);
+                foreach (var p in PlayerCharacter.All) if (p != null && p.Rerolls < 250) p.Rerolls++;
                 int chests = Mathf.Max(1, PlayerCharacter.All.Count);
                 for (int i = 0; i < chests; i++) Pickup.Spawn(Runner, cfg.chestPrefab, pos + RandomOffset() * 3f, PickupKind.Chest, 0);
                 Pickup.Spawn(Runner, cfg.magnetPrefab, pos + RandomOffset() * 2f, PickupKind.Magnet, 0);
@@ -251,6 +252,15 @@ namespace MultiBash
                 return;
             }
 
+            if (killer != null) killer.AddKill();
+            if (def.dropChests > 0)
+            {
+                Announce($"{(killer != null ? killer.DisplayName : "Someone")} caught the {def.displayName}!");
+                Rpc_BossDefeated(pos);
+                for (int i = 0; i < def.dropChests; i++) Pickup.Spawn(Runner, cfg.chestPrefab, pos + RandomOffset() * 2.5f, PickupKind.Chest, 0);
+                for (int i = 0; i < 8; i++) Pickup.SpawnXP(Runner, pos + RandomOffset() * 3f, 6);
+                return;
+            }
             int xp = def.xpValue * (e.Elite ? 10 : 1);
             Pickup.SpawnXP(Runner, pos, xp);
             if (Random.value < def.healthOrbChance) Pickup.Spawn(Runner, cfg.healthOrbPrefab, pos + RandomOffset(), PickupKind.Health, 0);
@@ -322,7 +332,7 @@ namespace MultiBash
             CameraRig.Instance?.Shake(0.8f);
             FxManager.Instance?.UpgradeBurst(pos, new Color(1f, 0.3f, 0.3f));
             var lib = AudioManager.Lib;
-            if (lib != null) AudioManager.PlayUI(lib.defeat, 0.6f, 1.4f);
+            if (lib != null) AudioManager.PlayUI(lib.bossWarning, 0.9f);
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]
@@ -344,15 +354,29 @@ namespace MultiBash
                     AudioManager.PlayUI(lib.magnet, 0.8f);
                     break;
                 case PickupKind.Chest:
-                    AudioManager.Play(lib.chest, pos, 1f);
+                    AudioManager.Play(lib.chest, pos, 0.8f);
+                    AudioManager.Play(lib.treasure, pos, 1f);
                     FxManager.Instance?.UpgradeBurst(pos, new Color(1f, 0.85f, 0.3f));
+                    FxManager.Instance?.LightPillar(pos, new Color(1f, 0.8f, 0.3f), 10f, 0.9f);
+                    FxManager.Instance?.Burst(pos + Vector3.up, new Color(1f, 0.85f, 0.3f), 30, 9f, 0.3f, 0.8f, 6f, true);
                     break;
             }
         }
 
+        bool _bossMusic;
+
         public override void Render()
         {
             var lib = AudioManager.Lib;
+            // boss fights get their own track (crossfaded), the map music comes back after
+            bool bossAlive = false;
+            if (State == RunState.Playing)
+                foreach (var e in EnemyRegistry.All) if (e != null && e.Boss && e.IsAlive) { bossAlive = true; break; }
+            if (bossAlive != _bossMusic && lib != null && lib.bossMusic != null)
+            {
+                _bossMusic = bossAlive;
+                AudioManager.PlayMusic(bossAlive ? lib.bossMusic : map != null && map.music != null ? map.music : lib.battleMusic, 1.5f);
+            }
             if (TeamLevel != _lastLevel)
             {
                 if (TeamLevel > _lastLevel && _lastLevel > 0)

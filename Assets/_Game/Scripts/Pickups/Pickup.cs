@@ -163,6 +163,7 @@ namespace MultiBash
                     break;
                 case PickupKind.Chest:
                     p.PendingLevelUps++;
+                    p.TreasurePicks++;
                     break;
             }
             gm.Rpc_PickupFx((byte)Kind, transform.position, p.Object.InputAuthority);

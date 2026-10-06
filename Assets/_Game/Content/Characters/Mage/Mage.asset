@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36a88f7216cd11e44a0d4bb1862cb441, type: 3}
   m_Name: Mage
   m_EditorClassIdentifier: Assembly-CSharp::MultiBash.CharacterDefinition
-  displayName: Mage
-  description: Calls lightning that leaps through packs of enemies.
+  displayName: Farzan
+  description: A bearded storm sage. Calls lightning that leaps through packs of
+    enemies.
   portrait: {fileID: 21300000, guid: 96760103357782e488c66c6ea26a572c, type: 3}
   color: {r: 0.8784314, g: 0.2784314, b: 0.23137255, a: 1}
   model: {fileID: 919132149155446097, guid: 52015cb15c2e1fd488c21b49f30bd007, type: 3}

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc1fb2f1ceac0749b04409fe13897d2, type: 3}
+  m_Name: PhantomLegion
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WeaponDefinition
+  displayName: Phantom Legion
+  description: Ten spectral blades hunt down every enemy nearby.
+  icon: {fileID: 21300000, guid: 95788619a5d6a654daf58732ff12b488, type: 3}
+  rarity: 3
+  kind: 9
+  levels:
+  - upgradeText: 
+    damage: 24
+    cooldown: 0.75
+    amount: 10
+    area: 1
+    pierce: 4
+    duration: 2.4
+    speed: 22
+    knockback: 3
+  heldModel: {fileID: 0}
+  projectileModel: {fileID: 919132149155446097, guid: dc941c92912e6c244a3b752cb36a6e69, type: 3}
+  fxColor: {r: 0.8862745, g: 0.72156864, b: 1, a: 1}
+  fireSound: {fileID: 8300000, guid: 0504ed97472b26840aecc55a5c0fea35, type: 3}
+  hitSound: {fileID: 8300000, guid: 4b4233bda3a43a14d9f9d0f3552d72d1, type: 3}
+  evolveWith: {fileID: 0}
+  evolvesInto: {fileID: 0}
+  isEvolution: 1

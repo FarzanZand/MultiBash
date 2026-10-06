@@ -17,6 +17,7 @@ namespace MultiBash
         [Networked] public NetworkBool Ready { get; set; }
         [Networked] public int Kills { get; set; }
         [Networked] public float DamageDealt { get; set; }
+        [Networked] public int BestCombo { get; set; }
         [Networked] public int JoinOrder { get; set; }
 
         /// <summary>The in-game character (only set in the Game scene).</summary>
@@ -116,6 +117,7 @@ namespace MultiBash
             if (!HasStateAuthority) return;
             Kills = 0;
             DamageDealt = 0;
+            BestCombo = 0;
         }
     }
 }

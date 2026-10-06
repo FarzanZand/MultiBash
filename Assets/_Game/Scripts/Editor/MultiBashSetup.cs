@@ -51,10 +51,14 @@ namespace MultiBash.EditorTools
             Force = true;
             BuildThemeAndAudio();
             BuildContent();
+            Force = false;
+            BuildPrefabs();          // only creates prefabs that are missing (new enemies / props)
+            Force = true;
             LinkContent();
             Force = false;
             RefreshDatabase();
             AssetDatabase.SaveAssets();
+            EditorApplication.ExecuteMenuItem("Tools/Fusion/Rebuild Prefab Table");
             Debug.Log("[MultiBash] Content data reset to the defaults in MultiBashSetup.Content.cs.");
         }
 

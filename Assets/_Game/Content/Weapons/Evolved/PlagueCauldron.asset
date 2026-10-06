@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc1fb2f1ceac0749b04409fe13897d2, type: 3}
+  m_Name: PlagueCauldron
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WeaponDefinition
+  displayName: Plague Cauldron
+  description: Hurls five flasks that leave huge, lasting plague pools.
+  icon: {fileID: 21300000, guid: 11252a91be47f064c80fb104beab3946, type: 3}
+  rarity: 3
+  kind: 3
+  levels:
+  - upgradeText: 
+    damage: 18
+    cooldown: 1.6
+    amount: 5
+    area: 4.6
+    pierce: 0
+    duration: 7
+    speed: 0
+    knockback: 0.6
+  heldModel: {fileID: 919132149155446097, guid: a47bae6bb5fb1e74d9724489e17745e7, type: 3}
+  projectileModel: {fileID: 919132149155446097, guid: a47bae6bb5fb1e74d9724489e17745e7, type: 3}
+  fxColor: {r: 0.78431374, g: 1, b: 0.22745098, a: 1}
+  fireSound: {fileID: 8300000, guid: ee36cc7b484ef21419cd4ea8f48dadeb, type: 3}
+  hitSound: {fileID: 8300000, guid: 4b4c922779f34374686d75c4dfcb1a70, type: 3}
+  evolveWith: {fileID: 0}
+  evolvesInto: {fileID: 0}
+  isEvolution: 1

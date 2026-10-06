@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36a88f7216cd11e44a0d4bb1862cb441, type: 3}
   m_Name: Alchemist
   m_EditorClassIdentifier: Assembly-CSharp::MultiBash.CharacterDefinition
-  displayName: Alchemist
-  description: Hurls toxic flasks that turn the ground into a death zone.
+  displayName: Fredrik
+  description: A bespectacled alchemist. Hurls toxic flasks that turn the ground
+    into a death zone.
   portrait: {fileID: 21300000, guid: e89cd04f822e66a42b0479296818a667, type: 3}
   color: {r: 0.9411765, g: 0.5921569, b: 0.22745098, a: 1}
   model: {fileID: 919132149155446097, guid: 1f1a4fc0afea14340a3e8f2395b43a06, type: 3}

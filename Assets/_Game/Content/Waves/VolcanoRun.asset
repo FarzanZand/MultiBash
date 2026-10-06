@@ -85,6 +85,27 @@ MonoBehaviour:
     elites: 1
     announcement: The ground boils!
     boss: 0
+  - minute: 2.25
+    enemy: {fileID: 11400000, guid: 778c89a0245b2824d88a0fce3bba61e3, type: 2}
+    count: 1
+    ring: 1
+    elites: 0
+    announcement: A Treasure Slime! Catch it before it escapes!
+    boss: 0
+  - minute: 5
+    enemy: {fileID: 11400000, guid: 778c89a0245b2824d88a0fce3bba61e3, type: 2}
+    count: 1
+    ring: 1
+    elites: 0
+    announcement: A Treasure Slime! Catch it before it escapes!
+    boss: 0
+  - minute: 7.75
+    enemy: {fileID: 11400000, guid: 778c89a0245b2824d88a0fce3bba61e3, type: 2}
+    count: 1
+    ring: 1
+    elites: 0
+    announcement: A Treasure Slime! Catch it before it escapes!
+    boss: 0
   - minute: 2.5
     enemy: {fileID: 11400000, guid: 9814521879f445b41b580bc620c92602, type: 2}
     count: 12

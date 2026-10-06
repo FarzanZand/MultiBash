@@ -688,6 +688,64 @@ def g_clover(d):
         d.ellipse([x - 4, y + 4, x + 28, y + 36], fill=g, outline=DARK, width=3)
     d.line([(64, 80), (80, 114)], fill=hexrgb("#2a8a4a"), width=7)
 
+
+def g_thorns(d):
+    pts = []
+    for i in range(20):
+        r = 56 if i % 2 == 0 else 38
+        a = math.radians(i * 18)
+        pts.append((64 + math.cos(a) * r, 64 + math.sin(a) * r))
+    d.polygon(pts, fill=hexrgb("#9aa4b4"), outline=DARK)
+    d.ellipse([36, 36, 92, 92], fill=hexrgb("#5c6678"), outline=DARK, width=3)
+    d.polygon([(64, 42), (84, 52), (80, 78), (64, 88), (48, 78), (44, 52)], fill=hexrgb("#c8d0dc"), outline=DARK)
+
+
+def g_execute(d):
+    d.ellipse([30, 20, 98, 86], fill=(236, 230, 214, 255), outline=DARK, width=3)
+    d.rectangle([46, 78, 82, 104], fill=(236, 230, 214, 255), outline=DARK, width=3)
+    d.ellipse([42, 44, 60, 62], fill=DARK)
+    d.ellipse([68, 44, 86, 62], fill=DARK)
+    d.polygon([(64, 64), (58, 76), (70, 76)], fill=DARK)
+    for x in (54, 64, 74):
+        d.line([(x, 86), (x, 104)], fill=DARK, width=3)
+    d.polygon([(8, 116), (18, 100), (112, 18), (120, 26), (30, 112)], fill=hexrgb("#ff4a3a"), outline=DARK)
+
+
+def g_phoenix(d):
+    d.polygon([(28, 108), (88, 18), (104, 26), (44, 114)], fill=hexrgb("#ff8a1a"), outline=DARK)
+    for k in range(6):
+        y = 30 + k * 13
+        d.line([(98 - k * 10, y - 6), (70 - k * 10, y + 10)], fill=hexrgb("#ffd23a"), width=4)
+    d.line([(24, 114), (96, 22)], fill=hexrgb("#8a1a0a"), width=4)
+    d.polygon([(20, 70), (34, 40), (40, 64), (52, 30), (56, 66)], fill=hexrgb("#ff3a1a"), outline=DARK)
+
+
+def evo_icon(fn, size=32):
+    """Evolved weapon: the base glyph with a molten-gold aura and a little star."""
+    gl = glyph_layer()
+    fn(ImageDraw.Draw(gl))
+    arr = np.array(gl).astype(np.float32)
+    a = arr[..., 3:4] / 255.0
+    warm = arr[..., :3] * 0.75 + np.array([255, 190, 60]) * 0.25
+    arr[..., :3] = warm * a + arr[..., :3] * (1 - a)
+    base = pixelate_icon(Image.fromarray(arr.clip(0, 255).astype(np.uint8), "RGBA"), size)
+    px = np.array(base)
+    solid = px[..., 3] > 0
+    out = px.copy()
+    for yy in range(size):
+        for xx in range(size):
+            if not solid[yy, xx] and any(0 <= xx + dx < size and 0 <= yy + dy < size and solid[yy + dy, xx + dx]
+                                         for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                out[yy, xx] = (255, 200, 60, 255)
+    for (x, y, c) in ((27, 1, (255, 255, 220)), (27, 2, (255, 220, 90)), (26, 2, (255, 220, 90)), (28, 2, (255, 220, 90)),
+                      (27, 3, (255, 220, 90)), (27, 0, (255, 200, 60)), (25, 2, (255, 200, 60)), (29, 2, (255, 200, 60)), (27, 4, (255, 200, 60))):
+        out[y, x] = (*c, 255)
+    return Image.fromarray(out, "RGBA")
+
+
+EVOS = {"TitansCleaver": g_sword, "HailOfArrows": g_bow, "ThunderGod": None, "PlagueCauldron": None, "BladeTornado": None,
+        "Sanctuary": None, "TwinMoons": None, "Armageddon": None, "AbsoluteZero": None, "PhantomLegion": None}
+
 ICONS = {
     ("Weapons", "Icon_Greatsword"): (("#5a8cf0", "#1d2c5c"), g_sword),
     ("Weapons", "Icon_Longbow"): (("#6cc050", "#1f3c18"), g_bow),
@@ -717,7 +775,12 @@ ICONS = {
     ("Powerups", "Icon_Armor"): (("#a0a8b8", "#2a2e38"), g_shield),
     ("Powerups", "Icon_Gold"): (("#f0d050", "#4c3c10"), g_coin),
     ("Powerups", "Icon_Heal"): (("#f07080", "#4c1020"), lambda d: g_heart(d, hexrgb("#ff8a9a"))),
+    ("Powerups", "Icon_Thorns"): (("#a0a8b8", "#2a2e38"), g_thorns),
+    ("Powerups", "Icon_Execution"): (("#f05050", "#4c1010"), g_execute),
+    ("Powerups", "Icon_Phoenix"): (("#ff8a1a", "#4c1a04"), g_phoenix),
 }
+EVOS.update({"ThunderGod": g_bolt, "PlagueCauldron": g_flask, "BladeTornado": g_blades, "Sanctuary": g_aura, "TwinMoons": g_boomerang,
+             "Armageddon": g_meteor, "AbsoluteZero": g_snowflake, "PhantomLegion": g_dagger})
 
 
 def icons():
@@ -726,6 +789,8 @@ def icons():
         gl = glyph_layer()
         fn(ImageDraw.Draw(gl))
         save(pixelate_icon(gl, 32), "UI", "Icons", folder, name + ".png")
+    for name, fn in EVOS.items():
+        save(evo_icon(fn), "UI", "Icons", "Weapons", f"Icon_Evo_{name}.png")
 
 
 def pixelate_portraits():
@@ -737,9 +802,9 @@ def pixelate_portraits():
         if f.startswith("Portrait_") and f.endswith(".png"):
             p = os.path.join(d, f)
             img = Image.open(p).convert("RGBA")
-            if img.width <= 64:
+            if img.width <= 80:
                 continue
-            small = img.resize((48, 48), Image.BOX)
+            small = img.resize((80, 80), Image.BOX)
             arr = np.array(small)
             arr[..., 3] = np.where(arr[..., 3] > 100, 255, 0)
             Image.fromarray(arr, "RGBA").save(p)

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -38,9 +38,17 @@ namespace MultiBash
         Text _levelUpTitle;
         readonly List<CardUI> _cards = new();
         float _choiceLock;
+        Button _reroll, _skip;
+        Text _rerollText;
+        // pause: build overview with full tooltips
+        RectTransform _build;
+        readonly List<(RectTransform root, Image icon, Text title, Text body, Text tag)> _buildRows = new();
+        Text _buildFooter;
         // overlays
         Image _damageFlash, _downedVignette;
-        Text _downedText, _announce, _countdown;
+        Text _downedText, _announce, _countdown, _combo, _frenzy;
+        int _shownCombo;
+        float _comboPunch, _frenzyT = 99f;
         float _announceT = 99f;
         // pause / results
         RectTransform _pause, _results;
@@ -151,12 +159,23 @@ namespace MultiBash
             BuildUpgradeWindow();
 
             // ---- center texts
-            _announce = Outlined(UIKit.Label(_root, "", 72, T.accent, new Vector2(0.5f, 0.5f), new Vector2(0, 230), new Vector2(1600, 90), TextAnchor.MiddleCenter, UIFont.Header, false), 4);
+            _announce = Outlined(UIKit.Label(_root, "", 72, T.accent, new Vector2(0.5f, 0.5f), new Vector2(-150, 300), new Vector2(1250, 90), TextAnchor.MiddleCenter, UIFont.Header, false), 4);
+            _announce.resizeTextForBestFit = true;
+            _announce.resizeTextMinSize = 36;
+            _announce.resizeTextMaxSize = 72;
+            _announce.horizontalOverflow = HorizontalWrapMode.Wrap;
+            _announce.verticalOverflow = VerticalWrapMode.Truncate;
             _countdown = Outlined(UIKit.Label(_root, "", 128, T.text, new Vector2(0.5f, 0.5f), new Vector2(0, 80), new Vector2(400, 190), TextAnchor.MiddleCenter, UIFont.Number, false), 5);
+            _combo = Outlined(UIKit.Label(_root, "", 40, T.text, new Vector2(0, 0.5f), new Vector2(30, 120), new Vector2(420, 60), TextAnchor.MiddleLeft, UIFont.Number, false), 3);
+            _combo.rectTransform.pivot = new Vector2(0, 0.5f);
+            _frenzy = Outlined(UIKit.Label(_root, "", 72, new Color(1f, 0.5f, 0.2f), new Vector2(0, 0.5f), new Vector2(30, 190), new Vector2(700, 90), TextAnchor.MiddleLeft, UIFont.Header, false), 4);
+            _frenzy.rectTransform.pivot = new Vector2(0, 0.5f);
+            _frenzy.horizontalOverflow = HorizontalWrapMode.Overflow;
             _downedText = Outlined(UIKit.Label(_root, "", 54, T.text, new Vector2(0.5f, 0.5f), new Vector2(0, -60), new Vector2(1400, 140), TextAnchor.MiddleCenter, UIFont.Header, false), 3);
 
-            var help = UIKit.Label(_root, "Space jump  |  Shift slide (slide + jump = speed boost!)  |  1/2/3 upgrades  |  Esc menu",
-                22, new Color(1, 1, 1, 0.7f), new Vector2(0, 0), new Vector2(24, 10), new Vector2(1100, 30), TextAnchor.LowerLeft, UIFont.Body, false);
+            var help = UIKit.Label(_root, "Space jump  |  Shift slide (slide + jump = speed boost!)  |  1/2/3 pick  R reroll  X skip  |  Esc build & menu",
+                22, new Color(1, 1, 1, 0.7f), new Vector2(0, 0), new Vector2(24, 10), new Vector2(1500, 30), TextAnchor.LowerLeft, UIFont.Body, false);
+            help.horizontalOverflow = HorizontalWrapMode.Overflow;
             UIKit.Outline(help, 2);
 
             BuildPause();
@@ -175,7 +194,7 @@ namespace MultiBash
 
         void BuildUpgradeWindow()
         {
-            _levelUp = UIKit.Panel(_root, "UpgradeOffers", new Vector2(1, 0.5f), new Vector2(-30, -60), new Vector2(660, 620), "Upgrade Offers");
+            _levelUp = UIKit.Panel(_root, "UpgradeOffers", new Vector2(1, 0.5f), new Vector2(-30, -90), new Vector2(660, 706), "Upgrade Offers");
             _levelUpTitle = _levelUp.Find("TitleBar").GetComponentInChildren<Text>();
             for (int i = 0; i < 3; i++)
             {
@@ -208,6 +227,35 @@ namespace MultiBash
                 c.key = UIKit.Label(kb, (i + 1).ToString(), 24, T.accent, new Vector2(0.5f, 0.5f), new Vector2(1, 0), new Vector2(40, 40), TextAnchor.MiddleCenter, UIFont.Number, false);
                 _cards.Add(c);
             }
+            _reroll = UIKit.Button(_levelUp, "Reroll", new Vector2(0.5f, 0), new Vector2(-150, 22), new Vector2(280, 58), Reroll, T.buttonBlue, 27);
+            _rerollText = _reroll.GetComponentInChildren<Text>();
+            _skip = UIKit.Button(_levelUp, "Skip (X)  +HP", new Vector2(0.5f, 0), new Vector2(150, 22), new Vector2(280, 58), Skip, T.buttonGrey, 27);
+        }
+
+        void Reroll()
+        {
+            var me = PlayerCharacter.Local;
+            var lib = AudioManager.Lib;
+            if (me == null || me.PendingLevelUps <= 0 || Time.unscaledTime < _choiceLock) return;
+            if (me.Rerolls == 0)
+            {
+                if (lib != null) AudioManager.PlayUI(lib.deny, 0.7f);
+                return;
+            }
+            _choiceLock = Time.unscaledTime + 0.35f;
+            me.Rpc_Reroll();
+            if (lib != null) AudioManager.PlayUI(lib.reroll, 0.8f);
+            foreach (var c in _cards) c.root.localScale = new Vector3(1f, 0.6f, 1f);
+        }
+
+        void Skip()
+        {
+            var me = PlayerCharacter.Local;
+            if (me == null || me.PendingLevelUps <= 0 || Time.unscaledTime < _choiceLock) return;
+            _choiceLock = Time.unscaledTime + 0.35f;
+            me.Rpc_Skip();
+            var lib = AudioManager.Lib;
+            if (lib != null) AudioManager.PlayUI(lib.click, 0.8f, 0.8f);
         }
 
         void BuildPause()
@@ -216,7 +264,8 @@ namespace MultiBash
             UIKit.AddImage(_pause, null, new Color(0, 0, 0, 0.55f)).raycastTarget = true;
             var p = UIKit.Panel(_pause, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(560, 640), "Paused");
             p.pivot = new Vector2(0.5f, 0.5f);
-            p.anchoredPosition = Vector2.zero;
+            p.anchoredPosition = new Vector2(-400, 0);
+            BuildBuildPanel();
             UIKit.Label(p, "(the game keeps running for your friends)", 22, T.mutedText, new Vector2(0.5f, 1), new Vector2(0, -78), new Vector2(500, 30));
             UIKit.Button(p, "Resume", new Vector2(0.5f, 1), new Vector2(0, -120), new Vector2(440, 72), () => SetPause(false), T.buttonBlue, 45);
             UIKit.Label(p, "Mouse sensitivity", 27, T.text, new Vector2(0.5f, 1), new Vector2(0, -212), new Vector2(440, 32), TextAnchor.MiddleLeft);
@@ -227,6 +276,78 @@ namespace MultiBash
             BuildSlider(p, new Vector2(0, -418), AudioManager.Instance != null ? AudioManager.Instance.sfxVolume : 0.8f, 0f, 1f, AudioManager.SetSfxVolume);
             UIKit.Button(p, "Leave Party", new Vector2(0.5f, 1), new Vector2(0, -500), new Vector2(440, 64), () => GameLauncher.Instance?.Leave(), T.buttonRed, 36);
             _pause.gameObject.SetActive(false);
+        }
+
+        void BuildBuildPanel()
+        {
+            _build = UIKit.Panel(_pause, "Build", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900, 880), "Your Build");
+            _build.pivot = new Vector2(0.5f, 0.5f);
+            _build.anchoredPosition = new Vector2(370, 0);
+            for (int i = 0; i < PlayerCharacter.MaxWeaponSlots + 6; i++)
+            {
+                var row = UIKit.Box(_build, "Row" + i, new Vector2(0.5f, 1), new Vector2(0, -80 - i * 74), new Vector2(850, 70));
+                var ib = UIKit.Box(row, "Icon", new Vector2(0, 0.5f), new Vector2(36, 0), new Vector2(62, 62));
+                UIKit.AddImage(ib, T.slot, Color.white);
+                var icon = UIKit.AddImage(UIKit.Box(ib, "I", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(48, 48)), null, Color.white);
+                var title = UIKit.Label(row, "", 27, T.text, new Vector2(0, 1), new Vector2(84, -2), new Vector2(460, 32), TextAnchor.UpperLeft, UIFont.Header);
+                title.horizontalOverflow = HorizontalWrapMode.Overflow;
+                var tag = UIKit.Label(row, "", 16, T.accent, new Vector2(1, 1), new Vector2(-6, -8), new Vector2(420, 24), TextAnchor.UpperRight, UIFont.Body);
+                var body = UIKit.Label(row, "", 16, T.mutedText, new Vector2(0, 1), new Vector2(84, -34), new Vector2(760, 40), TextAnchor.UpperLeft, UIFont.Body);
+                body.horizontalOverflow = HorizontalWrapMode.Overflow;
+                body.verticalOverflow = VerticalWrapMode.Truncate;
+                _buildRows.Add((row, icon, title, body, tag));
+            }
+            _buildFooter = UIKit.Label(_build, "", 22, T.accent, new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(770, 30), TextAnchor.MiddleCenter, UIFont.Body);
+        }
+
+        void RefreshBuild()
+        {
+            var me = PlayerCharacter.Local;
+            var db = GameDatabase.Instance;
+            int r = 0;
+            void Row(Sprite icon, string title, string body, string tag = "")
+            {
+                if (r >= _buildRows.Count) return;
+                var row = _buildRows[r++];
+                row.root.gameObject.SetActive(true);
+                row.icon.sprite = icon;
+                row.title.text = title;
+                row.body.text = body;
+                row.tag.text = tag;
+            }
+            if (me != null)
+            {
+                for (int i = 0; i < PlayerCharacter.MaxWeaponSlots; i++)
+                {
+                    int idx = me.WeaponIds.Get(i) - 1;
+                    var w = db.GetWeapon(idx);
+                    if (w == null) continue;
+                    int lvl = me.WeaponLevels.Get(i);
+                    var L = w.GetLevel(lvl);
+                    string lv = w.isEvolution ? "<color=#ffb347>EVOLVED</color>" : lvl >= w.MaxLevel ? "<color=#f2c447>MAX</color>" : $"LVL {lvl}/{w.MaxLevel}";
+                    string evo = "";
+                    if (!w.isEvolution && w.evolveWith != null && w.evolvesInto != null)
+                        evo = UpgradeSystem.CanEvolve(me, idx) ? "<color=#ffb347>Evolves on your next level-up!</color>"
+                            : $"<color=#d9b8ff>MAX + {w.evolveWith.displayName} = {w.evolvesInto.displayName}</color>";
+                    Row(w.icon, $"{w.displayName}  <size=22>{lv}</size>",
+                        $"{w.description}\n<color=#f2c447>{L.damage * me.Stats.Damage:0} damage   every {L.cooldown * me.Stats.Cooldown:0.##}s</color>", evo);
+                }
+                for (int i = 0; i < db.powerups.Count; i++)
+                {
+                    int lvl = me.PowerupLevels.Get(i);
+                    if (lvl <= 0) continue;
+                    var p = db.powerups[i];
+                    var parts = new List<string>();
+                    foreach (var m in p.perLevel) parts.Add(StatInfo.Describe(m.stat, m.value * lvl));
+                    string ptag = "";
+                    foreach (var w in db.weapons)
+                        if (w.evolveWith == p && w.evolvesInto != null && me.WeaponLevelOf(db.IndexOf(w)) > 0) { ptag = $"<color=#d9b8ff>Evolves {w.displayName}</color>"; break; }
+                    Row(p.icon, $"{p.displayName}  <size=22>LVL {lvl}/{p.maxLevel}</size>", $"{p.description}\n<color=#9fe39f>Total: {string.Join(", ", parts)}</color>", ptag);
+                }
+                var st = me.Stats;
+                _buildFooter.text = $"Rerolls {me.Rerolls}   |   Damage {st.Damage * 100f:0}%   |   Crit {st.CritChance * 100f:0}%   |   Armor {st.Armor:0}   |   Speed {st.MoveSpeed:0.#}";
+            }
+            for (int i = r; i < _buildRows.Count; i++) _buildRows[i].root.gameObject.SetActive(false);
         }
 
         Slider BuildSlider(Transform parent, Vector2 pos, float value, float min, float max, System.Action<float> onChange)
@@ -261,15 +382,15 @@ namespace MultiBash
             p.anchoredPosition = Vector2.zero;
             _resultsTitle = Outlined(UIKit.Label(p, "Victory", 108, T.accent, new Vector2(0.5f, 1), new Vector2(0, -78), new Vector2(940, 120), TextAnchor.MiddleCenter, UIFont.Header, false), 4);
             _resultsBody = UIKit.Label(p, "", 32, T.text, new Vector2(0.5f, 1), new Vector2(0, -204), new Vector2(940, 44), TextAnchor.UpperCenter);
-            string[] headers = { "Player", "Hero", "Kills", "Damage" };
-            float[] colX = { 70, 420, 640, 800 };
-            for (int c = 0; c < 4; c++)
-                UIKit.Label(p, headers[c], 27, T.mutedText, new Vector2(0, 1), new Vector2(colX[c], -262), new Vector2(200, 34), c >= 2 ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft, UIFont.Header, false);
+            string[] headers = { "Player", "Hero", "Kills", "Damage", "Best Combo" };
+            float[] colX = { 50, 330, 470, 650, 820 };
+            for (int c = 0; c < 5; c++)
+                UIKit.Label(p, headers[c], 27, T.mutedText, new Vector2(0, 1), new Vector2(colX[c], -262), new Vector2(c >= 2 ? 170 : 200, 34), c >= 2 ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft, UIFont.Header, false);
             for (int r = 0; r < 4; r++)
             {
-                var row = new Text[4];
-                for (int c = 0; c < 4; c++)
-                    row[c] = UIKit.Label(p, "", c >= 2 ? 27 : 36, T.text, new Vector2(0, 1), new Vector2(colX[c], -304 - r * 52), new Vector2(c == 0 ? 340 : 200, 46),
+                var row = new Text[5];
+                for (int c = 0; c < 5; c++)
+                    row[c] = UIKit.Label(p, "", c >= 2 ? 27 : 36, T.text, new Vector2(0, 1), new Vector2(colX[c], -304 - r * 52), new Vector2(c == 0 ? 280 : c == 1 ? 200 : 170, 46),
                         c >= 2 ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft, c >= 2 ? UIFont.Number : UIFont.Header);
                 _resultRows.Add(row);
             }
@@ -283,6 +404,33 @@ namespace MultiBash
 
         public void FlashDamage() => _damageFlash.color = new Color(0.8f, 0.05f, 0.05f, 0.45f);
 
+        public void Frenzy(int combo)
+        {
+            _frenzy.text = $"FRENZY x{combo}!  <size=27>heal + gem vacuum</size>";
+            _frenzyT = 0f;
+        }
+
+        void UpdateCombo(PlayerCharacter me)
+        {
+            int c = me != null ? me.Combo : 0;
+            if (c > _shownCombo) _comboPunch = 1f;
+            _shownCombo = c;
+            _comboPunch = Mathf.MoveTowards(_comboPunch, 0f, Time.deltaTime * 5f);
+            if (c >= 5)
+            {
+                var col = c >= 150 ? new Color(1f, 0.25f, 0.2f) : c >= 75 ? new Color(1f, 0.55f, 0.15f) : c >= 25 ? T.accent : T.text;
+                _combo.text = $"{c} <size=24>KILL COMBO</size>";
+                _combo.color = col;
+                _combo.rectTransform.localScale = Vector3.one * (1f + _comboPunch * 0.18f);
+            }
+            else _combo.text = "";
+            _frenzyT += Time.deltaTime;
+            var fc = _frenzy.color;
+            fc.a = _frenzyT < 1.8f ? 1f : Mathf.Clamp01(1f - (_frenzyT - 1.8f) * 2f);
+            _frenzy.color = fc;
+            _frenzy.rectTransform.localScale = Vector3.one * (1f + Mathf.Max(0f, 0.25f - _frenzyT) * 2f);
+        }
+
         public void ShowAnnouncement(string text)
         {
             _announce.text = text;
@@ -291,6 +439,7 @@ namespace MultiBash
 
         void SetPause(bool on)
         {
+            if (on) RefreshBuild();
             _pause.gameObject.SetActive(on);
             CameraRig.MenuOpen = on || _results.gameObject.activeSelf;
             LocalInput.Blocked = on;
@@ -324,7 +473,11 @@ namespace MultiBash
             if (kb != null && kb.escapeKey.wasPressedThisFrame && !_results.gameObject.activeSelf) SetPause(!_pause.gameObject.activeSelf);
 
             var df = _damageFlash.color;
-            df.a = Mathf.MoveTowards(df.a, 0f, Time.deltaTime * 1.6f);
+            var meNow = PlayerCharacter.Local;
+            float floor = 0f;
+            if (meNow != null && meNow.IsAlive && meNow.Health < meNow.MaxHealth * 0.3f)
+                floor = 0.07f + 0.05f * Mathf.Sin(Time.time * 7f);   // low HP: pulsing red edge
+            df.a = Mathf.Max(floor, Mathf.MoveTowards(df.a, 0f, Time.deltaTime * 1.6f));
             _damageFlash.color = df;
 
             _announceT += Time.deltaTime;
@@ -428,6 +581,8 @@ namespace MultiBash
 
             UpdateMates(me);
             UpdateTags();
+            UpdateCombo(me);
+            UpdateObjective(gm);
 
             bool ended = gm.State == RunState.Victory || gm.State == RunState.Defeat;
             if (ended != _results.gameObject.activeSelf)
@@ -452,7 +607,10 @@ namespace MultiBash
             bool show = me.PendingLevelUps > 0 && me.Choices.Get(0) != 0 && !me.Dead;
             _levelUp.gameObject.SetActive(show);
             if (!show) return;
-            _levelUpTitle.text = me.PendingLevelUps > 1 ? $"Upgrade Offers  <size=27>(+{me.PendingLevelUps - 1} more)</size>" : "Upgrade Offers";
+            string title = me.OfferIsTreasure ? "<color=#ffd24a>Treasure!</color>" : "Upgrade Offers";
+            _levelUpTitle.text = me.PendingLevelUps > 1 ? $"{title}  <size=27>(+{me.PendingLevelUps - 1} more)</size>" : title;
+            _rerollText.text = $"Reroll (R)  x{me.Rerolls}";
+            _reroll.image.color = me.Rerolls > 0 ? T.buttonBlue : T.buttonGrey;
 
             for (int i = 0; i < _cards.Count; i++)
             {
@@ -468,7 +626,8 @@ namespace MultiBash
                 c.icon.sprite = UpgradeSystem.IconOf(code);
                 c.title.text = UpgradeSystem.NameOf(code);
                 UpgradeSystem.Describe(me, code, out string lvl);
-                c.level.text = lvl.StartsWith("Lv") ? "LVL " + lvl.Substring(lvl.LastIndexOf(' ') + 1) : (lvl.Length > 0 ? "New!" : "");
+                c.level.text = lvl.StartsWith("Lv") ? "LVL " + lvl.Substring(lvl.LastIndexOf(' ') + 1) : lvl == "EVOLUTION" ? "<color=#ffd24a>EVOLVE!</color>" : (lvl.Length > 0 ? "New!" : "");
+                if (rarity == Rarity.Legendary) c.root.localScale = Vector3.one * (1f + 0.025f * Mathf.Sin(Time.unscaledTime * 6f));
                 c.body.text = UpgradeSystem.StatLines(me, code);
                 c.root.localScale = Vector3.Lerp(c.root.localScale, Vector3.one, Time.deltaTime * 12f);
             }
@@ -478,6 +637,8 @@ namespace MultiBash
             if ((kb != null && (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame)) || (pad != null && pad.dpad.left.wasPressedThisFrame)) Choose(0);
             if ((kb != null && (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame)) || (pad != null && pad.dpad.up.wasPressedThisFrame)) Choose(1);
             if ((kb != null && (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame)) || (pad != null && pad.dpad.right.wasPressedThisFrame)) Choose(2);
+            if ((kb != null && kb.rKey.wasPressedThisFrame) || (pad != null && pad.buttonNorth.wasPressedThisFrame)) Reroll();
+            if ((kb != null && kb.xKey.wasPressedThisFrame) || (pad != null && pad.dpad.down.wasPressedThisFrame)) Skip();
         }
 
         void UpdateMates(PlayerCharacter me)
@@ -551,6 +712,48 @@ namespace MultiBash
             }
         }
 
+        RectTransform _objective;
+        Text _objectiveText;
+
+        /// <summary>Points at a fleeing Treasure Slime (screen-edge arrow when it is off screen).</summary>
+        void UpdateObjective(GameManager gm)
+        {
+            var cam = Camera.main;
+            Enemy target = null;
+            if (gm.State == RunState.Playing)
+                foreach (var e in EnemyRegistry.All) if (e != null && e.IsAlive && e.Def != null && e.Def.dropChests > 0) { target = e; break; }
+            if (_objective == null)
+            {
+                _objective = UIKit.Box(_tagLayer, "Objective", Vector2.zero, Vector2.zero, new Vector2(260, 80));
+                _objective.pivot = new Vector2(0.5f, 0f);
+                _objectiveText = Outlined(UIKit.Label(_objective, "", 27, new Color(1f, 0.85f, 0.3f), new Vector2(0.5f, 1), Vector2.zero, new Vector2(260, 34), TextAnchor.MiddleCenter, UIFont.Header, false), 2);
+                var a = UIKit.Box(_objective, "Arrow", new Vector2(0.5f, 0.5f), new Vector2(0, -26), new Vector2(40, 40));
+                UIKit.AddImage(a, T.arrow, new Color(1f, 0.82f, 0.25f));
+            }
+            _objective.gameObject.SetActive(target != null && cam != null);
+            if (target == null || cam == null) return;
+            var arrow = (RectTransform)_objective.Find("Arrow");
+            var sp = cam.WorldToScreenPoint(target.transform.position + Vector3.up * 2.2f);
+            if (sp.z < 0) sp = new Vector3(Screen.width - sp.x, -100f, 0);
+            float margin = 90f;
+            bool off = sp.x < margin || sp.x > Screen.width - margin || sp.y < margin || sp.y > Screen.height - margin;
+            var center = new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
+            if (off)
+            {
+                var d = (Vector3)(Vector2)(sp - center);
+                float sx = (Screen.width / 2f - margin) / Mathf.Max(1f, Mathf.Abs(d.x));
+                float sy = (Screen.height / 2f - margin) / Mathf.Max(1f, Mathf.Abs(d.y));
+                sp = center + d * Mathf.Min(sx, sy);
+                arrow.gameObject.SetActive(true);
+                arrow.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(d.y, d.x) * Mathf.Rad2Deg - 90f);
+            }
+            else arrow.gameObject.SetActive(false);
+            _objective.position = new Vector3(sp.x, sp.y, 0);
+            float left = target.Def.lifetime > 0 ? Mathf.Max(0f, target.Def.lifetime - target.Age) : 0f;
+            _objectiveText.text = left > 0 ? $"TREASURE  {Mathf.CeilToInt(left)}s" : "TREASURE";
+            _objective.localScale = Vector3.one * (1f + 0.06f * Mathf.Sin(Time.time * 8f));
+        }
+
         void UpdateResults(GameManager gm)
         {
             bool win = gm.State == RunState.Victory;
@@ -575,6 +778,7 @@ namespace MultiBash
                 row[1].text = $"<color=#{UIKit.Hex(c.color)}>{c.displayName}</color>";
                 row[2].text = p.Kills.ToString("N0");
                 row[3].text = Mathf.RoundToInt(p.DamageDealt).ToString("N0");
+                row[4].text = p.BestCombo.ToString("N0");
             }
             float left = gm.StateTimer.RemainingTime(gm.Runner) ?? 0f;
             bool host = gm.Runner.IsServer;

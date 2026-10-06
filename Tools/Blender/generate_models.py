@@ -1194,7 +1194,35 @@ def fire_totem():
     root_with([group("Mesh", ps, (0, 0, 0))])
 
 
+def treasure_slime():
+    """Golden slime stuffed with coins and gems, a tiny crown and nervous eyes (it runs away!)."""
+    random.seed(77)
+    body = [
+        soft("ico", (0, 0, 0.4), (1.0, 0.95, 0.78), "gold", sub=3),
+        soft("ico", (0, 0, 0.12), (1.1, 1.05, 0.26), "gold_dark", sub=2),
+        soft("ico", (-0.22, -0.2, 0.66), (0.2, 0.12, 0.12), "white", sub=2, rot=(0, -30, 0)),
+        soft("ico", (-0.33, -0.24, 0.52), (0.07, 0.05, 0.07), "white", sub=1),
+    ]
+    for i in range(7):                                                                            # coins and gems inside
+        a = random.uniform(0, 6.28)
+        r = random.uniform(0.1, 0.3)
+        c = ("gem_red", "gem_blue", "gem_green", "crown_gold")[i % 4]
+        body.append(soft("cyl" if i % 4 == 3 else "ico", (math.cos(a) * r, math.sin(a) * r + 0.05, random.uniform(0.25, 0.55)),
+                         (0.12, 0.12, 0.03) if i % 4 == 3 else (0.07, 0.07, 0.08), c, verts=8, rot=(random.uniform(0, 90), 0, 0)))
+    body += eye(-0.17, -0.42, 0.5, 0.075, look=(0.6, 0.3)) + eye(0.17, -0.42, 0.5, 0.075, look=(0.6, 0.3))
+    body.append(soft("ico", (0, -0.45, 0.3), (0.1, 0.04, 0.08), "gold_dark", sub=1))             # little "o" mouth
+    for i in range(5):                                                                            # crown
+        a = math.radians(i * 72)
+        body.append(soft("cone", (math.cos(a) * 0.12, math.sin(a) * 0.12, 0.92), (0.07, 0.07, 0.14), "crown_gold", verts=4))
+    body.append(soft("cyl", (0, 0, 0.84), (0.3, 0.3, 0.07), "crown_gold", verts=10))
+    body.append(soft("ico", (0, -0.15, 0.86), (0.05, 0.03, 0.05), "gem_red", sub=1))
+    body.append(soft("ico", (0.3, 0.45, 0.25), (0.28, 0.24, 0.26), "leather", sub=2))            # loot sack on its back
+    body.append(soft("cone", (0.3, 0.45, 0.5), (0.1, 0.1, 0.1), "rope", verts=6))
+    root_with([group("Body", body, (0, 0, 0))])
+
+
 VOLCANO_MODELS = [
+    ("Enemies", "TreasureSlime", treasure_slime),
     ("Enemies", "MagmaSlime", magma_slime),
     ("Enemies", "FireImp", fire_imp),
     ("Environment", "BasaltColumnsA", basalt_columns(3)),
@@ -1929,7 +1957,7 @@ def skeleton():
     root_with(parts + JOINTS)
 
 
-SMOOTH_ENEMIES = {"Slime", "MagmaSlime", "Bat", "FireImp", "BombShroom"}
+SMOOTH_ENEMIES = {"Slime", "MagmaSlime", "Bat", "FireImp", "BombShroom", "TreasureSlime"}
 
 
 def _smooth_all():

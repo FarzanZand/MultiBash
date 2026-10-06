@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MultiBash.AudioLibrary
   menuMusic: {fileID: 8300000, guid: 21acbda06aa66044785a11ebdb01c98f, type: 3}
   battleMusic: {fileID: 8300000, guid: 52e7fd0ecf6cda94385c6235a3f864f8, type: 3}
+  bossMusic: {fileID: 8300000, guid: 4e3a5362de638a54faec72c6d7e9d7ca, type: 3}
   musicVolume: 0.45
   click: {fileID: 8300000, guid: 094c1e3e0a749f64a8902be78447f9f1, type: 3}
   hover: {fileID: 8300000, guid: 76c318d7c1df12a40990db58dd2d3571, type: 3}
@@ -21,6 +22,10 @@ MonoBehaviour:
   start: {fileID: 8300000, guid: cbbe1aba359ec8440a719419a72e0642, type: 3}
   victory: {fileID: 8300000, guid: 1fb377dc17887c04fb2335b1b0e03dc3, type: 3}
   defeat: {fileID: 8300000, guid: c419a3c6550686945bf74a6c13000162, type: 3}
+  deny: {fileID: 8300000, guid: 732d16bf0e0ae2943a273ec0283e8cad, type: 3}
+  reroll: {fileID: 8300000, guid: 4c0aedcf4858951449078bf9b45c8c94, type: 3}
+  evolution: {fileID: 8300000, guid: 1c0d679eb46b8d3499d9eb138153a7db, type: 3}
+  bossWarning: {fileID: 8300000, guid: 30c9cc9b04c61904fb0eb3b852fa1a6b, type: 3}
   hurt: {fileID: 8300000, guid: 8d5b2a3483a56954a9c93d82b394f222, type: 3}
   jump: {fileID: 8300000, guid: 3ffcfbbaa39b8204e85bbaa8d240d588, type: 3}
   slide: {fileID: 8300000, guid: 1140181453baf684ea7d9eccff5bc44e, type: 3}
@@ -28,7 +33,10 @@ MonoBehaviour:
   revive: {fileID: 8300000, guid: ed57e720d7aae5347b46129ccf59a395, type: 3}
   levelUp: {fileID: 8300000, guid: fe209ba5fe0ec0b41be9f7d72d81a116, type: 3}
   lavaSizzle: {fileID: 8300000, guid: b51624d636d8b234c9ca9db316589748, type: 3}
+  heartbeat: {fileID: 8300000, guid: fe6bf87db46b78546817ca0d33dbe86d, type: 3}
+  crit: {fileID: 8300000, guid: e37e9d8fa5142a04a9d93d36e8bb7f1d, type: 3}
   gem: {fileID: 8300000, guid: b0df2dd7387a4ab4baeeedd50ba60d58, type: 3}
   health: {fileID: 8300000, guid: 9cb9246a36ef8b543ba3a257570d8bef, type: 3}
   magnet: {fileID: 8300000, guid: 979df233e76636d4eb5965093f5b046d, type: 3}
   chest: {fileID: 8300000, guid: 679353fdcb0340f4fb4471c88ee5683d, type: 3}
+  treasure: {fileID: 8300000, guid: fd11b99ae7ff7374382a0dc3244f05f4, type: 3}

@@ -30,6 +30,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bc375dd8a2d17504693305fe087e8fd8, type: 2}
   - {fileID: 11400000, guid: a9d161f8d7040ae438f96fac8dc549ff, type: 2}
   - {fileID: 11400000, guid: d1980179ca9d0564298b03360f5f38a6, type: 2}
+  - {fileID: 11400000, guid: 5b469eec54e46124991021055d699329, type: 2}
+  - {fileID: 11400000, guid: ce9aa7b84f662734b94ddcfde77c06f6, type: 2}
+  - {fileID: 11400000, guid: 801398d6b85dfd945abd6ed845466853, type: 2}
+  - {fileID: 11400000, guid: a07dd08b5f7d1d543b85644f998006f0, type: 2}
+  - {fileID: 11400000, guid: 39041758c5e92ec439c97b166f553a6c, type: 2}
+  - {fileID: 11400000, guid: 16f0ae2364bbf0249a03458a27482ee6, type: 2}
+  - {fileID: 11400000, guid: 43699016f6437714a81bf623c05b9265, type: 2}
+  - {fileID: 11400000, guid: d2851633cd5189b4a99c94a374a21582, type: 2}
+  - {fileID: 11400000, guid: 905bf283b7b5eac49a3452cba731d741, type: 2}
+  - {fileID: 11400000, guid: ef1d24ba032e40a40b56f1e0236490f7, type: 2}
   powerups:
   - {fileID: 11400000, guid: 19a39487019ac554c969a1c7d8b614d8, type: 2}
   - {fileID: 11400000, guid: 8bd014f3a77f3ff45be6693776d0f37c, type: 2}
@@ -47,6 +57,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 60fa1f238aad06d47909dbf320b8bfb6, type: 2}
   - {fileID: 11400000, guid: a06f3cec3b2668447a5a95393f6a5cb0, type: 2}
   - {fileID: 11400000, guid: 806b28be14b1d294391ef8a67317fd2e, type: 2}
+  - {fileID: 11400000, guid: 76815bd6c97c9d246be068a9f077a893, type: 2}
+  - {fileID: 11400000, guid: d48cdb542a1369a4d942d7a93c05c21b, type: 2}
+  - {fileID: 11400000, guid: fd673ca3996699f48a4d42f1e0056fcb, type: 2}
   enemies:
   - {fileID: 11400000, guid: 4f6d03a082aa34a4c858e10a149cf481, type: 2}
   - {fileID: 11400000, guid: 1b90f4b589daf7c4cb471e27e5764768, type: 2}
@@ -58,6 +71,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9814521879f445b41b580bc620c92602, type: 2}
   - {fileID: 11400000, guid: d3f0133d089eae44eb4dd13ec674a873, type: 2}
   - {fileID: 11400000, guid: 078e1434b2dd68243a67ac57b4072cb7, type: 2}
+  - {fileID: 11400000, guid: 778c89a0245b2824d88a0fce3bba61e3, type: 2}
   maps:
   - {fileID: 11400000, guid: 17df5ab1abd2de343b26d3ac01bd906c, type: 2}
   - {fileID: 11400000, guid: f590a9db72d0fb34b8c2a6bf1f264389, type: 2}

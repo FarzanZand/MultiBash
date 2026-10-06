@@ -77,11 +77,16 @@ namespace MultiBash
             Health = MaxHealth;
         }
 
+        [Networked] public int SpawnTick { get; set; }
+        /// <summary>Seconds since this enemy spawned (all peers).</summary>
+        public float Age => Runner != null ? (Runner.Tick - SpawnTick) * Runner.DeltaTime : 0f;
+
         public string DisplayName => Def == null ? "" : Boss && !string.IsNullOrEmpty(Def.bossName) ? Def.bossName : Def.displayName;
 
         public override void Spawned()
         {
             Def = GameDatabase.Instance.GetEnemy(DefIndex);
+            if (HasStateAuthority) SpawnTick = Runner.Tick;
             if (ScaleMul <= 0f) ScaleMul = 1f;
             _baseScale = Mathf.Max(0.1f, transform.localScale.x);
             transform.localScale = Vector3.one * ScaleMul * _baseScale;
@@ -133,6 +138,15 @@ namespace MultiBash
 
             float dt = Runner.DeltaTime;
             EnemyRegistry.EnsureGrid(Runner.Tick);
+            if (Def.lifetime > 0f && Age > Def.lifetime)
+            {
+                // got away!
+                gm.Announce($"The {Def.displayName} got away...");
+                gm.Rpc_Blast(transform.position, 2f, DefIndex, false);
+                Health = 0f;
+                Runner.Despawn(Object);
+                return;
+            }
 
             var pos = transform.position;
             var target = PlayerCharacter.NearestAlive(pos);
@@ -210,9 +224,16 @@ namespace MultiBash
                         _hopping = true;
                         _hopT = 0f;
                         _hopDir = dir;
+                        if (Def.flees)
+                        {
+                            // run from the nearest hero, zig-zagging; hug the arena so it can be cornered
+                            _hopDir = Quaternion.Euler(0, Random.Range(-55f, 55f), 0) * -dir;
+                            var c = -new Vector3(pos.x, 0, pos.z);
+                            if (c.magnitude > GameDatabase.Config.arenaHalfSize * 0.7f) _hopDir = (_hopDir + c.normalized * 0.8f).normalized;
+                        }
                         // average speed over a full hop cycle equals moveSpeed
                         _hopSpeed = speed * (Def.hopRest + Def.hopTime) / Mathf.Max(0.05f, Def.hopTime);
-                        _hopSpeed = Mathf.Min(_hopSpeed, Mathf.Max(dist, 1f) / Def.hopTime * 1.2f);
+                        if (!Def.flees) _hopSpeed = Mathf.Min(_hopSpeed, Mathf.Max(dist, 1f) / Def.hopTime * 1.2f);
                     }
                 }
                 else
@@ -270,12 +291,15 @@ namespace MultiBash
 
             // contact attack
             _attackTimer -= dt;
-            if (target != null && _attackTimer <= 0f && dist <= Radius + 0.45f + Def.attackRange
+            if (target != null && ContactDamage > 0f && _attackTimer <= 0f && dist <= Radius + 0.45f + Def.attackRange
                 && Mathf.Abs(target.transform.position.y - pos.y) < 1.7f + y)
             {
                 _attackTimer = Def.attackInterval;
                 AttackTick = Runner.Tick;
+                float before = target.Health;
                 target.TakeDamage(ContactDamage);
+                if (target.Health < before) target.Reflect(this, ContactDamage);
+                if (!IsAlive) return;
             }
 
             // special attacks
@@ -357,6 +381,12 @@ namespace MultiBash
             if (WeaponSystem.PendingCrit) CritCount++;
             WeaponSystem.PendingCrit = false;
             Health -= amount;
+            // Execution tome: finish off weakened (non-boss) enemies
+            if (source != null && !Boss && Health > 0f && Health < MaxHealth * source.Stats.Execute)
+            {
+                amount += Health;
+                Health = 0f;
+            }
             if (source != null && source.Data != null) source.Data.DamageDealt += amount;
             if (source != null)
             {
@@ -403,6 +433,7 @@ namespace MultiBash
                 FxManager.Instance?.DamageNumber(transform.position + Vector3.up * (1.9f * ScaleMul), dmg, false, crit);
                 FxManager.Instance?.HitSpark(transform.position + Vector3.up * (0.9f * ScaleMul), crit);
                 if (Def.hitSound != null) AudioManager.Play(Def.hitSound, transform.position, 0.45f);
+                if (crit && AudioManager.Lib != null) AudioManager.Play(AudioManager.Lib.crit, transform.position, 0.3f, 1f, 0.15f);
                 _rig?.Hit();
             }
             _lastHealth = h;

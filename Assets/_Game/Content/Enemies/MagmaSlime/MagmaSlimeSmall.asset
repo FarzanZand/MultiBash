@@ -25,6 +25,9 @@ MonoBehaviour:
   hopRest: 0.3
   hopTime: 0.35
   hopHeight: 0.8
+  flees: 0
+  lifetime: 0
+  dropChests: 0
   attack: 0
   attackDistance: 9
   specialCooldown: 3

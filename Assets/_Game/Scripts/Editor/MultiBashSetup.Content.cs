@@ -56,6 +56,14 @@ namespace MultiBash.EditorTools
             {
                 a.menuMusic = Clip("MUS_Menu");
                 a.battleMusic = Clip("MUS_Battle");
+                a.bossMusic = Clip("MUS_Boss");
+                a.deny = Clip("SFX_UIDeny");
+                a.reroll = Clip("SFX_Reroll");
+                a.evolution = Clip("SFX_Evolution");
+                a.bossWarning = Clip("SFX_BossWarning");
+                a.heartbeat = Clip("SFX_Heartbeat");
+                a.crit = Clip("SFX_Crit");
+                a.treasure = Clip("SFX_Treasure");
                 a.click = Clip("SFX_UIClick");
                 a.hover = Clip("SFX_UIHover");
                 a.ready = Clip("SFX_UIReady");
@@ -202,7 +210,7 @@ namespace MultiBash.EditorTools
                     L("MAX: +50% damage, huge radius", 12, 0.4f, 1, 4.8f, 0, 0, 0, 2.5f),
                 };
             });
-            Asset<WeaponDefinition>($"{W}/Boomerang/Boomerang.asset", w =>
+            var boomerang = Asset<WeaponDefinition>($"{W}/Boomerang/Boomerang.asset", w =>
             {
                 w.displayName = "Boomerang";
                 w.description = "Thrown at the nearest foe, then flies back. Hits on the way out and back.";
@@ -222,7 +230,7 @@ namespace MultiBash.EditorTools
                     L("MAX: +1 boomerang, huge damage", 32, 1.0f, 4, 1.5f, 0, 1.5f, 24, 6),
                 };
             });
-            Asset<WeaponDefinition>($"{W}/MeteorStaff/MeteorStaff.asset", w =>
+            var meteor = Asset<WeaponDefinition>($"{W}/MeteorStaff/MeteorStaff.asset", w =>
             {
                 w.displayName = "Meteor Staff";
                 w.description = "Calls meteors down on the thickest crowd. Huge explosions.";
@@ -242,7 +250,7 @@ namespace MultiBash.EditorTools
                     L("MAX: +1 meteor, enormous blasts", 64, 1.9f, 3, 4.0f, 0, 0, 0, 12),
                 };
             });
-            Asset<WeaponDefinition>($"{W}/FrostNova/FrostNova.asset", w =>
+            var nova = Asset<WeaponDefinition>($"{W}/FrostNova/FrostNova.asset", w =>
             {
                 w.displayName = "Frost Nova";
                 w.description = "An icy blast around you that damages and slows everything it touches.";
@@ -262,7 +270,7 @@ namespace MultiBash.EditorTools
                     L("MAX: huge blast, +50% damage", 24, 1.7f, 1, 6.3f, 0, 3.2f, 0, 9),
                 };
             });
-            Asset<WeaponDefinition>($"{W}/SpiritDaggers/SpiritDaggers.asset", w =>
+            var daggers = Asset<WeaponDefinition>($"{W}/SpiritDaggers/SpiritDaggers.asset", w =>
             {
                 w.displayName = "Spirit Daggers";
                 w.description = "Ghostly blades that hunt down enemies on their own.";
@@ -285,42 +293,94 @@ namespace MultiBash.EditorTools
 
             // ------------------------------------------------------------------ powerups
             string P = Content + "/Powerups";
-            void Pow(string name, string desc, Rarity r, int max, StatType stat, float v)
+            PowerupDefinition Pow(string name, string desc, Rarity r, int max, StatType stat, float v, string iconName = null)
             {
-                Asset<PowerupDefinition>($"{P}/{name}.asset", p =>
+                return Asset<PowerupDefinition>($"{P}/{name}.asset", p =>
                 {
                     p.displayName = name;
                     p.description = desc;
                     p.rarity = r;
                     p.maxLevel = max;
-                    p.icon = Sprite($"{icons}/Powerups/Icon_{name}.png");
+                    p.icon = Sprite($"{icons}/Powerups/Icon_{iconName ?? name}.png");
                     p.perLevel = new List<StatModifier> { new(stat, v) };
                 });
             }
-            Pow("Might", "Hit harder with every weapon.", Rarity.Common, 5, StatType.Damage, 0.12f);
-            Pow("Swiftness", "Run faster.", Rarity.Common, 5, StatType.MoveSpeed, 0.6f);
+            var might = Pow("Might", "Hit harder with every weapon.", Rarity.Common, 5, StatType.Damage, 0.12f);
+            var swift = Pow("Swiftness", "Run faster.", Rarity.Common, 5, StatType.MoveSpeed, 0.6f);
             Pow("Vitality", "More max health (and heals that much).", Rarity.Common, 5, StatType.MaxHealth, 20f);
-            Pow("Haste", "Weapons attack more often.", Rarity.Rare, 5, StatType.Cooldown, -0.07f);
-            Pow("Expanse", "Bigger swings, auras, puddles and orbits.", Rarity.Common, 5, StatType.Area, 0.12f);
+            var haste = Pow("Haste", "Weapons attack more often.", Rarity.Rare, 5, StatType.Cooldown, -0.07f);
+            var expanse = Pow("Expanse", "Bigger swings, auras, puddles and orbits.", Rarity.Common, 5, StatType.Area, 0.12f);
             Pow("Multishot", "+1 arrow, flask, blade, swing and lightning jump.", Rarity.Epic, 2, StatType.ProjectileCount, 1f);
             Pow("Magnet", "Collect XP from further away.", Rarity.Common, 5, StatType.PickupRadius, 1.3f);
-            Pow("Wisdom", "Gain more XP for the whole team.", Rarity.Rare, 5, StatType.XPGain, 0.1f);
-            Pow("Regeneration", "Slowly recover health.", Rarity.Rare, 5, StatType.HealthRegen, 0.6f);
-            Pow("Armor", "Take less damage from every hit.", Rarity.Common, 5, StatType.Armor, 1f);
-            Pow("Precision", "More critical hits.", Rarity.Common, 5, StatType.CritChance, 0.06f);
-            Pow("Brutality", "Critical hits deal even more damage.", Rarity.Rare, 5, StatType.CritDamage, 0.3f);
+            var wisdom = Pow("Wisdom", "Gain more XP for the whole team.", Rarity.Rare, 5, StatType.XPGain, 0.1f);
+            var regen = Pow("Regeneration", "Slowly recover health.", Rarity.Rare, 5, StatType.HealthRegen, 0.6f);
+            var armor = Pow("Armor", "Take less damage from every hit.", Rarity.Common, 5, StatType.Armor, 1f);
+            var precision = Pow("Precision", "More critical hits.", Rarity.Common, 5, StatType.CritChance, 0.06f);
+            var brutality = Pow("Brutality", "Critical hits deal even more damage.", Rarity.Rare, 5, StatType.CritDamage, 0.3f);
             Pow("Vampirism", "Heal for a share of the damage you deal.", Rarity.Epic, 4, StatType.Lifesteal, 0.012f);
             Pow("Feather", "Jump again in mid-air. Great for escaping the horde.", Rarity.Rare, 2, StatType.ExtraJumps, 1f);
-            Pow("Persistence", "Projectiles, puddles and slows last longer.", Rarity.Common, 5, StatType.Duration, 0.12f);
+            var persistence = Pow("Persistence", "Projectiles, puddles and slows last longer.", Rarity.Common, 5, StatType.Duration, 0.12f);
             Pow("Clover", "Luckier upgrade offers and more crits.", Rarity.Rare, 5, StatType.Luck, 0.15f);
+            Pow("Thorns", "Spiked armor: anything that hits you takes damage back.", Rarity.Common, 5, StatType.Thorns, 0.6f);
+            Pow("Execution", "Weakened enemies are slain outright (not bosses).", Rarity.Rare, 4, StatType.Execute, 0.04f);
+            Pow("Phoenix Feather", "When you would go down, rise at 60% HP and blast foes away. 1 per level.", Rarity.Epic, 2,
+                StatType.Revives, 1f, "Phoenix");
+
+            // ------------------------------------------------------------------ evolutions (max weapon + its tome)
+            WeaponDefinition Evo(WeaponDefinition from, PowerupDefinition with, string folder, string name, string desc, string fx, WeaponLevel lvl)
+            {
+                var evo = Asset<WeaponDefinition>($"{W}/Evolved/{folder}.asset", w =>
+                {
+                    w.displayName = name;
+                    w.description = desc;
+                    w.kind = from.kind;
+                    w.rarity = Rarity.Legendary;
+                    w.isEvolution = true;
+                    var evoIcon = Sprite($"{icons}/Weapons/Icon_Evo_{folder}.png");
+                    w.icon = evoIcon != null ? evoIcon : from.icon;
+                    w.heldModel = from.heldModel;
+                    w.projectileModel = from.projectileModel;
+                    w.fxColor = Hex(fx);
+                    w.fireSound = from.fireSound;
+                    w.hitSound = from.hitSound;
+                    w.levels = new[] { lvl };
+                });
+                if (Force || from.evolvesInto == null)
+                {
+                    from.evolvesInto = evo;
+                    from.evolveWith = with;
+                    EditorUtility.SetDirty(from);
+                }
+                return evo;
+            }
+            Evo(sword, might, "TitansCleaver", "Titan's Cleaver", "A colossal blade. Every swing cleaves a full circle around you.", "#ffd27a",
+                L("", 58, 0.75f, 4, 5.8f, 0, 0, 0, 12));
+            Evo(bow, haste, "HailOfArrows", "Hail of Arrows", "A volley of eight arrows that pierce through whole hordes.", "#eaffb0",
+                L("", 24, 0.45f, 8, 1, 14, 1.2f, 36, 4));
+            Evo(staff, precision, "ThunderGod", "Thunder God's Rod", "Five bolts at once, each leaping through ten enemies.", "#e8f6ff",
+                L("", 40, 0.95f, 5, 9f, 10, 0, 0, 3));
+            Evo(flask, persistence, "PlagueCauldron", "Plague Cauldron", "Hurls five flasks that leave huge, lasting plague pools.", "#c8ff3a",
+                L("", 18, 1.6f, 5, 4.6f, 0, 7f, 0, 0.6f));
+            Evo(blades, expanse, "BladeTornado", "Blade Tornado", "Eight blades spin in a wide, fast storm around you.", "#f0c8ff",
+                L("", 26, 0.32f, 8, 4.4f, 0, 0, 380, 9));
+            Evo(aura, regen, "Sanctuary", "Sanctuary", "A blazing holy circle that scorches everything around you.", "#fff2a8",
+                L("", 18, 0.33f, 1, 6.5f, 0, 0, 0, 3f));
+            Evo(boomerang, swift, "TwinMoons", "Twin Moons", "Six glaives fly out and back, shredding both ways.", "#ffe9a0",
+                L("", 44, 0.9f, 6, 1.8f, 0, 1.6f, 26, 7));
+            Evo(meteor, brutality, "Armageddon", "Armageddon", "A rain of six meteors with enormous blasts.", "#ff6a1a",
+                L("", 95, 1.6f, 6, 5.2f, 0, 0, 0, 14));
+            Evo(nova, armor, "AbsoluteZero", "Absolute Zero", "A vast frozen blast that nearly stops everything it touches.", "#dff8ff",
+                L("", 36, 1.3f, 1, 9f, 0, 5f, 0, 10));
+            Evo(daggers, wisdom, "PhantomLegion", "Phantom Legion", "Ten spectral blades hunt down every enemy nearby.", "#e2b8ff",
+                L("", 24, 0.75f, 10, 1, 4, 2.4f, 22, 3));
 
             // ------------------------------------------------------------------ characters
             string C = Content + "/Characters";
-            void Hero(string name, string desc, string color, WeaponDefinition weapon, params StatModifier[] bonuses)
+            void Hero(string name, string display, string desc, string color, WeaponDefinition weapon, params StatModifier[] bonuses)
             {
                 Asset<CharacterDefinition>($"{C}/{name}/{name}.asset", c =>
                 {
-                    c.displayName = name;
+                    c.displayName = display;
                     c.description = desc;
                     c.color = Hex(color);
                     c.portrait = Sprite($"{icons}/Characters/Portrait_{name}.png");
@@ -329,13 +389,13 @@ namespace MultiBash.EditorTools
                     c.statBonuses = bonuses.ToList();
                 });
             }
-            Hero("Knight", "A walking fortress. Wades into the horde and cleaves everything in reach.", "#4f86f0", sword,
+            Hero("Knight", "Knight", "A walking fortress. Wades into the horde and cleaves everything in reach.", "#4f86f0", sword,
                 new StatModifier(StatType.MaxHealth, 30), new StatModifier(StatType.Armor, 2));
-            Hero("Ranger", "Fast and precise. Keep moving and let the arrows do the work.", "#5fc04a", bow,
+            Hero("Ranger", "Ranger", "Fast and precise. Keep moving and let the arrows do the work.", "#5fc04a", bow,
                 new StatModifier(StatType.MoveSpeed, 1.2f), new StatModifier(StatType.PickupRadius, 1f));
-            Hero("Mage", "Calls lightning that leaps through packs of enemies.", "#e0473b", staff,
+            Hero("Mage", "Farzan", "A bearded storm sage. Calls lightning that leaps through packs of enemies.", "#e0473b", staff,
                 new StatModifier(StatType.Cooldown, -0.1f), new StatModifier(StatType.XPGain, 0.1f));
-            Hero("Alchemist", "Hurls toxic flasks that turn the ground into a death zone.", "#f0973a", flask,
+            Hero("Alchemist", "Fredrik", "A bespectacled alchemist. Hurls toxic flasks that turn the ground into a death zone.", "#f0973a", flask,
                 new StatModifier(StatType.Area, 0.2f), new StatModifier(StatType.Duration, 0.2f));
 
             // ------------------------------------------------------------------ enemies (prefab linked later)
@@ -416,6 +476,18 @@ namespace MultiBash.EditorTools
                 e.deathColor = Hex("#8e939c");
             });
 
+            Asset<EnemyDefinition>($"{E}/TreasureSlime/TreasureSlime.asset", e =>
+            {
+                e.displayName = "Treasure Slime";
+                e.maxHealth = 70; e.moveSpeed = 6.2f; e.contactDamage = 0; e.attackInterval = 1f; e.radius = 0.55f;
+                e.movement = EnemyMovement.Hopper; e.hopRest = 0.18f; e.hopTime = 0.42f; e.hopHeight = 1.1f;
+                e.flees = true; e.lifetime = 28f; e.dropChests = 2;
+                e.knockbackResist = 0.6f;
+                e.xpValue = 0; e.healthOrbChance = 0f;
+                e.hitSound = Clip("SFX_GemPickup"); e.deathSound = Clip("SFX_Treasure"); e.moveSound = Clip("SFX_SlimeHop");
+                e.deathColor = Hex("#ffd24a");
+            });
+
             // volcano
             var smallMagma = Asset<EnemyDefinition>($"{E}/MagmaSlime/MagmaSlimeSmall.asset", e =>
             {
@@ -475,6 +547,8 @@ namespace MultiBash.EditorTools
             LinkEnemy($"{E}/MagmaSlime/MagmaSlime.asset", $"{E}/MagmaSlime/MagmaSlime.prefab");
             LinkEnemy($"{E}/MagmaSlime/MagmaSlimeSmall.asset", $"{E}/MagmaSlime/MagmaSlimeSmall.prefab");
             LinkEnemy($"{E}/FireImp/FireImp.asset", $"{E}/FireImp/FireImp.prefab");
+            LinkEnemy($"{E}/TreasureSlime/TreasureSlime.asset", $"{E}/TreasureSlime/TreasureSlime.prefab");
+            var treasure = Load<EnemyDefinition>($"{E}/TreasureSlime/TreasureSlime.asset");
 
             var skel = Load<EnemyDefinition>($"{E}/Skeleton/Skeleton.asset");
             var slime = Load<EnemyDefinition>($"{E}/Slime/Slime.asset");
@@ -498,6 +572,9 @@ namespace MultiBash.EditorTools
                 w.bursts = new List<WaveBurst>
                 {
                     new() { minute = 1.5f, enemy = skel, count = 24, ring = true, elites = 1, announcement = "A ring of bones closes in!" },
+                    new() { minute = 2.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
+                    new() { minute = 5.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
+                    new() { minute = 8.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
                     new() { minute = 2.25f, enemy = bat, count = 28, ring = false, elites = 0, announcement = "A swarm of bats!" },
                     new() { minute = 3f, enemy = slime, count = 22, ring = false, elites = 1, announcement = "Slime tide!" },
                     new() { minute = 3.75f, enemy = shroom, count = 12, ring = true, elites = 0, announcement = "Something is ticking..." },
@@ -530,6 +607,9 @@ namespace MultiBash.EditorTools
                 w.bursts = new List<WaveBurst>
                 {
                     new() { minute = 1.5f, enemy = magma, count = 10, ring = true, elites = 1, announcement = "The ground boils!" },
+                    new() { minute = 2.25f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
+                    new() { minute = 5.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
+                    new() { minute = 7.75f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
                     new() { minute = 2.5f, enemy = imp, count = 12, ring = false, elites = 1, announcement = "Imps rain fire from above!" },
                     new() { minute = 3.25f, enemy = shroom, count = 14, ring = true, elites = 0, announcement = "Something is ticking..." },
                     new() { minute = 4.25f, enemy = skel, count = 60, ring = true, elites = 2, announcement = "The ashen dead march!" },
@@ -608,7 +688,8 @@ namespace MultiBash.EditorTools
             // keep existing order (network ids!) and append anything new
             Merge(db.characters, PreferredOrder<CharacterDefinition>("Knight", "Ranger", "Mage", "Alchemist"));
             Merge(db.weapons, PreferredOrder<WeaponDefinition>("Greatsword", "Longbow", "StormStaff", "PoisonFlask", "OrbitingBlades", "HolyAura",
-                "Boomerang", "MeteorStaff", "FrostNova", "SpiritDaggers"));
+                "Boomerang", "MeteorStaff", "FrostNova", "SpiritDaggers", "TitansCleaver", "HailOfArrows", "ThunderGod", "PlagueCauldron",
+                "BladeTornado", "Sanctuary", "TwinMoons", "Armageddon", "AbsoluteZero", "PhantomLegion"));
             Merge(db.powerups, PreferredOrder<PowerupDefinition>());
             Merge(db.enemies, PreferredOrder<EnemyDefinition>("Skeleton", "Slime", "SlimeSmall"));
             Merge(db.maps, PreferredOrder<MapDefinition>("Graveyard", "Volcano"));

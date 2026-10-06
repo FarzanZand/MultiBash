@@ -263,7 +263,9 @@ namespace MultiBash
             {
                 _weaponIcon.sprite = def.startingWeapon.icon;
                 _weaponName.text = def.startingWeapon.displayName;
-                _weaponDesc.text = def.startingWeapon.description;
+                var sw = def.startingWeapon;
+                _weaponDesc.text = sw.description + (sw.evolveWith != null && sw.evolvesInto != null
+                    ? $"\n<size=18><color=#e2c8ff>Evolves: MAX + {sw.evolveWith.displayName} = {sw.evolvesInto.displayName}</color></size>" : "");
             }
 
             bool host = IsHost;

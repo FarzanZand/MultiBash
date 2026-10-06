@@ -4,8 +4,9 @@ using UnityEngine;
 namespace MultiBash
 {
     /// <summary>
-    /// Pooled one-shot SFX + music. Limits how many copies of the same clip can play at once,
-    /// so 200 skeletons dying at once doesn't turn into noise.
+    /// Pooled one-shot SFX + crossfading music. Limits how many copies of the same clip can play at once,
+    /// so 200 skeletons dying at once doesn't turn into noise. UI sounds get their own small pool so a
+    /// pitched sound (gem combo) never re-pitches another one that is still playing.
     /// </summary>
     public class AudioManager : MonoBehaviour
     {
@@ -17,10 +18,11 @@ namespace MultiBash
         [Range(0, 1)] public float sfxVolume = 0.8f;
 
         readonly List<AudioSource> _pool = new();
+        readonly List<AudioSource> _uiPool = new();
         readonly Dictionary<AudioClip, float> _lastPlayed = new();
-        AudioSource _music;
-        AudioSource _ui;
-        int _next;
+        AudioSource _music, _musicB;   // _music = current, _musicB = fading out
+        float _fadeTime = 1f, _fadeT = 1f;
+        int _next, _nextUi;
 
         void Awake()
         {
@@ -38,14 +40,37 @@ namespace MultiBash
                 s.dopplerLevel = 0f;
                 _pool.Add(s);
             }
-            _music = gameObject.AddComponent<AudioSource>();
-            _music.loop = true;
-            _music.playOnAwake = false;
-            _music.spatialBlend = 0f;
-            _ui = gameObject.AddComponent<AudioSource>();
-            _ui.playOnAwake = false;
-            _ui.spatialBlend = 0f;
+            _music = MusicSource();
+            _musicB = MusicSource();
+            for (int i = 0; i < 6; i++)
+            {
+                var s = gameObject.AddComponent<AudioSource>();
+                s.playOnAwake = false;
+                s.spatialBlend = 0f;
+                _uiPool.Add(s);
+            }
             sfxVolume = PlayerPrefs.GetFloat("sfxVolume", sfxVolume);
+        }
+
+        AudioSource MusicSource()
+        {
+            var m = gameObject.AddComponent<AudioSource>();
+            m.loop = true;
+            m.playOnAwake = false;
+            m.spatialBlend = 0f;
+            return m;
+        }
+
+        static float MusicTarget => Lib != null ? Lib.musicVolume * PlayerPrefs.GetFloat("musicVolume", 1f) : 0.4f;
+
+        void Update()
+        {
+            if (_fadeT >= 1f) return;
+            _fadeT = Mathf.Min(1f, _fadeT + Time.unscaledDeltaTime / Mathf.Max(0.01f, _fadeTime));
+            float target = MusicTarget;
+            _music.volume = target * _fadeT;
+            _musicB.volume = target * (1f - _fadeT);
+            if (_fadeT >= 1f) _musicB.Stop();
         }
 
         public static AudioLibrary Lib => GameDatabase.Instance != null ? GameDatabase.Instance.audio : null;
@@ -53,8 +78,19 @@ namespace MultiBash
         public static void PlayUI(AudioClip clip, float volume = 1f, float pitch = 1f)
         {
             if (Instance == null || clip == null) return;
-            Instance._ui.pitch = pitch;
-            Instance._ui.PlayOneShot(clip, volume * Instance.sfxVolume);
+            var I = Instance;
+            AudioSource src = null;
+            for (int i = 0; i < I._uiPool.Count; i++)
+            {
+                var s = I._uiPool[(I._nextUi + i) % I._uiPool.Count];
+                if (!s.isPlaying) { src = s; break; }
+            }
+            if (src == null) src = I._uiPool[I._nextUi];
+            I._nextUi = (I._nextUi + 1) % I._uiPool.Count;
+            src.clip = clip;
+            src.pitch = pitch;
+            src.volume = volume * I.sfxVolume;
+            src.Play();
         }
 
         public static void Play(AudioClip clip, Vector3 position, float volume = 1f, float pitch = 1f, float pitchJitter = 0.08f)
@@ -89,20 +125,33 @@ namespace MultiBash
             src.Play();
         }
 
-        public static void PlayMusic(AudioClip clip)
+        /// <summary>Switch music. fade > 0 crossfades from the current track.</summary>
+        public static void PlayMusic(AudioClip clip, float fade = 0f)
         {
             if (Instance == null || clip == null) return;
-            var m = Instance._music;
-            if (m.clip == clip && m.isPlaying) return;
-            m.clip = clip;
-            m.volume = Lib != null ? Lib.musicVolume * PlayerPrefs.GetFloat("musicVolume", 1f) : 0.4f;
-            m.Play();
+            var I = Instance;
+            if (I._music.clip == clip && I._music.isPlaying) return;
+            if (fade <= 0f || !I._music.isPlaying)
+            {
+                I._musicB.Stop();
+                I._music.clip = clip;
+                I._music.volume = MusicTarget;
+                I._music.Play();
+                I._fadeT = 1f;
+                return;
+            }
+            (I._music, I._musicB) = (I._musicB, I._music);
+            I._music.clip = clip;
+            I._music.volume = 0f;
+            I._music.Play();
+            I._fadeTime = fade;
+            I._fadeT = 0f;
         }
 
         public static void SetMusicVolume(float v)
         {
             PlayerPrefs.SetFloat("musicVolume", v);
-            if (Instance != null && Lib != null) Instance._music.volume = Lib.musicVolume * v;
+            if (Instance != null && Lib != null && Instance._fadeT >= 1f) Instance._music.volume = Lib.musicVolume * v;
         }
 
         public static void SetSfxVolume(float v)
@@ -113,7 +162,7 @@ namespace MultiBash
 
         public static void StopMusic()
         {
-            if (Instance != null) Instance._music.Stop();
+            if (Instance != null) { Instance._music.Stop(); Instance._musicB.Stop(); Instance._fadeT = 1f; }
         }
     }
 }

@@ -5,6 +5,7 @@ namespace MultiBash
 {
     public enum EnemyMovement
     {
+        // (Hopper / Walker enemies can also flee: see EnemyDefinition.flees)
         Walker,   // walks straight at the nearest player
         Hopper,   // waits, then leaps toward the player
         Flyer,    // flies at head height with a weaving swoop, ignores props
@@ -47,6 +48,14 @@ namespace MultiBash
         public float hopTime = 0.45f;
         [Tooltip("Hopper: hop height in meters.")]
         public float hopHeight = 1.2f;
+
+        [Header("Treasure (runaway loot enemies)")]
+        [Tooltip("Hops AWAY from the players instead of toward them.")]
+        public bool flees;
+        [Tooltip("Despawns ('got away') after this many seconds. 0 = never.")]
+        public float lifetime;
+        [Tooltip("Chests dropped on death (also shows the TREASURE marker on the HUD).")]
+        public int dropChests;
 
         [Header("Special attack")]
         public EnemyAttack attack = EnemyAttack.Contact;

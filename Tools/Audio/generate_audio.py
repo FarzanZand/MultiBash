@@ -135,7 +135,15 @@ def pluck(freq, dur, damp=0.996):
     return out
 
 
+MIX_DB = {
+    "SFX_PlayerJump": -6, "SFX_SlimeHop": -7, "SFX_GemPickup": -4, "SFX_MagnetPickup": -3, "SFX_HealthPickup": -2,
+    "SFX_FuseHiss": -4, "SFX_ImpDeath": -3, "SFX_BatDeath": -4, "SFX_BatScreech": -3, "SFX_SlimeHit": -4, "SFX_SlimeDeath": -3,
+    "SFX_MagmaDeath": -2, "SFX_PlayerSlide": -2, "SFX_UIHover": -6, "SFX_AuraPulse": -4, "SFX_Heartbeat": -2,
+}
+
+
 def write(x, folder, name, peak=0.9):
+    peak *= 10 ** (MIX_DB.get(name, 0) / 20)
     x = fade_out(norm(np.asarray(x, dtype=float), peak))
     path = os.path.join(AUDIO, folder, name + ".wav")
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -349,6 +357,60 @@ def defeat():
     return lowpass(mix(*parts), 2500)
 
 
+def evolution():
+    """Weapon evolution: rising arpeggio into a big shimmering chord with an impact."""
+    notes = [262, 330, 392, 523, 659, 784, 1046, 1318]
+    arp = [delay((saw(f, 0.25) * 0.3 + sine(f, 0.25)) * env(int(SR * 0.25), a=0.003, d=0.09), i * 0.055) for i, f in enumerate(notes)]
+    chord = mix(*[(saw(f, 1.6) * 0.25 + sine(f, 1.6) + 0.3 * sine(f * 2, 1.6)) * env(int(SR * 1.6), a=0.01, d=0.7) for f in (523, 659, 784, 1046)])
+    boom = sine(sweep(120, 40, 0.8, 0.5), 0.8) * env(int(SR * 0.8), a=0.001, d=0.3)
+    shimmer = highpass(noise(1.4), 7000) * env(int(SR * 1.4), a=0.05, d=0.5) * 0.2
+    return mix(*arp, delay(lowpass(chord, 4000) * 0.6, 0.45), delay(boom, 0.45), delay(shimmer, 0.45))
+
+
+def reroll():
+    """Slot-machine ticks for rerolling upgrade offers."""
+    parts = []
+    for i in range(7):
+        f = 900 + 140 * (i % 3)
+        parts.append(delay(square(f, 0.03, 0.3) * env(int(SR * 0.03), a=0.001, d=0.01) * 0.5, i * 0.045 * (1 + i * 0.12)))
+    ding = (sine(1318, 0.3) + 0.3 * sine(2636, 0.3)) * env(int(SR * 0.3), a=0.002, d=0.1)
+    return mix(*parts, delay(ding, 0.42))
+
+
+def boss_warning():
+    """Two low horn blasts when a boss enters."""
+    def horn(f, d):
+        n = int(SR * d)
+        x = np.tanh((saw(f, d) + saw(f * 1.006, d) + 0.5 * saw(f * 1.5, d)) * 1.4)
+        return lowpass(x, 900) * env(n, a=0.12, d=d * 0.8, s=0.6, r=0.2)
+    return mix(horn(73.4, 0.9), delay(horn(69.3, 1.4), 1.0))
+
+
+def crit_hit():
+    d = 0.18
+    n = int(SR * d)
+    return (sine(2093, d) + 0.6 * sine(3136, d) + 0.3 * square(1046, d, 0.2)) * env(n, a=0.001, d=0.05)
+
+
+def heartbeat():
+    def thump(f):
+        d = 0.18
+        return sine(sweep(f, f * 0.6, d, 0.5), d) * env(int(SR * d), a=0.004, d=0.06)
+    return lowpass(mix(thump(70), delay(thump(62) * 0.7, 0.22)), 400)
+
+
+def ui_deny():
+    d = 0.18
+    return lowpass(square(110, d, 0.4) + square(116, d, 0.4), 1200) * env(int(SR * d), a=0.002, d=0.08) * 0.6
+
+
+def treasure():
+    """Chest burst: coins and a sparkling fanfare."""
+    coins = mix(*[delay((sine(2600 + (i % 4) * 300, 0.12) + 0.4 * sine(5200, 0.12)) * env(int(SR * 0.12), a=0.001, d=0.03) * 0.35, 0.02 + i * 0.04 + rng.random() * 0.02) for i in range(14)])
+    fan = mix(*[delay((sine(f, 0.6) + 0.35 * square(f, 0.6, 0.25)) * env(int(SR * 0.6), a=0.004, d=0.22), i * 0.09) for i, f in enumerate([523, 659, 784, 1046, 1318])])
+    return mix(coins, delay(fan, 0.12))
+
+
 def bat_screech():
     d = 0.22
     n = int(SR * d)
@@ -549,9 +611,10 @@ SFX = {
     "Player": [("SFX_PlayerHurt", player_hurt), ("SFX_PlayerJump", player_jump), ("SFX_PlayerSlide", player_slide),
                ("SFX_PlayerDowned", player_downed), ("SFX_PlayerRevive", player_revive), ("SFX_LevelUp", level_up)],
     "Pickups": [("SFX_GemPickup", gem_pickup), ("SFX_HealthPickup", health_pickup), ("SFX_MagnetPickup", magnet_pickup),
-                ("SFX_ChestOpen", chest_open), ("SFX_ShrineCharge", shrine_charge)],
+                ("SFX_ChestOpen", chest_open), ("SFX_ShrineCharge", shrine_charge), ("SFX_Treasure", treasure)],
     "UI": [("SFX_UIClick", ui_click), ("SFX_UIHover", ui_hover), ("SFX_UIReady", ui_ready), ("SFX_UIStart", ui_start),
-           ("SFX_Victory", victory), ("SFX_Defeat", defeat)],
+           ("SFX_Victory", victory), ("SFX_Defeat", defeat), ("SFX_Evolution", evolution), ("SFX_Reroll", reroll),
+           ("SFX_BossWarning", boss_warning), ("SFX_Crit", crit_hit), ("SFX_Heartbeat", heartbeat), ("SFX_UIDeny", ui_deny)],
 }
 
 
@@ -677,10 +740,8 @@ if __name__ == "__main__":
                     continue
                 write(fn(), os.path.join("SFX", cat), name)
     if what in ("all", "music"):
-        l, r = menu_theme()
-        write_stereo(l, r, "Music", "MUS_Menu")
-        l, r = battle_theme()
-        write_stereo(l, r, "Music", "MUS_Battle")
-    if what in ("all", "music", "volcano"):
-        l, r = volcano_theme()
-        write_stereo(l, r, "Music", "MUS_Volcano")
+        import music_v2   # longer sectioned loops + boss theme
+        for name, fn in (("MUS_Menu", music_v2.menu_theme), ("MUS_Battle", music_v2.battle_theme),
+                         ("MUS_Volcano", music_v2.volcano_theme), ("MUS_Boss", music_v2.boss_theme)):
+            l, r = fn()
+            write_stereo(l, r, "Music", name)

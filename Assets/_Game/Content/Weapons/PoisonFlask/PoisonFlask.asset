@@ -68,3 +68,6 @@ MonoBehaviour:
   fxColor: {r: 0.6117647, g: 1, b: 0.22745098, a: 1}
   fireSound: {fileID: 8300000, guid: ee36cc7b484ef21419cd4ea8f48dadeb, type: 3}
   hitSound: {fileID: 8300000, guid: 4b4c922779f34374686d75c4dfcb1a70, type: 3}
+  evolveWith: {fileID: 11400000, guid: 60fa1f238aad06d47909dbf320b8bfb6, type: 2}
+  evolvesInto: {fileID: 11400000, guid: a07dd08b5f7d1d543b85644f998006f0, type: 2}
+  isEvolution: 0

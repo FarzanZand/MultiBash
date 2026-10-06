@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc1fb2f1ceac0749b04409fe13897d2, type: 3}
+  m_Name: AbsoluteZero
+  m_EditorClassIdentifier: Assembly-CSharp::MultiBash.WeaponDefinition
+  displayName: Absolute Zero
+  description: A vast frozen blast that nearly stops everything it touches.
+  icon: {fileID: 21300000, guid: 6a19b6e2b2b351f409785f8c174b314e, type: 3}
+  rarity: 3
+  kind: 8
+  levels:
+  - upgradeText: 
+    damage: 36
+    cooldown: 1.3
+    amount: 1
+    area: 9
+    pierce: 0
+    duration: 5
+    speed: 0
+    knockback: 10
+  heldModel: {fileID: 0}
+  projectileModel: {fileID: 919132149155446097, guid: 5f624b426b0492c4e9e1201305ad1e11, type: 3}
+  fxColor: {r: 0.8745098, g: 0.972549, b: 1, a: 1}
+  fireSound: {fileID: 8300000, guid: ae3d55cc7b097484d8c7d00357821f34, type: 3}
+  hitSound: {fileID: 0}
+  evolveWith: {fileID: 0}
+  evolvesInto: {fileID: 0}
+  isEvolution: 1

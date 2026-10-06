@@ -52,6 +52,8 @@ MonoBehaviour:
   maxWeapons: 4
   maxPowerups: 6
   healChoicePercent: 0.3
+  rerollsPerRun: 3
+  skipHealPercent: 0.15
   healthPerMinute: 0.25
   healthPerMinuteSquared: 0.07
   speedPerMinute: 0.05

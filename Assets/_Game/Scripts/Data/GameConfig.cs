@@ -45,6 +45,9 @@ namespace MultiBash
         public int maxWeapons = 4;
         public int maxPowerups = 6;
         [Range(0f, 1f)] public float healChoicePercent = 0.3f;
+        [Tooltip("Free rerolls of the upgrade offers per run (each boss kill gives everyone one more).")]
+        public int rerollsPerRun = 3;
+        [Range(0f, 1f)] public float skipHealPercent = 0.15f;
 
         [Header("Enemy scaling")]
         [Tooltip("Enemy HP +X per minute (0.15 = +15%/min).")]

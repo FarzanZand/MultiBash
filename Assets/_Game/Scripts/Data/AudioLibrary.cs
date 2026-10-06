@@ -9,6 +9,7 @@ namespace MultiBash
         [Header("Music")]
         public AudioClip menuMusic;
         public AudioClip battleMusic;
+        public AudioClip bossMusic;
         [Range(0, 1)] public float musicVolume = 0.45f;
 
         [Header("UI")]
@@ -18,6 +19,10 @@ namespace MultiBash
         public AudioClip start;
         public AudioClip victory;
         public AudioClip defeat;
+        public AudioClip deny;
+        public AudioClip reroll;
+        public AudioClip evolution;
+        public AudioClip bossWarning;
 
         [Header("Player")]
         public AudioClip hurt;
@@ -27,11 +32,14 @@ namespace MultiBash
         public AudioClip revive;
         public AudioClip levelUp;
         public AudioClip lavaSizzle;
+        public AudioClip heartbeat;
+        public AudioClip crit;
 
         [Header("Pickups")]
         public AudioClip gem;
         public AudioClip health;
         public AudioClip magnet;
         public AudioClip chest;
+        public AudioClip treasure;
     }
 }

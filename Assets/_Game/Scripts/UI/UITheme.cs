@@ -61,6 +61,7 @@ namespace MultiBash
         {
             Rarity.Rare => rare,
             Rarity.Epic => epic,
+            Rarity.Legendary => new Color(0.85f, 0.5f, 0.08f),
             _ => common,
         };
 
@@ -68,6 +69,7 @@ namespace MultiBash
         {
             Rarity.Rare => "Rare",
             Rarity.Epic => "Epic",
+            Rarity.Legendary => "Legendary",
             _ => "Common",
         };
     }
