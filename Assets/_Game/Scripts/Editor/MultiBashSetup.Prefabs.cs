@@ -126,7 +126,6 @@ namespace MultiBash.EditorTools
             Prop("Banner", 0f, PropCollider.None);
             Prop("FlowersA", 0f, PropCollider.None, shadows: false);
             Prop("FlowersB", 0f, PropCollider.None, shadows: false);
-            Prop("Mushrooms", 0f, PropCollider.None, shadows: false);
             Prop("Crates", 1.0f, PropCollider.Box);
             Prop("SkullPile", 0f, PropCollider.None, shadows: false);
             Prop("RuneStone", 0.6f, PropCollider.Box);
@@ -150,7 +149,6 @@ namespace MultiBash.EditorTools
             Prop("Mausoleum", 3.4f, PropCollider.Box);
             Prop("Windmill", 2.4f, PropCollider.Capsule);
             Prop("Bridge", 0f, PropCollider.Mesh);
-            Prop("HangingTree", 1.3f, PropCollider.Capsule);
             Prop("KnightStatue", 2.4f, PropCollider.Box);
             Prop("Well", 1.1f, PropCollider.Capsule);
             Prop("DragonSkull", 5.5f, PropCollider.Mesh, withLight: true, lightHeight: 3f, lightColor: new Color(1f, 0.45f, 0.15f), lightRange: 16f, lightIntensity: 4f);

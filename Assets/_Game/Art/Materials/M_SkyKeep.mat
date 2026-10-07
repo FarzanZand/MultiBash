@@ -26,20 +26,20 @@ Material:
     m_Ints: []
     m_Floats:
     - _Aurora: 0
-    - _CloudCover: 0.42
+    - _CloudCover: 0.45
     - _CloudScale: 2.8
     - _MoonSize: 0.07
     - _Pixel: 90
     - _Speed: 0.004
-    - _StarDensity: 0.45
+    - _StarDensity: 0
     m_Colors:
     - _AuroraA: {r: 0.29999998, g: 1, b: 0.65, a: 1}
     - _AuroraB: {r: 0.6, g: 0.34999996, b: 1, a: 1}
-    - _BottomColor: {r: 0.36, g: 0.34, b: 0.46, a: 1}
-    - _CloudColor: {r: 0.62, g: 0.5, b: 0.68, a: 1}
-    - _HorizonColor: {r: 0.9, g: 0.62, b: 0.55, a: 1}
-    - _MoonColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+    - _BottomColor: {r: 0.36, g: 0.5, b: 0.6, a: 1}
+    - _CloudColor: {r: 0.95, g: 0.97, b: 1, a: 1}
+    - _HorizonColor: {r: 0.6, g: 0.8, b: 0.95, a: 1}
+    - _MoonColor: {r: 0.62, g: 0.8, b: 0.96, a: 1}
     - _MoonDir: {r: -0.3, g: 0.62, b: 0.72, a: 0}
-    - _TopColor: {r: 0.13, g: 0.17, b: 0.42, a: 1}
+    - _TopColor: {r: 0.18, g: 0.46, b: 0.82, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -397,12 +397,9 @@ def skeleton(archer=False):
     R["jaw"].fill("bone", -0.2)
     sk = R["skull"]
     ve = vz(1.795, z0, z1)
-    for u in (0.385, 0.615):                                                # deep round sockets with ember pupils
-        sk.box(u - 0.035, ve - 0.14, u + 0.035, ve + 0.14, "black", 1)
-        sk.box(u - 0.055, ve - 0.09, u + 0.055, ve + 0.09, "black", 1)
-        sk.box(u - 0.035, ve - 0.09, u + 0.035, ve + 0.09, "black", 0)
-        sk.box(u - 0.012, ve - 0.02, u + 0.012, ve + 0.04, "ember", 3)
-        sk.glow(u - 0.012, ve - 0.02, u + 0.012, ve + 0.04)
+    for u in (0.4, 0.6):                                                    # plain round eye holes: dark, no glow
+        sk.box(u - 0.022, ve - 0.12, u + 0.022, ve + 0.12, "black", 0)    # rounded: narrow tall core...
+        sk.box(u - 0.036, ve - 0.07, u + 0.036, ve + 0.07, "black", 0)    # ...plus a wider middle
     vn = vz(1.74, z0, z1)
     sk.box(0.48, vn - 0.04, 0.52, vn + 0.06, "black", 0)                   # nasal cavity
     vt = vz(1.695, z0, z1)

@@ -420,16 +420,17 @@ namespace MultiBash.EditorTools
             };
             // sky / water materials are always refreshed (cheap) so look tweaks land without a full rebuild
             KeepSkyMat = Mat(Mats + "/M_SkyKeep.mat", Shader.Find("MultiBash/PixelSky"), m => { });
-            KeepSkyMat.SetColor("_TopColor", new Color(0.13f, 0.17f, 0.42f));
-            KeepSkyMat.SetColor("_HorizonColor", new Color(0.9f, 0.62f, 0.55f));
-            KeepSkyMat.SetColor("_BottomColor", new Color(0.36f, 0.34f, 0.46f));
-            KeepSkyMat.SetColor("_CloudColor", new Color(0.62f, 0.5f, 0.68f));
-            KeepSkyMat.SetFloat("_CloudCover", 0.42f);
+            // daytime blue (StageMood darkens it into night and adds the stars / moon in later stages)
+            KeepSkyMat.SetColor("_TopColor", new Color(0.18f, 0.46f, 0.82f));
+            KeepSkyMat.SetColor("_HorizonColor", new Color(0.6f, 0.8f, 0.95f));
+            KeepSkyMat.SetColor("_BottomColor", new Color(0.36f, 0.5f, 0.6f));
+            KeepSkyMat.SetColor("_CloudColor", new Color(0.95f, 0.97f, 1f));
+            KeepSkyMat.SetFloat("_CloudCover", 0.45f);
             KeepSkyMat.SetFloat("_CloudScale", 2.8f);
-            KeepSkyMat.SetFloat("_StarDensity", 0.45f);
+            KeepSkyMat.SetFloat("_StarDensity", 0f);
             KeepSkyMat.SetFloat("_MoonSize", 0.07f);
             KeepSkyMat.SetVector("_MoonDir", new Vector4(-0.3f, 0.62f, 0.72f, 0));
-            KeepSkyMat.SetColor("_MoonColor", new Color(1f, 0.96f, 0.86f));
+            KeepSkyMat.SetColor("_MoonColor", new Color(0.62f, 0.8f, 0.96f));   // hidden in the day sky, lit by the night mood
             EditorUtility.SetDirty(KeepSkyMat);
             FrostSkyMat = Mat(Mats + "/M_SkyFrost.mat", Shader.Find("MultiBash/PixelSky"), m => { });
             FrostSkyMat.SetColor("_TopColor", new Color(0.04f, 0.07f, 0.2f));

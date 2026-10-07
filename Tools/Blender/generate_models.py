@@ -2266,7 +2266,6 @@ EXTRA_MODELS = [
     ("Environment", "Banner", banner),
     ("Environment", "FlowersA", flowers(1)),
     ("Environment", "FlowersB", flowers(2)),
-    ("Environment", "Mushrooms", mushrooms),
     ("Environment", "Crates", crates),
     ("Environment", "SkullPile", skull_pile),
     ("Environment", "RuneStone", rune_stone),

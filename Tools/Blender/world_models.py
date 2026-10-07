@@ -239,6 +239,19 @@ def bounce_shroom():
     root_with([group("Mesh", ps, (0, 0, 0))])
 
 
+def rune_spring():
+    """Bounce pad for the Keep: a carved stone disc with a glowing blue rune ring and four crystal studs."""
+    ps = [part("cyl", (0, 0, 0.12), (3.0, 3.0, 0.24), "stone_dark", verts=12),
+          part("cyl", (0, 0, 0.27), (2.6, 2.6, 0.08), "stone_light", verts=12),
+          part("cyl", (0, 0, 0.31), (1.9, 1.9, 0.03), "rune_blue", verts=12),
+          part("cyl", (0, 0, 0.33), (1.6, 1.6, 0.03), "stone", verts=12),
+          part("cyl", (0, 0, 0.35), (0.7, 0.7, 0.04), "crystal_light", verts=8)]
+    for k in range(4):
+        x, y = r2(1.35, 0, k * 90 + 45)
+        ps.append(part("cone", (x, y, 0.5), (0.26, 0.26, 0.5), "crystal", verts=5))
+    root_with([group("Mesh", ps, (0, 0, 0))])
+
+
 def knight_statue():
     """Huge kneeling stone knight, hands on a sword planted in the plinth (~7m)."""
     ps = [part("cube", (0, 0, 0.6), (4.2, 4.2, 1.2), "stone_dark"),
@@ -825,8 +838,7 @@ MODELS = [
     ("Environment", "Mausoleum", mausoleum),
     ("Environment", "Windmill", windmill),
     ("Environment", "Bridge", bridge),
-    ("Environment", "HangingTree", hanging_tree),
-    ("Environment", "BounceShroom", bounce_shroom),
+    ("Environment", "RuneSpring", rune_spring),
     ("Environment", "KnightStatue", knight_statue),
     ("Environment", "Well", well),
     ("Environment", "SupplyCrate", supply_crate),

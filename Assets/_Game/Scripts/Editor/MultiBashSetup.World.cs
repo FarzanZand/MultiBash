@@ -333,11 +333,11 @@ namespace MultiBash.EditorTools
         /// windmill and mountains. The heroes stand around x 0..5, z 0..3 facing the camera (-Z).</summary>
         static Transform FrontEndSet(string terrainName, int seed)
         {
-            var fog = new Color(0.47f, 0.47f, 0.6f);
-            Lighting(KeepSkyMat, fog, 30f, 230f, new Color(0.58f, 0.62f, 0.88f), new Color(0.66f, 0.6f, 0.62f), new Color(0.38f, 0.36f, 0.34f));
-            Sun(new Vector3(28, -55, 0), new Color(1f, 0.84f, 0.66f), 1.5f);
+            var fog = new Color(0.58f, 0.74f, 0.9f);
+            Lighting(KeepSkyMat, fog, 34f, 240f, new Color(0.62f, 0.76f, 1f), new Color(0.62f, 0.68f, 0.72f), new Color(0.36f, 0.4f, 0.32f));
+            Sun(new Vector3(52, -40, 0), new Color(1f, 0.96f, 0.88f), 1.45f);
             new GameObject("PostProcess").AddComponent<Volume>().sharedProfile = MapProfile("Assets/Settings/MB_PostProcessKeep.asset",
-                1.0f, 0.7f, new Color(1f, 0.85f, 0.75f), 0.22f, new Color(0.06f, 0.04f, 0.12f), 18f, 14f, 0.2f, new Color(1f, 0.98f, 1.0f));
+                1.05f, 0.5f, new Color(1f, 0.95f, 0.9f), 0.18f, new Color(0.04f, 0.06f, 0.12f), 16f, 12f, 0.1f, new Color(1f, 1f, 1f));
             FindVolume().isGlobal = true;
             var road = new (Vector2 a, Vector2 b)[] { (new(2, -4), new(2.5f, 30)), (new(2.5f, 30), new(4, 70)) };
             float Hf(float x, float z)
@@ -368,7 +368,7 @@ namespace MultiBash.EditorTools
             At("Windmill", new Vector3(-22, 0, 34), 140f, 1.2f);
             At("TowerRuin", new Vector3(26, 0, 30), 70f, 1.1f);
             At("Mausoleum", new Vector3(24, 0, 16), -120f, 1f);
-            At("HangingTree", new Vector3(-14, 0, 14), 40f, 1.0f);
+            At("TreeA", new Vector3(-14, 0, 14), 40f, 1.2f);
             for (int i = 0; i < 6; i++)
             {
                 At("Brazier", new Vector3(i % 2 == 0 ? -0.5f : 5.5f, 0, 12 + i * 7), 0, 1.1f);
@@ -465,12 +465,12 @@ namespace MultiBash.EditorTools
             var cfg = Load<GameConfig>(Content + "/GameConfig.asset");
             float half = cfg != null ? cfg.arenaHalfSize : 58f;
 
-            // ---- golden dusk: low warm sun, violet sky with the moon rising, cool shadows
-            var fogColor = new Color(0.47f, 0.47f, 0.6f);
-            Lighting(KeepSkyMat, fogColor, 26f, 210f, new Color(0.58f, 0.62f, 0.88f), new Color(0.66f, 0.6f, 0.62f), new Color(0.38f, 0.36f, 0.34f));
-            var sun = Sun(new Vector3(34, -65, 0), new Color(1f, 0.84f, 0.66f), 1.55f);
+            // ---- stage 1: clear blue day (night falls in stage 2, see AddMoods below)
+            var fogColor = new Color(0.58f, 0.74f, 0.9f);
+            Lighting(KeepSkyMat, fogColor, 30f, 220f, new Color(0.62f, 0.76f, 1f), new Color(0.62f, 0.68f, 0.72f), new Color(0.36f, 0.4f, 0.32f));
+            var sun = Sun(new Vector3(52, -40, 0), new Color(1f, 0.96f, 0.88f), 1.45f);
             new GameObject("PostProcess").AddComponent<Volume>().sharedProfile = MapProfile("Assets/Settings/MB_PostProcessKeep.asset",
-                1.0f, 0.7f, new Color(1f, 0.85f, 0.75f), 0.22f, new Color(0.06f, 0.04f, 0.12f), 18f, 14f, 0.2f, new Color(1f, 0.98f, 1.0f));
+                1.05f, 0.5f, new Color(1f, 0.95f, 0.9f), 0.18f, new Color(0.04f, 0.06f, 0.12f), 16f, 12f, 0.1f, new Color(1f, 1f, 1f));
             FindVolume().isGlobal = true;
 
             HeightBase = 2f;
@@ -525,9 +525,7 @@ namespace MultiBash.EditorTools
                 if (d.RoadDist(p) < 2.4f) continue;
                 d.At("Fence", p, 90f, 1f);
             }
-            var tree = new Vector3(36, 0, -14);
-            d.At("HangingTree", tree, d.R() * 360f, 1.1f, 0.2f, 2.5f);
-            PointLight(d.deco, tree + Vector3.up * (H(tree) + 4f), new Color(1f, 0.78f, 0.45f), 12f, 2.4f, "TreeGlow");
+            d.At("TreeA", new Vector3(36, 0, -14), d.R() * 360f, 1.3f, 0.2f, 2.5f);
             d.Scatter("SkullPile", 8, 1f, 0.8f, 1.2f, 20f, 14f, false, center: new Vector2(38, 4));
             d.Scatter("LanternPost", 4, 1.5f, 1f, 1f, 10f, 12f, center: new Vector2(32, 8), roadClear: 0f, where: p => d.RoadDist(p) < 3.2f);
 
@@ -545,7 +543,6 @@ namespace MultiBash.EditorTools
             d.Scatter("TreePine", 26, 2f, 1.0f, 1.6f, 22f, half - 3, where: wood);
             d.Scatter("TreeA", 12, 2.4f, 1.0f, 1.4f, 20f, half - 3, where: wood);
             d.Scatter("DeadTree", 10, 1.5f, 1.0f, 1.4f, 20f, half - 3, where: wood);
-            d.Scatter("Mushrooms", 40, 0.5f, 1.0f, 2.0f, 25f, half - 2, false, where: wood);
             d.Scatter("Bush", 30, 1.2f, 0.9f, 1.4f, 25f, half - 2, false, where: wood);
 
             // ---- SOUTH: the brook, two bridges, windmill, well, the knight statue on its knoll
@@ -587,7 +584,6 @@ namespace MultiBash.EditorTools
             d.Scatter("LanternPost", 8, 1.5f, 1f, 1f, 10f, half - 4, roadClear: 0f, where: p => d.RoadDist(p) < 3.4f && d.RoadDist(p) > 2.2f);
             d.Scatter("FlowersA", 80, 0f, 0.8f, 1.4f, 25f, half, false, 0.02f, where: p => p.x > -22f);
             d.Scatter("FlowersB", 80, 0f, 0.8f, 1.4f, 25f, half, false, 0.02f, where: p => p.x > -22f);
-            d.Scatter("Mushrooms", 20, 0.5f, 0.8f, 1.4f, 25f, half - 2, false);
             d.Scatter("Bush", 30, 1.2f, 0.8f, 1.3f, 25f, half - 2, false);
             d.Scatter("GrassTuft", 1000, 0f, 0.7f, 1.5f, 35f, half, false, 0.02f, where: p => d.RoadDist(p) > 1.8f);
 
@@ -616,9 +612,9 @@ namespace MultiBash.EditorTools
             MakeShrines(KeepShrines, H);
             MakeBreakables(d, new[] { ("SupplyCrate", new Color(0.62f, 0.42f, 0.24f), 1.0f), ("GrainSack", new Color(0.78f, 0.7f, 0.48f), 1.0f), ("Urn", new Color(0.8f, 0.45f, 0.25f), 1.1f), ("Barrel", new Color(0.55f, 0.36f, 0.2f), 1.0f) },
                 44, new[] { new Vector2(0, 32), new Vector2(34, 6), new Vector2(-34, -6), new Vector2(-26, -42), new Vector2(12, -38), new Vector2(-20, 22), new Vector2(24, -24) }, 0.75f);
-            var shroom = new Color(1f, 0.45f, 0.55f);
+            var rune = new Color(0.4f, 0.8f, 1f);
             foreach (var p in new[] { new Vector3(-30, 0, 12), new Vector3(-44, 0, 8), new Vector3(-11, 0, 37), new Vector3(36, 0, 33), new Vector3(-36, 0, -34), new Vector3(20, 0, -32) })
-                MakePad(d, "BounceShroom", p, 20f, shroom, 1.4f, 1.2f);
+                MakePad(d, "RuneSpring", p, 20f, rune, 1.4f, 1.0f);
 
             // stage 2: night falls; stage 3: the blood moon rises
             AddMoods(sun,
