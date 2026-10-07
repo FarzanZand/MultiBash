@@ -333,18 +333,15 @@ namespace MultiBash.EditorTools
             var haste = Pow("Haste", "Weapons attack more often.", Rarity.Rare, 5, StatType.Cooldown, -0.07f);
             var expanse = Pow("Expanse", "Bigger swings, auras, puddles and orbits.", Rarity.Common, 5, StatType.Area, 0.12f);
             Pow("Multishot", "+1 arrow, flask, blade, swing, ring and lightning jump.", Rarity.Epic, 4, StatType.ProjectileCount, 1f);
-            Pow("Magnet", "Collect XP from further away.", Rarity.Common, 5, StatType.PickupRadius, 1.3f);
             var wisdom = Pow("Wisdom", "Gain more XP for the whole team.", Rarity.Rare, 5, StatType.XPGain, 0.1f);
             var regen = Pow("Regeneration", "Slowly recover health.", Rarity.Rare, 5, StatType.HealthRegen, 0.6f);
             var armor = Pow("Armor", "Take less damage from every hit.", Rarity.Common, 5, StatType.Armor, 1f);
             var precision = Pow("Precision", "More critical hits.", Rarity.Common, 5, StatType.CritChance, 0.06f);
-            var brutality = Pow("Brutality", "Critical hits deal even more damage.", Rarity.Rare, 5, StatType.CritDamage, 0.3f);
             Pow("Vampirism", "Heal for a share of the damage you deal.", Rarity.Epic, 4, StatType.Lifesteal, 0.012f);
             Pow("Feather", "Jump again in mid-air. Great for escaping the horde.", Rarity.Rare, 2, StatType.ExtraJumps, 1f);
             var persistence = Pow("Persistence", "Projectiles, puddles and slows last longer.", Rarity.Common, 5, StatType.Duration, 0.12f);
-            Pow("Clover", "Luckier upgrade offers and more crits.", Rarity.Rare, 5, StatType.Luck, 0.15f);
+            var clover = Pow("Clover", "Luckier upgrade offers and more crits.", Rarity.Rare, 5, StatType.Luck, 0.15f);
             Pow("Thorns", "Spiked armor: anything that hits you takes damage back.", Rarity.Common, 5, StatType.Thorns, 0.6f);
-            Pow("Execution", "Weakened enemies are slain outright (not bosses).", Rarity.Rare, 4, StatType.Execute, 0.04f);
             Pow("Phoenix Feather", "When you would go down, rise at 60% HP and blast foes away. 1 per level.", Rarity.Epic, 2,
                 StatType.Revives, 1f, "Phoenix");
 
@@ -391,7 +388,7 @@ namespace MultiBash.EditorTools
                 L("", 18, 0.33f, 1, 6.5f, 0, 0, 0, 3f));
             Evo(boomerang, swift, "TwinMoons", "Twin Moons", "Six glaives fly out and back, shredding both ways.", "#ffe9a0",
                 L("", 44, 0.9f, 6, 1.8f, 0, 1.6f, 26, 7));
-            Evo(meteor, brutality, "Armageddon", "Armageddon", "A rain of six meteors with enormous blasts.", "#ff6a1a",
+            Evo(meteor, clover, "Armageddon", "Armageddon", "A rain of six meteors with enormous blasts.", "#ff6a1a",
                 L("", 95, 1.6f, 6, 5.2f, 0, 0, 0, 14));
             Evo(nova, armor, "AbsoluteZero", "Absolute Zero", "A vast frozen blast that nearly stops everything it touches.", "#dff8ff",
                 L("", 36, 1.3f, 1, 9f, 0, 5f, 0, 10));

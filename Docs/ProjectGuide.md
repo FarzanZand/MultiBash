@@ -9,7 +9,7 @@ Open a game scene (`Assets/_Game/Scenes/Game.unity` or `Volcano.unity`) and sele
 | Object | What it controls | Settings asset |
 |---|---|---|
 | **ProgressionManager** | Run length, team leveling and XP curve, upgrade offers (rerolls, evolve level, treasure luck, Power Surge), enemy toughness (per minute / team level / party size), elites and bosses, the 3 enemy stages, spawn rate and burst size, drops and gem merging, kill combo / FRENZY, downed and revive | `Content/Settings/ProgressionSettings.asset` |
-| **CombatManager** | Hero base stats, global damage / cooldown / area / speed knobs, movement (jump, slide), damage spread, crits, knockback, damage taken and invulnerability, enemy damage, item effects (Thorns, Execution, Phoenix Feather), screen shake, damage numbers, low-HP warning | `Content/Settings/CombatSettings.asset` |
+| **CombatManager** | Hero base stats, global damage / cooldown / area / speed knobs, movement (jump, slide), damage spread, crits, knockback, damage taken and invulnerability, enemy damage, item effects (Thorns, Phoenix Feather), screen shake, damage numbers, low-HP warning | `Content/Settings/CombatSettings.asset` |
 | **GameManager** | Which map this scene is (`map`: waves, music, ambience, intro line, difficulty) | `Content/Maps/*.asset` |
 
 * Every field has a tooltip. Values apply **live while playing**.
