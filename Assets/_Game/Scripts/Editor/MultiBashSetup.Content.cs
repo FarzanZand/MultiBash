@@ -879,7 +879,7 @@ namespace MultiBash.EditorTools
             string Mp = Content + "/Maps";
             Asset<MapDefinition>($"{Mp}/Graveyard.asset", m =>
             {
-                m.displayName = "Haunted Keep";
+                m.displayName = "The Keep";
                 m.description = "Ruined castle grounds full of bones, slimes and old magic. A good first run.";
                 m.sceneName = "Game";
                 m.waves = waves;

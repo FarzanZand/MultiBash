@@ -8,7 +8,7 @@ with plateaus/cliffs/ramps, castle walls, ruins and props, pixel UI (Silkscreen 
 **Run:** 10 minutes of swarms (skeletons, slimes, bats, archers, bomb shrooms, golems; magma slimes and
 fire imps on the volcano). Elites wear crowns and drop chests, three bosses per run, charge shrines,
 10 weapons, 16 powerups, crits, downed/revive co-op.
-**Maps:** *Haunted Keep* (castle ruins) and *Molten Caldera* (volcano with lava rivers that burn).
+**Maps:** *The Keep* (castle ruins) and *Molten Caldera* (volcano with lava rivers that burn).
 The host picks the map in the lobby.
 
 ---

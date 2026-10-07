@@ -249,7 +249,7 @@ def frost_textures():
 
 
 def keep_textures():
-    """Haunted Keep extras: cobbled road and a darker forest floor."""
+    """The Keep extras: cobbled road and a darker forest floor."""
     rng = np.random.default_rng(51)
     road = pixel_tex(64, (124, 116, 102), [((108, 100, 88), 0.3), ((140, 132, 116), 0.16), ((92, 86, 76), 0.08)], 51)
     d = ImageDraw.Draw(road)

@@ -280,7 +280,7 @@ def drums(S, t0, style, bar_i, fill=False, density=1.0, open_hats=False):
 # ----------------------------------------------------------------------------- tracks
 
 def battle_theme():
-    """Haunted Keep: A minor, 132 bpm, ~87 s: intro, verse, chorus, breakdown, bridge, chorus 2, turnaround."""
+    """The Keep: A minor, 132 bpm, ~87 s: intro, verse, chorus, breakdown, bridge, chorus 2, turnaround."""
     S = Song(132, 48)
     b = S.beat
     I = {"Am": [57, 60, 64], "F": [53, 57, 60], "C": [48, 52, 55], "G": [55, 59, 62], "Em": [52, 55, 59],

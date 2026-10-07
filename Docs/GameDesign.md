@@ -169,7 +169,7 @@ Picked at level-up, stack up to 5 times each. All are data-only assets.
 The host picks the map in the lobby (`<` `>` under **Map**); everyone sees the choice. Each map is a
 `MapDefinition` asset (`Content/Maps/`): scene, wave timeline, music, difficulty, lobby preview.
 
-### Haunted Keep (`Game` scene)
+### The Keep (`Game` scene)
 - ~120 x 120 m arena on generated **terrain**: rolling ground, six raised plateaus with steep cliffs and a
   ramp each (enemies scramble up cliffs, so nothing is a safe spot), hills rising outside the arena.
 - A ring of castle walls and towers frames the arena; ruined towers, walls, arches, rune stones,
