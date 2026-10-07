@@ -341,7 +341,6 @@ namespace MultiBash.EditorTools
             Pow("Feather", "Jump again in mid-air. Great for escaping the horde.", Rarity.Rare, 2, StatType.ExtraJumps, 1f);
             var persistence = Pow("Persistence", "Projectiles, puddles and slows last longer.", Rarity.Common, 5, StatType.Duration, 0.12f);
             var clover = Pow("Clover", "Luckier upgrade offers and more crits.", Rarity.Rare, 5, StatType.Luck, 0.15f);
-            Pow("Thorns", "Spiked armor: anything that hits you takes damage back.", Rarity.Common, 5, StatType.Thorns, 0.6f);
             Pow("Phoenix Feather", "When you would go down, rise at 60% HP and blast foes away. 1 per level.", Rarity.Epic, 2,
                 StatType.Revives, 1f, "Phoenix");
 

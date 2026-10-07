@@ -5,7 +5,7 @@ using UnityEngine;
 namespace MultiBash
 {
     /// <summary>
-    /// Smashable pots, crates, sacks, barrels and ice crates scattered over a map (one scene NetworkObject holds them all).
+    /// Smashable pots, crates, barrels and ice crates scattered over a map (one scene NetworkObject holds them all).
     /// Children are the visual props, in order. Walk / slide into one or hit it with any attack to smash it: it bursts
     /// into debris and drops loot (gems, sometimes a health orb, a magnet or even a chest). Smashed props grow back later.
     /// The host decides what breaks and what drops; every peer plays the FX from the replicated break ticks.

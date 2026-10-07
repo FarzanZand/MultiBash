@@ -842,7 +842,6 @@ MODELS = [
     ("Environment", "KnightStatue", knight_statue),
     ("Environment", "Well", well),
     ("Environment", "SupplyCrate", supply_crate),
-    ("Environment", "GrainSack", grain_sack),
     ("Environment", "Urn", urn()),
     ("Environment", "Barrel", barrel),
     # molten caldera

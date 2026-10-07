@@ -236,7 +236,7 @@ namespace MultiBash.EditorTools
                 Place("Brazier", new Vector3(x, 0, 1.8f), 0, 1.1f, deco);
             Place("LanternPost", new Vector3(-2.5f, 0, -1.5f), 0, 1f, deco);
             Place("SupplyCrate", new Vector3(-2.3f, 0, 0.6f), 30, 1.0f, deco);
-            Place("GrainSack", new Vector3(6.0f, 0, 0.2f), -20, 1.1f, deco);
+            Place("SupplyCrate", new Vector3(6.0f, 0, 0.2f), -20, 0.9f, deco);
             Place("Barrel", new Vector3(7.2f, 0, 1.0f), 0, 1f, deco);
 
             new GameObject("MainMenuUI").AddComponent<MainMenuUI>();
@@ -273,7 +273,7 @@ namespace MultiBash.EditorTools
             }
             Place("LanternPost", new Vector3(-1.2f, 0, 3.4f), 0, 1f, deco);
             Place("LanternPost", new Vector3(6.6f, 0, 3.4f), 0, 1f, deco);
-            Place("GrainSack", new Vector3(-1.8f, 0, 2.2f), 20, 1.1f, deco);
+            Place("SupplyCrate", new Vector3(-1.8f, 0, 2.2f), 20, 0.9f, deco);
             Place("Barrel", new Vector3(7.4f, 0, 2.6f), 0, 1f, deco);
             Place("Brazier", new Vector3(8.6f, 0, 4.5f), 0, 1.1f, deco);
 
