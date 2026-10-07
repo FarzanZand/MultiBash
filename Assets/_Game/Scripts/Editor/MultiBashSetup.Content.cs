@@ -494,7 +494,7 @@ namespace MultiBash.EditorTools
                 e.attack = EnemyAttack.Stomp; e.attackDistance = 4f; e.specialCooldown = 4f; e.telegraphTime = 1.05f;
                 e.specialRadius = 4.5f; e.specialDamageMul = 1.5f; e.specialColor = Hex("#5ad8ff"); e.specialSound = Clip("SFX_GolemStomp");
                 e.knockbackResist = 0.85f;
-                e.bossName = "Ancient Golem"; e.bossHealthMultiplier = 160f; e.bossDamageMultiplier = 2f; e.bossScale = 2.4f;
+                e.bossName = "Ancient Golem"; e.bossHealthMultiplier = 95f; e.bossDamageMultiplier = 2f; e.bossScale = 2.4f;
                 e.xpValue = 8; e.healthOrbChance = 0.15f; e.magnetChance = 0.02f;
                 e.hitSound = Clip("SFX_RockHit"); e.deathSound = Clip("SFX_GolemStomp");
                 e.deathColor = Hex("#8e939c");
@@ -626,7 +626,7 @@ namespace MultiBash.EditorTools
                 e.attack = EnemyAttack.Stomp; e.attackDistance = 4f; e.specialCooldown = 4.2f; e.telegraphTime = 1.0f;
                 e.specialRadius = 4.4f; e.specialDamageMul = 1.5f; e.specialColor = Hex("#9ff4ff"); e.specialSound = Clip("SFX_GolemStomp");
                 e.knockbackResist = 0.8f;
-                e.bossName = "Yeti King"; e.bossHealthMultiplier = 170f; e.bossDamageMultiplier = 2.1f; e.bossScale = 2.5f;
+                e.bossName = "Yeti King"; e.bossHealthMultiplier = 95f; e.bossDamageMultiplier = 2.1f; e.bossScale = 2.5f;
                 e.xpValue = 8; e.healthOrbChance = 0.15f; e.magnetChance = 0.02f;
                 e.hitSound = Clip("SFX_YetiHit"); e.deathSound = Clip("SFX_YetiRoar");
                 e.deathColor = Hex("#e8eef2");
@@ -673,7 +673,7 @@ namespace MultiBash.EditorTools
                 e.xpValue = 2; e.healthOrbChance = 0.02f; e.magnetChance = 0.003f;
                 e.splitInto = smallMagma; e.splitCount = 2;
                 e.knockbackResist = 0.35f;
-                e.bossName = "Magma Queen"; e.bossHealthMultiplier = 300f; e.bossDamageMultiplier = 2f; e.bossScale = 3.8f; e.bossSplitCount = 10;
+                e.bossName = "Magma Queen"; e.bossHealthMultiplier = 300f; e.bossDamageMultiplier = 1.7f; e.bossScale = 3.8f; e.bossSplitCount = 10;
                 e.hitSound = Clip("SFX_MagmaHit"); e.deathSound = Clip("SFX_MagmaDeath"); e.moveSound = Clip("SFX_SlimeHop");
                 e.deathColor = Hex("#ff7a1a");
             });
@@ -683,7 +683,7 @@ namespace MultiBash.EditorTools
                 e.maxHealth = 10; e.moveSpeed = 5.2f; e.contactDamage = 5; e.attackInterval = 0.9f; e.radius = 0.38f;
                 e.movement = EnemyMovement.Flyer;
                 e.attack = EnemyAttack.Ranged; e.attackDistance = 9f; e.specialCooldown = 3.6f; e.projectileSpeed = 10f;
-                e.specialDamageMul = 1.3f; e.specialRadius = 0.5f; e.specialColor = Hex("#ff8a1a"); e.specialSound = Clip("SFX_Fireball");
+                e.specialDamageMul = 1.0f; e.specialRadius = 0.5f; e.specialColor = Hex("#ff8a1a"); e.specialSound = Clip("SFX_Fireball");
                 e.xpValue = 2; e.healthOrbChance = 0.012f;
                 e.hitSound = Clip("SFX_ImpCackle"); e.deathSound = Clip("SFX_ImpDeath");
                 e.deathColor = Hex("#ff5a1a");
@@ -805,7 +805,7 @@ namespace MultiBash.EditorTools
                     new() { enemy = brute, startMinute = 5.8f, endMinute = 10f, rateAtStart = 0.08f, rateAtEnd = 0.45f, groupSize = 1, eliteChance = 0.04f },
                     new() { enemy = wraith, startMinute = 6.2f, endMinute = 10f, rateAtStart = 0.2f, rateAtEnd = 1.2f, groupSize = 3, eliteChance = 0.01f },
                     new() { enemy = rabble, startMinute = 4f, endMinute = 10f, rateAtStart = 0.15f, rateAtEnd = 2.2f, groupSize = 7, rampCurve = 1.3f, eliteChance = 0f },
-                    new() { enemy = imp, startMinute = 1.5f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 1.3f, groupSize = 2, eliteChance = 0.01f },
+                    new() { enemy = imp, startMinute = 1.75f, endMinute = 10f, rateAtStart = 0.05f, rateAtEnd = 1.0f, groupSize = 2, eliteChance = 0.01f },
                     new() { enemy = bat, startMinute = 2f, endMinute = 10f, rateAtStart = 0.1f, rateAtEnd = 1.2f, groupSize = 5, eliteChance = 0f },
                     new() { enemy = magma, startMinute = 3f, endMinute = 10f, rateAtStart = 0.06f, rateAtEnd = 0.6f, groupSize = 6, eliteChance = 0f },
                     new() { enemy = shroom, startMinute = 2.75f, endMinute = 10f, rateAtStart = 0.1f, rateAtEnd = 0.9f, groupSize = 1, eliteChance = 0f },
@@ -818,7 +818,7 @@ namespace MultiBash.EditorTools
                     new() { minute = 2.25f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
                     new() { minute = 5.0f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
                     new() { minute = 7.75f, enemy = treasure, count = 1, ring = true, elites = 0, announcement = "A Treasure Slime! Catch it before it escapes!" },
-                    new() { minute = 2.5f, enemy = imp, count = 12, ring = false, elites = 1, announcement = "Imps rain fire from above!" },
+                    new() { minute = 2.5f, enemy = imp, count = 8, ring = false, elites = 1, announcement = "Imps rain fire from above!" },
                     new() { minute = 3.25f, enemy = shroom, count = 14, ring = true, elites = 0, announcement = "Something is ticking..." },
                     new() { minute = 4.25f, enemy = skel, count = 60, ring = true, elites = 2, announcement = "The ashen dead march!" },
                     new() { minute = 5.5f, enemy = magma, boss = true, announcement = "THE MAGMA QUEEN ERUPTS!" },
@@ -903,7 +903,7 @@ namespace MultiBash.EditorTools
                 m.music = Clip("MUS_Volcano");
                 m.accent = Hex("#ff7a2a");
                 m.preview = Sprite(UIDir + "/Sprites/Map_Volcano.png");
-                m.difficulty = 1.1f;
+                m.difficulty = 1.05f;
                 m.intro = "The caldera wakes. Don't touch the lava!";
                 m.ambience = Clip("AMB_Volcano");
                 m.ambienceVolume = 0.38f;

@@ -49,7 +49,7 @@ MonoBehaviour:
   splitCount: 2
   bossName: Magma Queen
   bossHealthMultiplier: 300
-  bossDamageMultiplier: 2
+  bossDamageMultiplier: 1.7
   bossScale: 3.8
   bossSplitCount: 10
   hitSound: {fileID: 8300000, guid: 308f464d63e2dde45a0c224fb59b3ba4, type: 3}

@@ -383,7 +383,7 @@ namespace MultiBash
                         _cc.Velocity = new Vector3(v.x, 0f, v.z);
                         _cc.Jump(true, pad.launch);
                         PadTick = Runner.Tick;
-                        Momentum = true;
+                        Momentum = pad.boost > 1.01f;   // boosting pads also grant the slide-jump speed
                         AirJumps = 0;
                     }
                 }

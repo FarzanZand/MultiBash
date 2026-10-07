@@ -38,7 +38,7 @@ MonoBehaviour:
   specialCooldown: 3.6
   telegraphTime: 0.9
   specialRadius: 0.5
-  specialDamageMul: 1.3
+  specialDamageMul: 1
   projectileSpeed: 10
   specialColor: {r: 1, g: 0.5411765, b: 0.101960786, a: 1}
   specialSound: {fileID: 8300000, guid: aa128aac028fac64e9e592bda4d7e941, type: 3}

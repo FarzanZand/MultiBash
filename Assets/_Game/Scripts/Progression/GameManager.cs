@@ -231,7 +231,7 @@ namespace MultiBash
             float minute = RunTime / 60f;
             int players = Mathf.Max(1, PlayerCharacter.All.Count);
             // all scaling formulas live in ProgressionSettings (time, team level, party size, map difficulty)
-            float hpMul = P.EnemyHealthMultiplier(minute, TeamLevel, players, map != null ? map.difficulty : 1f, def.fodder);
+            float hpMul = P.EnemyHealthMultiplier(minute, TeamLevel, players, map != null ? map.difficulty : 1f, def.fodder, boss);
             float dmgMul = P.EnemyDamageMultiplier(minute) * CombatManager.Settings.enemyDamageMultiplier;
             if (boss) { hpMul *= P.bossHealthMultiplier; dmgMul *= P.bossDamageMultiplier; }
             var rot = Quaternion.Euler(0, Random.Range(0f, 360f), 0);

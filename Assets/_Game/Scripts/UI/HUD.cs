@@ -179,7 +179,7 @@ namespace MultiBash
             _frenzy.horizontalOverflow = HorizontalWrapMode.Overflow;
             _downedText = Outlined(UIKit.Label(_root, "", 54, T.text, new Vector2(0.5f, 0.5f), new Vector2(0, -60), new Vector2(1400, 140), TextAnchor.MiddleCenter, UIFont.Header, false), 3);
 
-            var help = UIKit.Label(_root, "Space jump  |  Shift slide (slide + jump = speed boost!)  |  1/2/3 pick  R reroll  X skip  |  Esc build & menu",
+            var help = UIKit.Label(_root, "Mouse look, wheel zoom  |  Space jump  |  Shift slide (+ jump = speed boost)  |  1/2/3 pick  R reroll  X skip  |  Esc build & menu",
                 22, new Color(1, 1, 1, 0.7f), new Vector2(0, 0), new Vector2(24, 10), new Vector2(1500, 30), TextAnchor.LowerLeft, UIFont.Body, false);
             help.horizontalOverflow = HorizontalWrapMode.Overflow;
             UIKit.Outline(help, 2);
@@ -291,10 +291,10 @@ namespace MultiBash
         {
             _build = UIKit.Panel(_pause, "Build", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900, 880), "Your Build");
             _build.pivot = new Vector2(0.5f, 0.5f);
-            _build.anchoredPosition = new Vector2(370, 0);
+            _build.anchoredPosition = new Vector2(370, -50);
             for (int i = 0; i < PlayerCharacter.MaxWeaponSlots + 6; i++)
             {
-                var row = UIKit.Box(_build, "Row" + i, new Vector2(0.5f, 1), new Vector2(0, -80 - i * 74), new Vector2(850, 70));
+                var row = UIKit.Box(_build, "Row" + i, new Vector2(0.5f, 1), new Vector2(0, -78 - i * 70), new Vector2(850, 68));
                 var ib = UIKit.Box(row, "Icon", new Vector2(0, 0.5f), new Vector2(36, 0), new Vector2(62, 62));
                 UIKit.AddImage(ib, T.slot, Color.white);
                 var icon = UIKit.AddImage(UIKit.Box(ib, "I", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(48, 48)), null, Color.white);
@@ -306,7 +306,7 @@ namespace MultiBash
                 body.verticalOverflow = VerticalWrapMode.Truncate;
                 _buildRows.Add((row, icon, title, body, tag));
             }
-            _buildFooter = UIKit.Label(_build, "", 22, T.accent, new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(770, 30), TextAnchor.MiddleCenter, UIFont.Body);
+            _buildFooter = UIKit.Label(_build, "", 22, T.accent, new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(770, 30), TextAnchor.MiddleCenter, UIFont.Body);
         }
 
         void RefreshBuild()
@@ -404,7 +404,7 @@ namespace MultiBash
                 _resultRows.Add(row);
             }
             _resultsFooter = UIKit.Label(p, "", 27, T.mutedText, new Vector2(0.5f, 0), new Vector2(0, 116), new Vector2(940, 34));
-            _resultsLobby = UIKit.Button(p, "Back to Lobby", new Vector2(0.5f, 0), new Vector2(-190, 30), new Vector2(340, 74), () => GameManager.Instance?.ReturnToLobbyNow(), T.buttonBlue, 40);
+            _resultsLobby = UIKit.Button(p, "Back to Lobby", new Vector2(0.5f, 0), new Vector2(-190, 30), new Vector2(340, 74), () => GameManager.Instance?.ReturnToLobbyNow(), T.buttonBlue, 30);
             UIKit.Button(p, "Leave Party", new Vector2(0.5f, 0), new Vector2(190, 30), new Vector2(340, 74), () => GameLauncher.Instance?.Leave(), T.buttonRed, 40);
             _results.gameObject.SetActive(false);
         }
@@ -630,7 +630,8 @@ namespace MultiBash
 
         void UpdateLevelUp(PlayerCharacter me, Keyboard kb)
         {
-            bool show = me.PendingLevelUps > 0 && me.Choices.Get(0) != 0 && !me.Dead;
+            // hidden while the pause / build screen is up (it would show through it); picks wait until you resume
+            bool show = me.PendingLevelUps > 0 && me.Choices.Get(0) != 0 && !me.Dead && !_pause.gameObject.activeSelf;
             _levelUp.gameObject.SetActive(show);
             if (!show) return;
             string title = me.OfferIsTreasure ? "<color=#ffd24a>Treasure!</color>" : "Upgrade Offers";

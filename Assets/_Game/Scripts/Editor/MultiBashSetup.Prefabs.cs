@@ -154,7 +154,7 @@ namespace MultiBash.EditorTools
             Prop("KnightStatue", 2.4f, PropCollider.Box);
             Prop("Well", 1.1f, PropCollider.Capsule);
             Prop("DragonSkull", 5.5f, PropCollider.Mesh, withLight: true, lightHeight: 3f, lightColor: new Color(1f, 0.45f, 0.15f), lightRange: 16f, lightIntensity: 4f);
-            Prop("DragonRibcage", 0f, PropCollider.Mesh);
+            Prop("DragonRibcage", 0f, PropCollider.None);   // walk-through arch over the lava bridge (solid ribs pushed players into the lava)
             Prop("DragonClaw", 2.2f, PropCollider.Mesh);
             Prop("DwarfForge", 3f, PropCollider.Box, withLight: true, lightHeight: 1.4f, lightColor: new Color(1f, 0.55f, 0.2f), lightRange: 12f, lightIntensity: 5f);
             Prop("GiantHammer", 2.2f, PropCollider.Mesh, withLight: true, lightHeight: 1.5f, lightColor: new Color(1f, 0.45f, 0.15f), lightRange: 9f, lightIntensity: 3f);

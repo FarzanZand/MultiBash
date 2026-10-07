@@ -272,7 +272,10 @@ namespace MultiBash
                 foreach (var w in db.weapons)
                     if (w.evolveWith == p && w.evolvesInto != null && pc.WeaponLevelOf(db.IndexOf(w)) > 0)
                     {
-                        Add($"<color=#e2c8ff>Evolves your {w.displayName}</color>");
+                        int lv = pc.WeaponLevelOf(db.IndexOf(w));
+                        Add(lv >= w.EvolveAt
+                            ? $"<color=#e2c8ff>Unlocks {w.evolvesInto.displayName}!</color>"
+                            : $"<color=#e2c8ff>Key to {w.evolvesInto.displayName} ({w.displayName} LVL {w.EvolveAt})</color>");
                         break;
                     }
                 return sb.ToString();

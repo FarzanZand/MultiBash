@@ -48,7 +48,7 @@ MonoBehaviour:
   splitInto: {fileID: 0}
   splitCount: 0
   bossName: Ancient Golem
-  bossHealthMultiplier: 160
+  bossHealthMultiplier: 95
   bossDamageMultiplier: 2
   bossScale: 2.4
   bossSplitCount: 0

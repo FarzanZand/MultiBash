@@ -70,10 +70,10 @@ MonoBehaviour:
     groupSize: 7
     eliteChance: 0
   - enemy: {fileID: 11400000, guid: 9814521879f445b41b580bc620c92602, type: 2}
-    startMinute: 1.5
+    startMinute: 1.75
     endMinute: 10
-    rateAtStart: 0.06
-    rateAtEnd: 1.3
+    rateAtStart: 0.05
+    rateAtEnd: 1
     rampCurve: 1.6
     groupSize: 2
     eliteChance: 0.01
@@ -148,7 +148,7 @@ MonoBehaviour:
     boss: 0
   - minute: 2.5
     enemy: {fileID: 11400000, guid: 9814521879f445b41b580bc620c92602, type: 2}
-    count: 12
+    count: 8
     ring: 0
     elites: 1
     announcement: Imps rain fire from above!

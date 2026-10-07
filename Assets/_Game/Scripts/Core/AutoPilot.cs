@@ -24,9 +24,19 @@ namespace MultiBash
                 if (a == "-autopilot") Enabled = true;
         }
 
+        static float _stuck;
+
         void Update()
         {
             PerfStats.Frames++;
+            {
+                var lp = PlayerCharacter.Local;
+                if (Enabled && lp != null && lp.Object != null && lp.Object.IsValid && lp.IsAlive)
+                {
+                    var v = lp.Velocity; v.y = 0;
+                    if (v.magnitude < 1.5f) _stuck += Time.deltaTime;
+                }
+            }
             var kb = Keyboard.current;
             bool dev = Application.isEditor || Debug.isDebugBuild;
             if (dev && kb != null && kb.f8Key.wasPressedThisFrame) Enabled = !Enabled;
@@ -83,10 +93,13 @@ namespace MultiBash
             var me = PlayerCharacter.Local;
             string line = $"t={gm.RunTime:0} state={gm.State} lvl={gm.TeamLevel} xp={gm.TeamXP}/{gm.XPToNext} enemies={EnemyRegistry.All.Count} gems={Pickup.All.Count} kills={gm.TotalKills} fps={1f / Mathf.Max(0.0001f, Time.smoothDeltaTime):0}";
             if (me != null && me.Object != null && me.Object.IsValid)
-                line += $" hp={me.Health:0}/{me.MaxHealth:0} downed={me.Downed} weapons={me.WeaponCount} powerups={me.PowerupCount} dmgHits={PlayerCharacter.DamageFromHits:0} dmgLava={PlayerCharacter.DamageFromLava:0} hitsPerKill={(Enemy.RegularKills > 0 ? Enemy.RegularHits / (float)Enemy.RegularKills : 0):0.00}";
+                line += $" hp={me.Health:0}/{me.MaxHealth:0} downed={me.Downed} weapons={me.WeaponCount} powerups={me.PowerupCount} dmgHits={PlayerCharacter.DamageFromHits:0} dmgLava={PlayerCharacter.DamageFromLava:0} hitsPerKill={(Enemy.RegularKills > 0 ? Enemy.RegularHits / (float)Enemy.RegularKills : 0):0.00} pos={me.transform.position.x:0},{me.transform.position.z:0} stuck={_stuck:0.0}s";
                 Enemy.RegularHits = 0; Enemy.RegularKills = 0;
+            foreach (var e in EnemyRegistry.All)
+                if (e != null && e.Boss && e.IsAlive) line += $" BOSS {e.DisplayName} {e.Health / Mathf.Max(1f, e.MaxHealth) * 100f:0}%";
             line += " | " + PerfStats.Report();
             Telemetry.AppendLine(line);
+            _stuck = 0f;
             Debug.Log("[Telemetry] " + line);
         }
 

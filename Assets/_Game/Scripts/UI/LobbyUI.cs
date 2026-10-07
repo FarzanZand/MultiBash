@@ -32,6 +32,8 @@ namespace MultiBash
             public Text name, sub;
         }
 
+        Button _copy;
+
         void Start()
         {
             LocalInput.Blocked = false;
@@ -98,7 +100,7 @@ namespace MultiBash
             var codeBox = UIKit.Panel(root, "Code", new Vector2(1, 1), new Vector2(-40, -20), new Vector2(620, 116));
             UIKit.Label(codeBox, "Room Code", 27, T.mutedText, new Vector2(0, 1), new Vector2(26, -14), new Vector2(300, 30), TextAnchor.UpperLeft);
             _code = UIKit.Label(codeBox, "-----", 40, T.text, new Vector2(0, 0), new Vector2(26, 16), new Vector2(380, 54), TextAnchor.LowerLeft, UIFont.Number);
-            UIKit.Button(codeBox, "Copy", new Vector2(1, 0.5f), new Vector2(-22, 0), new Vector2(150, 62), () =>
+            _copy = UIKit.Button(codeBox, "Copy", new Vector2(1, 0.5f), new Vector2(-22, 0), new Vector2(150, 62), () =>
             {
                 GUIUtility.systemCopyBuffer = GameLauncher.Instance != null ? GameLauncher.Instance.RoomCode : "";
                 _status.text = "Room code copied!";
@@ -223,6 +225,7 @@ namespace MultiBash
             var db = GameDatabase.Instance;
             var T = UIKit.T;
             _code.text = launcher.RoomCode;
+            if (_copy != null) _copy.gameObject.SetActive(launcher.RoomCode != "SOLO");   // nothing to share in a solo run
 
             var players = new List<PlayerData>(PlayerData.All);
             players.RemoveAll(p => p == null || p.Object == null || !p.Object.IsValid);

@@ -80,10 +80,10 @@ namespace MultiBash
                     27, T.text, new Vector2(0.5f, 0), new Vector2(0, 20), new Vector2(580, 110), TextAnchor.MiddleLeft);
             }
 
-            var help = UIKit.Label(root, "WASD move  |  Mouse camera  |  Space jump  |  Shift slide  |  1/2/3 pick upgrade  |  R reroll  |  Esc build & menu",
-                27, T.text, new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(1700, 40), TextAnchor.MiddleCenter, UIFont.Body, false);
+            var help = UIKit.Label(root, "WASD move  |  Mouse look, wheel zoom  |  Space jump  |  Shift slide  |  1/2/3 pick  |  R reroll  |  Esc menu",
+                24, T.text, new Vector2(0.5f, 0), new Vector2(-60, 18), new Vector2(1500, 40), TextAnchor.MiddleCenter, UIFont.Body, false);
             UIKit.Outline(help, 2);
-            var ver = UIKit.Label(root, "version 0.3", 24, T.text, new Vector2(1, 0), new Vector2(-20, 14), new Vector2(300, 30), TextAnchor.LowerRight, UIFont.Number, false);
+            var ver = UIKit.Label(root, "version 0.4", 24, T.text, new Vector2(1, 0), new Vector2(-20, 14), new Vector2(300, 30), TextAnchor.LowerRight, UIFont.Number, false);
             UIKit.Outline(ver, 2);
         }
 

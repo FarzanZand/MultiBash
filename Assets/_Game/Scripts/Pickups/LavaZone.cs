@@ -31,8 +31,10 @@ namespace MultiBash
             if (Mathf.Approximately(Level, level)) Level = float.NaN;
         }
 
-        /// <summary>True if a point (feet position) is standing in lava.</summary>
-        public static bool InLava(Vector3 feet) => !float.IsNaN(Level) && feet.y < Level + 0.3f;
+        /// <summary>True if a point (feet position) is standing in lava.
+        /// Only where the ground actually dips under the lava surface: dry banks next to a river never burn.</summary>
+        public static bool InLava(Vector3 feet) =>
+            !float.IsNaN(Level) && feet.y < Level + 0.3f && Ground.TerrainHeight(feet) < Level - 0.05f;
 
         void Update()
         {

@@ -60,6 +60,9 @@ namespace MultiBash
         public float healthPerExtraPlayer = 0.2f;
         [Tooltip("Enemy contact/attack damage +X per minute.")]
         public float damagePerMinute = 0.08f;
+        [Tooltip("Early-game mercy: enemy damage starts at this fraction and ramps to full by 'earlyGraceMinutes'.")]
+        [Range(0.3f, 1f)] public float earlyDamageFraction = 0.8f;
+        public float earlyGraceMinutes = 4f;
         [Tooltip("Enemy move speed +X per minute, capped below.")]
         public float speedPerMinute = 0.05f;
         public float maxSpeedBonus = 0.35f;
@@ -71,6 +74,8 @@ namespace MultiBash
         [Tooltip("Multiplies every boss's HP on top of its own boss multiplier.")]
         public float bossHealthMultiplier = 1f;
         public float bossDamageMultiplier = 1f;
+        [Tooltip("How much of the team-level HP scaling bosses get (0 = none, 1 = like regular enemies). Below 1 keeps late bosses killable.")]
+        [Range(0f, 1f)] public float bossLevelScaling = 0.6f;
 
         [Header("Enemy stages (new looks, gear and enemy types)")]
         [Tooltip("Run fraction where enemies switch to their stage 2 look (helmets, steel tint).")]
@@ -127,16 +132,18 @@ namespace MultiBash
         }
 
         /// <summary>Enemy HP multiplier for something spawning now (before elite / boss / stage bonuses).</summary>
-        public float EnemyHealthMultiplier(float minute, int teamLevel, int players, float mapDifficulty, bool fodder)
+        public float EnemyHealthMultiplier(float minute, int teamLevel, int players, float mapDifficulty, bool fodder, bool boss = false)
         {
             float L = Mathf.Max(0, teamLevel - 1);
             float levelMul = 1f + healthPerTeamLevel * L + healthPerTeamLevelSquared * L * L;
             if (fodder) levelMul = 1f + (levelMul - 1f) * fodderLevelScaling;
+            if (boss) levelMul = 1f + (levelMul - 1f) * bossLevelScaling;
             float timeMul = fodder ? 1f : 1f + healthPerMinute * minute + healthPerMinuteSquared * minute * minute;
             return timeMul * levelMul * (1f + healthPerExtraPlayer * (players - 1)) * mapDifficulty;
         }
 
-        public float EnemyDamageMultiplier(float minute) => 1f + damagePerMinute * minute;
+        public float EnemyDamageMultiplier(float minute) =>
+            (1f + damagePerMinute * minute) * Mathf.Lerp(earlyDamageFraction, 1f, Mathf.Clamp01(minute / Mathf.Max(0.01f, earlyGraceMinutes)));
 
         public float EnemySpeedMultiplier(float minute) => 1f + Mathf.Min(minute * speedPerMinute, maxSpeedBonus);
 

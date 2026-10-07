@@ -210,7 +210,7 @@ namespace MultiBash.EditorTools
 
         static Transform _padRoot;
 
-        static void MakePad(Dresser d, string model, Vector3 p, float launch, Color color, float radius = 1.4f, float scale = 1f)
+        static void MakePad(Dresser d, string model, Vector3 p, float launch, Color color, float radius = 1.4f, float scale = 1f, float boost = 1.6f)
         {
             if (_padRoot == null) _padRoot = new GameObject("JumpPads").transform;
             p.y = d.H(p) - 0.05f;
@@ -222,6 +222,7 @@ namespace MultiBash.EditorTools
             m.transform.localScale = Vector3.one * scale;
             var pad = go.AddComponent<JumpPad>();
             pad.launch = launch;
+            pad.boost = boost;
             pad.color = color;
             pad.radius = radius * scale;
             pad.sound = Clip("SFX_Bounce");

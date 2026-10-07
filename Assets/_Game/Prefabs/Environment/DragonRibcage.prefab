@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5442544932411249669
+--- !u!1 &5557419928486514
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,7 +8,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1047048154167855583}
+  - component: {fileID: 2019842597049275579}
   m_Layer: 8
   m_Name: DragonRibcage
   m_TagString: Untagged
@@ -16,29 +16,29 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
   m_IsActive: 1
---- !u!4 &1047048154167855583
+--- !u!4 &2019842597049275579
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5442544932411249669}
+  m_GameObject: {fileID: 5557419928486514}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6956150876942877194}
+  - {fileID: 5029022373985917044}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &7422933993312396769
+--- !u!1001 &4773837909689204639
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1047048154167855583}
+    m_TransformParent: {fileID: 2019842597049275579}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: e4c7f3bb5e748bb42a51611b4e348c6e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -103,40 +103,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3743993344710040121, guid: e4c7f3bb5e748bb42a51611b4e348c6e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 7128998111951438468}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e4c7f3bb5e748bb42a51611b4e348c6e, type: 3}
---- !u!1 &6122319609108430808 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3743993344710040121, guid: e4c7f3bb5e748bb42a51611b4e348c6e, type: 3}
-  m_PrefabInstance: {fileID: 7422933993312396769}
-  m_PrefabAsset: {fileID: 0}
---- !u!64 &7128998111951438468
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6122319609108430808}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -5523277661179574252, guid: e4c7f3bb5e748bb42a51611b4e348c6e, type: 3}
---- !u!4 &6956150876942877194 stripped
+--- !u!4 &5029022373985917044 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e4c7f3bb5e748bb42a51611b4e348c6e, type: 3}
-  m_PrefabInstance: {fileID: 7422933993312396769}
+  m_PrefabInstance: {fileID: 4773837909689204639}
   m_PrefabAsset: {fileID: 0}

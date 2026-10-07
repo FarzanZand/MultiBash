@@ -300,7 +300,9 @@ namespace MultiBash
 
             // contact attack
             _attackTimer -= dt;
-            if (target != null && ContactDamage > 0f && _attackTimer <= 0f && dist <= Radius + 0.45f + Def.attackRange
+            // hoppers only hurt when they're down (on landing / resting), not while sailing over your head
+            bool airborne = Def.movement == EnemyMovement.Hopper && _hopping && y > 0.4f;
+            if (target != null && ContactDamage > 0f && _attackTimer <= 0f && !airborne && dist <= Radius + 0.45f + Def.attackRange
                 && Mathf.Abs(target.transform.position.y - pos.y) < 1.7f + y)
             {
                 _attackTimer = Def.attackInterval;

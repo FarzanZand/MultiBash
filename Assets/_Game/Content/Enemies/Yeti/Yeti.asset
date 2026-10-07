@@ -48,7 +48,7 @@ MonoBehaviour:
   splitInto: {fileID: 0}
   splitCount: 0
   bossName: Yeti King
-  bossHealthMultiplier: 170
+  bossHealthMultiplier: 95
   bossDamageMultiplier: 2.1
   bossScale: 2.5
   bossSplitCount: 0

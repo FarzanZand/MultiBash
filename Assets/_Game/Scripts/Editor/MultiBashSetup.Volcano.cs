@@ -263,8 +263,36 @@ namespace MultiBash.EditorTools
             MakeBreakables(d, new[] { ("MagmaUrn", new Color(0.35f, 0.3f, 0.3f), 1.1f), ("Urn", new Color(0.8f, 0.45f, 0.25f), 1.1f), ("Barrel", new Color(0.55f, 0.36f, 0.2f), 1.0f) },
                 44, new[] { new Vector2(-14, -28), new Vector2(34, -10), new Vector2(-34, 10), new Vector2(20, 40), new Vector2(20, -20), new Vector2(-20, 18) }, 0.75f);
             var steam = new Color(1f, 0.7f, 0.35f);
-            foreach (var p in new[] { new Vector3(20, 0, 2), new Vector3(-6, 0, -26), new Vector3(-32, 0, 34), new Vector3(34, 0, 34), new Vector3(-36, 0, -12), new Vector3(16, 0, -40) })
-                if (H(p) > LavaLevel + 0.6f) MakePad(d, "SteamVent", p, 21f, steam, 1.4f, 1.1f);
+            // a pad launch carries you ~15 m: only put vents where no lava is in reach, so they never fling you into it
+            bool LavaNear(Vector3 c, float r)
+            {
+                for (float rr = 0f; rr <= r; rr += 2f)
+                    for (int k = 0; k < 16; k++)
+                    {
+                        var q = c + Quaternion.Euler(0, k * 22.5f, 0) * Vector3.forward * rr;
+                        if (LavaMask(q.x, q.z, half) > 0.05f) return true;
+                    }
+                return false;
+            }
+            int pads = 0;
+            var padSpots = new List<Vector3>();
+            for (int gz = -4; gz <= 4; gz++)
+                for (int gx = -4; gx <= 4; gx++)
+                {
+                    var p = new Vector3(gx * 12f + (gz & 1) * 6f, 0, gz * 12f);
+                    if (new Vector2(p.x, p.z).magnitude < 12f || Mathf.Abs(p.x) > half - 6f || Mathf.Abs(p.z) > half - 6f) continue;
+                    if (LavaNear(p, 14f) || !d.Free(p, 2f) || d.Steep(p) > 15f) continue;
+                    bool spaced = true;
+                    foreach (var o in padSpots) if ((o - p).magnitude < 20f) spaced = false;
+                    if (!spaced) continue;
+                    padSpots.Add(p);
+                }
+            foreach (var p in padSpots)
+                {
+                    if (pads >= 6) break;
+                    MakePad(d, "SteamVent", p, 19f, steam, 1.4f, 1.1f, boost: 1f);   // no speed boost near lava
+                    pads++;
+                }
 
             // stage 2: the mountain rumbles; stage 3: eruption (red sky, ember storm)
             AddMoods(sun,
