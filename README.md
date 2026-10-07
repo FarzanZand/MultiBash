@@ -59,8 +59,13 @@ MultiBash.exe -name Amy -character 0 -join K7QX2-eu
 ### Make a build
 *File ▸ Build Profiles ▸ Windows ▸ Build* → choose `Builds/Windows`. Scenes are already in the build list (MainMenu, Lobby, Game).
 
-### Photon App ID
-Already set in *Tools ▸ Fusion ▸ Realtime Settings ▸ App Id Fusion*. Your friend does **not** need an account; the App ID is inside the build.
+### Photon Fusion SDK and App ID (not in this repo)
+The Photon Fusion 2 SDK (`Assets/Photon/`) and the App ID are not committed. To open the project from a fresh clone:
+1. Import **Photon Fusion 2** (Unity Asset Store or [photonengine.com](https://www.photonengine.com/fusion)) into the project. It lands in `Assets/Photon/`.
+2. Create a free Fusion app in the Photon dashboard and paste its App ID in *Tools ▸ Fusion ▸ Realtime Settings ▸ App Id Fusion*.
+3. Run *MultiBash ▸ Setup ▸ Build Everything*.
+
+Players of a build do **not** need an account: the App ID is baked into the build.
 
 ---
 

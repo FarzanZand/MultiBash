@@ -71,3 +71,7 @@ Thumbs.db
 # Unity crash-recovery scene backups
 /[Aa]ssets/_Recovery/
 /[Aa]ssets/_Recovery.meta
+
+# Photon Fusion SDK + App ID: third-party, not redistributed (import it yourself, see README)
+/[Aa]ssets/Photon/
+/[Aa]ssets/Photon.meta
