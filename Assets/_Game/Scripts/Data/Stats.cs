@@ -27,8 +27,6 @@ namespace MultiBash
         CritDamage,       // multiplier on crit (2 = double)
         Lifesteal,        // fraction of damage dealt returned as HP (0.02 = 2%)
         ExtraJumps,       // mid-air jumps
-        Thorns,           // enemies that hit you take this multiple of their hit back
-        Execute,          // non-boss enemies below this fraction of their HP die instantly (0.05 = 5%)
         Revives,          // self-revives per run (Phoenix Feather)
     }
 
@@ -55,7 +53,7 @@ namespace MultiBash
         public static bool IsMultiplier(StatType s) =>
             s is StatType.Damage or StatType.Area or StatType.Cooldown or StatType.ProjectileSpeed
                 or StatType.Duration or StatType.XPGain or StatType.Luck or StatType.CritChance
-                or StatType.CritDamage or StatType.Lifesteal or StatType.Thorns or StatType.Execute;
+                or StatType.CritDamage or StatType.Lifesteal;
 
         public static string Describe(StatType s, float v)
         {
@@ -71,8 +69,6 @@ namespace MultiBash
                 StatType.PickupRadius => $"{sign}{v:0.#}m pickup radius",
                 StatType.ExtraJumps => $"{sign}{v:0} mid-air jump",
                 StatType.Lifesteal => $"{sign}{v * 100f:0.#}% lifesteal",
-                StatType.Thorns => $"{sign}{v * 100f:0}% damage reflected",
-                StatType.Execute => $"execute below {v * 100f:0}% HP",
                 StatType.Revives => $"{sign}{v:0} self-revive",
                 _ => $"{sign}{v * 100f:0}% {Nice(s)}",
             };
@@ -112,8 +108,6 @@ namespace MultiBash
         public float CritDamage => Mathf.Max(CombatManager.Settings.minCritMultiplier, _v[(int)StatType.CritDamage]);
         public float Lifesteal => _v[(int)StatType.Lifesteal];
         public int ExtraJumps => Mathf.RoundToInt(_v[(int)StatType.ExtraJumps]);
-        public float Thorns => _v[(int)StatType.Thorns];
-        public float Execute => Mathf.Min(CombatManager.Settings.executeCap, _v[(int)StatType.Execute]);
         public int Revives => Mathf.RoundToInt(_v[(int)StatType.Revives]);
 
         public void Clear() => Array.Clear(_v, 0, _v.Length);

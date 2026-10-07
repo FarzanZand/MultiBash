@@ -514,7 +514,7 @@ namespace MultiBash
             }
         }
 
-        /// <summary>Critical hit flair: a golden star burst (bigger with Brutality's big crits).</summary>
+        /// <summary>Critical hit flair: a golden star burst (bigger for bigger crits).</summary>
         float _critBudget = 20f, _critTime;
 
         public void CritBurst(Vector3 pos, float power)
@@ -525,13 +525,6 @@ namespace MultiBash
             if (_critBudget < 1f) return;
             _critBudget -= 1f;
             Burst(pos, new Color(1f, 0.85f, 0.25f), Mathf.RoundToInt(4 + 3 * power), 6f + 2f * power, 0.14f, 0.28f, 0f, true);
-        }
-
-        /// <summary>Execution: a red skull flash where an enemy was finished off.</summary>
-        public void ExecuteBurst(Vector3 pos)
-        {
-            LightPillar(pos, new Color(1f, 0.2f, 0.15f), 4f, 0.4f);
-            Burst(pos + Vector3.up * 1f, new Color(1f, 0.25f, 0.2f), 14, 6f, 0.2f, 0.45f, 2f, true);
         }
 
         public void Nova(Vector3 center, float radius, Color color)

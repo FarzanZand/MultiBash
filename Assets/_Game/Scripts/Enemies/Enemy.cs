@@ -307,10 +307,7 @@ namespace MultiBash
             {
                 _attackTimer = Def.attackInterval;
                 AttackTick = Runner.Tick;
-                float before = target.Health;
                 target.TakeDamage(ContactDamage);
-                if (target.Health < before) target.Reflect(this, ContactDamage);
-                if (!IsAlive) return;
             }
 
             // special attacks
@@ -397,13 +394,6 @@ namespace MultiBash
             if (WeaponSystem.PendingCrit) CritCount++;
             WeaponSystem.PendingCrit = false;
             Health -= amount;
-            // Execution tome: finish off weakened (non-boss) enemies
-            if (source != null && !Boss && Health > 0f && Health < MaxHealth * source.Stats.Execute)
-            {
-                amount += Health;
-                Health = 0f;
-                GameManager.Instance?.Rpc_Execute(transform.position);
-            }
             if (source != null && source.Data != null) source.Data.DamageDealt += amount;
             if (source != null)
             {

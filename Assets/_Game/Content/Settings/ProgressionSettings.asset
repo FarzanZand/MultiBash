@@ -37,6 +37,8 @@ MonoBehaviour:
   fodderLevelScaling: 0.35
   healthPerExtraPlayer: 0.2
   damagePerMinute: 0.08
+  earlyDamageFraction: 0.8
+  earlyGraceMinutes: 4
   speedPerMinute: 0.05
   maxSpeedBonus: 0.35
   eliteHealthMultiplier: 8
@@ -44,6 +46,7 @@ MonoBehaviour:
   eliteScale: 1.8
   bossHealthMultiplier: 1
   bossDamageMultiplier: 1
+  bossLevelScaling: 0.6
   stage2At: 0.36
   stage3At: 0.63
   stageBonus: 0.1

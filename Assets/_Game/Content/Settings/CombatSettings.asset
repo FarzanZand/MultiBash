@@ -56,8 +56,6 @@ MonoBehaviour:
   minDamageTaken: 1
   hurtInvulnerability: 0.33
   enemyDamageMultiplier: 1
-  thornsFlat: 4
-  executeCap: 0.3
   phoenixHealPercent: 0.6
   phoenixBlastRadius: 6
   phoenixBlastDamage: 40

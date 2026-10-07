@@ -259,8 +259,6 @@ namespace MultiBash
                         StatType.CritChance => "Crit Chance",
                         StatType.CritDamage => "Crit Damage",
                         StatType.ExtraJumps => "Air Jumps",
-                        StatType.Thorns => "Thorns",
-                        StatType.Execute => "Execute",
                         StatType.Revives => "Self-Revives",
                         _ => m.stat.ToString(),
                     };

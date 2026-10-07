@@ -5,7 +5,7 @@ namespace MultiBash
 {
     /// <summary>
     /// Everything about how COMBAT feels: hero base stats and movement, global damage / cooldown / area knobs,
-    /// crits and knockback, how hard enemies hit, item effects (Thorns, Phoenix Feather...) and screen feel.
+    /// crits and knockback, how hard enemies hit, item effects (Phoenix Feather...) and screen feel.
     /// Edit it on the CombatManager object in a game scene (or this asset: Content/Settings/CombatSettings).
     /// Values are read live; the host's values are the ones that count for damage.
     /// </summary>
@@ -62,10 +62,6 @@ namespace MultiBash
         public float enemyDamageMultiplier = 1f;
 
         [Header("Items")]
-        [Tooltip("Thorns: flat damage added to every reflected hit.")]
-        public float thornsFlat = 4f;
-        [Tooltip("Execution can never go above this share of an enemy's HP.")]
-        [Range(0f, 1f)] public float executeCap = 0.3f;
         [Tooltip("Phoenix Feather: HP you rise with, blast radius and damage (+ share of your max HP).")]
         [Range(0f, 1f)] public float phoenixHealPercent = 0.6f;
         public float phoenixBlastRadius = 6f;

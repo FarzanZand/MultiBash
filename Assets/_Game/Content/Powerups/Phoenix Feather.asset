@@ -19,5 +19,5 @@ MonoBehaviour:
   rarity: 2
   maxLevel: 2
   perLevel:
-  - stat: 19
+  - stat: 17
     value: 1

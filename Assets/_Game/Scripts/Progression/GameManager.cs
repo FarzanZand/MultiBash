@@ -332,14 +332,6 @@ namespace MultiBash
             if (me != null && (me.transform.position - pos).sqrMagnitude < (radius + 8f) * (radius + 8f)) CameraRig.Instance?.Shake(explosion ? 0.45f : 0.35f);
         }
 
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]
-        public void Rpc_Execute(Vector3 pos)
-        {
-            FxManager.Instance?.ExecuteBurst(pos);
-            var lib = AudioManager.Lib;
-            if (lib != null) AudioManager.Play(lib.crit, pos, 0.4f, 0.55f);
-        }
-
         /// <summary>A big horde arrives: a rumble for everyone.</summary>
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         public void Rpc_Horde(int count)

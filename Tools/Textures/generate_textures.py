@@ -163,7 +163,6 @@ def terrain_textures():
     save(moss, "Art", "Textures", "T_TerrainMoss.png")
 
 
-
 def volcano_textures():
     """Volcano level: basalt ground, ash, magma crust, dark cliff and the animated lava surface."""
     rng = np.random.default_rng(21)
@@ -667,14 +666,6 @@ def g_multishot(d):
         d.polygon(head, fill=(220, 230, 240, 255), outline=DARK)
 
 
-def g_magnet(d):
-    d.arc([24, 20, 104, 100], 180, 360, fill=hexrgb("#d83a3a"), width=20)
-    d.rectangle([24, 58, 44, 100], fill=hexrgb("#d83a3a"))
-    d.rectangle([84, 58, 104, 100], fill=hexrgb("#d83a3a"))
-    d.rectangle([24, 92, 44, 112], fill=(220, 225, 230, 255))
-    d.rectangle([84, 92, 104, 112], fill=(220, 225, 230, 255))
-
-
 def g_star(d):
     pts = []
     for i in range(10):
@@ -739,16 +730,6 @@ def g_crosshair(d):
     d.rectangle([88, 60, 118, 68], fill=W)
 
 
-def g_burst(d):
-    pts = []
-    for i in range(16):
-        r = 54 if i % 2 == 0 else 24
-        a = math.radians(i * 22.5)
-        pts.append((64 + math.cos(a) * r, 64 + math.sin(a) * r))
-    d.polygon(pts, fill=hexrgb("#ff5a3a"), outline=DARK)
-    d.ellipse([48, 48, 80, 80], fill=hexrgb("#ffd23a"))
-
-
 def g_drop(d):
     d.polygon([(64, 12), (100, 70), (28, 70)], fill=hexrgb("#c8102e"), outline=DARK)
     d.ellipse([28, 44, 100, 112], fill=hexrgb("#c8102e"), outline=DARK, width=3)
@@ -773,28 +754,6 @@ def g_clover(d):
     for (x, y) in ((40, 22), (68, 22), (40, 50), (68, 50)):
         d.ellipse([x - 4, y + 4, x + 28, y + 36], fill=g, outline=DARK, width=3)
     d.line([(64, 80), (80, 114)], fill=hexrgb("#2a8a4a"), width=7)
-
-
-def g_thorns(d):
-    pts = []
-    for i in range(20):
-        r = 56 if i % 2 == 0 else 38
-        a = math.radians(i * 18)
-        pts.append((64 + math.cos(a) * r, 64 + math.sin(a) * r))
-    d.polygon(pts, fill=hexrgb("#9aa4b4"), outline=DARK)
-    d.ellipse([36, 36, 92, 92], fill=hexrgb("#5c6678"), outline=DARK, width=3)
-    d.polygon([(64, 42), (84, 52), (80, 78), (64, 88), (48, 78), (44, 52)], fill=hexrgb("#c8d0dc"), outline=DARK)
-
-
-def g_execute(d):
-    d.ellipse([30, 20, 98, 86], fill=(236, 230, 214, 255), outline=DARK, width=3)
-    d.rectangle([46, 78, 82, 104], fill=(236, 230, 214, 255), outline=DARK, width=3)
-    d.ellipse([42, 44, 60, 62], fill=DARK)
-    d.ellipse([68, 44, 86, 62], fill=DARK)
-    d.polygon([(64, 64), (58, 76), (70, 76)], fill=DARK)
-    for x in (54, 64, 74):
-        d.line([(x, 86), (x, 104)], fill=DARK, width=3)
-    d.polygon([(8, 116), (18, 100), (112, 18), (120, 26), (30, 112)], fill=hexrgb("#ff4a3a"), outline=DARK)
 
 
 def g_phoenix(d):
@@ -844,7 +803,6 @@ ICONS = {
     ("Weapons", "Icon_FrostNova"): (("#f0d070", "#4c3a10"), g_snowflake),
     ("Weapons", "Icon_SpiritDaggers"): (("#f0d070", "#4c3a10"), g_dagger),
     ("Powerups", "Icon_Precision"): (("#f0d070", "#4c3a10"), g_crosshair),
-    ("Powerups", "Icon_Brutality"): (("#f0d070", "#4c3a10"), g_burst),
     ("Powerups", "Icon_Vampirism"): (("#f0d070", "#4c3a10"), g_drop),
     ("Powerups", "Icon_Feather"): (("#f0d070", "#4c3a10"), g_feather),
     ("Powerups", "Icon_Persistence"): (("#f0d070", "#4c3a10"), g_infinity),
@@ -855,14 +813,11 @@ ICONS = {
     ("Powerups", "Icon_Haste"): (("#f0c050", "#4c3810"), g_hourglass),
     ("Powerups", "Icon_Expanse"): (("#50a0f0", "#10284c"), g_expanse),
     ("Powerups", "Icon_Multishot"): (("#c0a070", "#3c2c14"), g_multishot),
-    ("Powerups", "Icon_Magnet"): (("#e06060", "#3c1414"), g_magnet),
     ("Powerups", "Icon_Wisdom"): (("#70c0f0", "#14304c"), g_star),
     ("Powerups", "Icon_Regeneration"): (("#50f080", "#104c20"), g_plus),
     ("Powerups", "Icon_Armor"): (("#a0a8b8", "#2a2e38"), g_shield),
     ("Powerups", "Icon_Gold"): (("#f0d050", "#4c3c10"), g_coin),
     ("Powerups", "Icon_Heal"): (("#f07080", "#4c1020"), lambda d: g_heart(d, hexrgb("#ff8a9a"))),
-    ("Powerups", "Icon_Thorns"): (("#a0a8b8", "#2a2e38"), g_thorns),
-    ("Powerups", "Icon_Execution"): (("#f05050", "#4c1010"), g_execute),
     ("Powerups", "Icon_Phoenix"): (("#ff8a1a", "#4c1a04"), g_phoenix),
 }
 EVOS.update({"ThunderGod": g_bolt, "PlagueCauldron": g_flask, "BladeTornado": g_blades, "Sanctuary": g_aura, "TwinMoons": g_boomerang,

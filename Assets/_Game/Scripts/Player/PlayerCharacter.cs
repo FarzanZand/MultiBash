@@ -532,16 +532,6 @@ namespace MultiBash
             FrenzyTick = Runner.Tick;
         }
 
-        /// <summary>Host: thorns. Called when an enemy lands a contact hit on this player.</summary>
-        public void Reflect(Enemy attacker, float hit)
-        {
-            float t = Stats.Thorns;
-            if (t <= 0f || attacker == null || !attacker.IsAlive) return;
-            var at = attacker.transform.position;
-            attacker.TakeDamage(hit * t + CombatManager.Settings.thornsFlat, transform.position, 3f, this);
-            Rpc_Thorns(at);
-        }
-
         /// <summary>Host: instantly bring back (used when a run ends in victory).</summary>
         public void ForceRevive()
         {
@@ -695,15 +685,6 @@ namespace MultiBash
             var def = GameDatabase.Instance.GetWeapon(weapon);
             FxManager.Instance?.Shockwave(pos, radius, def != null ? def.fxColor : Color.white, false);
             if (def != null) AudioManager.Play(def.hitSound != null ? def.hitSound : def.fireSound, pos, 0.4f, 0.8f);
-        }
-
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]
-        void Rpc_Thorns(Vector3 pos)
-        {
-            FxManager.Instance?.Burst(pos + Vector3.up * 0.9f, new Color(0.85f, 0.9f, 1f), 10, 7f, 0.16f, 0.3f, 0f, true);
-            FxManager.Instance?.HitSpark(pos + Vector3.up * 0.9f, true);
-            var lib = AudioManager.Lib;
-            if (lib != null) AudioManager.Play(lib.crit, pos, 0.35f, 0.6f);
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]
